@@ -1,0 +1,19 @@
+# SWARM Language File
+#
+#   SWARM INIT PROCEDURE
+#
+SWARM_MSG_STR_FAILED="FAILED"
+SWARM_MSG_STR_=""
+SWARM_MSG_INIT_LOADING="Loading SWARM"
+SWARM_MSG_INIT_MISSING_FILE="Seems this file could not be loaded:"
+SWARM_MSG_INIT_INJECTION=""
+SWARM_MSG_INIT_HOME_NOT_FOUND="Could not find HOME dir variable, fallback to current dir $(\pwd) as HOME and for ./swarmrc"
+SWARM_MSG_INIT_SWARMRC_PROV_NOT_FOUND="The provided path to the SWARMRC was not found: $SWARMRC"
+SWARM_MSG_INIT_UNSANE_USERCONFIG="Aborting, userconfig not sane! (default: \$HOME/.swarmrc + \$HOME/.config/swarm)"
+SWARM_MSG_INIT_RO_SYSTEM="SWARMRC is set but could not be written. Assuming Read-Only System."
+SWARM_MSG_INIT_CANT_READ_EXISINTG_SWARMRC="SWARNRC ($SWARMRC) exists, but could not be read!"
+SWARM_MSG_INIT_=""
+SWARM_MSG_=""
+#
+#   SWARM ....
+#

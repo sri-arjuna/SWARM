@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+#
+# Prepare some functions
+#
+    swarm.sanity.userconfig() { #
+    # Make sure the basic user environment is ready
+    #
+        if [[ ! -f "$SWARMRC" ]]
+        then    swarm.sanity.userconfig.write
+                RET=$?
+                [[ ! -d "$HOME/.config" ]] && \
+                    $MKDIR "$HOME/.config" >>/dev/null
+                [[ ! -d "$HOME/.config/swarm" ]] && \
+                    $MKDIR "$HOME/.config/swarm" >>/dev/null
+        fi
+        return $RET
+
+    }
+    swarm.sanity.userconfig.write() { #
+    # Make sure there is a user config with valid information
+    #
+        cat > $SWARMRC <<EOF
+# Configuration file generated for SWARM (${SWARM[VERSION]} : ${SWARM[BUILD]})
+
+# Leave empty to use SWARM that was provided with the script. HIGHLY RECOMENDED!
+# If it contains a directory leading to SWARM, this version will be used, always!
+# This might lead to version conflicts if you use different scripts
+    SWARM_DIR_INSTALLED="$SWARM_DIR_INSTALLED"
+
+# User Information
+    USER_NAME="$USER_NAME"
+    USER_EMAIL="$USER @ $HOSTNAME"
+    USER_HOMEPAGE=""
+
+# SWARM Settings
+    SWARM_THEME=default
+    SWARM_USER_CONFIG=\$HOME/.config/swarm
+
+
+# Core utils
+# If you should encounter any loading issues of SWARM
+# adjust the paths to the core utils here
+# Specialy SunOS/Solaris users might need to adjust AWK.
+# Otherwise it is not recomended to change anything here.
+    AWK=${AWK:-\gawk}
+    ECHO="${ECHO:-\printf '\$1\n'}"
+    PRINTF=${PRINTF:-\printf}
+    GREP=${GREP:-\grep}
+    SED=${SED:-\sed}
+    WHICH=${WHICH:-\which}
+    LS=${LS:-\ls}
+
+    MKDIR=${MKDIR:-\mkdir}
+    RMDIR=${RMDIR:-\rmdir}
+    RM=${RM:-\rm}
+    TPUT=${TPUT:-\tput}
+
+    LOCATE=${LOCATE:-\locate}
+    WHOAMI=${WHOAMI:-\whoami}
+
+    $(swarm.sanity.coreutils | $GREP -v PWD= -e -v HOSTNAME=)
+EOF
+        # &1>>"$SWARMRC"
+        return $?
+    }
+    swarm.sanity.coreutils() { #
+    # Verfy all core utils work as expected
+    #
+        local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which whoami pwd_exec hostname hostname_exec date more less"
+        local worked=""
+        local failed=""
+
+        # Fun question:
+        WHICH=$($WHICH \which 2&> /dev/null)
+
+        if [[ -f "${WHICH:-\which}" ]]
+        then    # Ok, lets do it the fast way:
+                for lc in $list_cmd
+                do
+                    if ${WHICH:-\which} ${lc/_exec} > /dev/null
+                    then    worked="$lc $worked"
+                    else    failed="$lc $failed"
+                    fi
+                done
+        else    # Ok, the complicated way
+
+                for lc in $list_cmd
+                do
+                    tmp_exe=${lc^^}
+                    tmp_exec2=${!tmp_exe}
+                    if $(eval ${tmp_exec2} --help &>> /dev/null )  &>> /dev/null
+                    then
+                            worked="$worked $lc"
+                    else
+                            # Handle possible exceptions
+                            case "$tmp_exe" in
+                            "PWD")
+                                    [[ -d  "${tmp_exec2}" ]] && \
+                                        worked="$worked $lc" || \
+                                        failed="$failed $lc"   ;;
+                            "PWD_EXEC")
+                                    tmp_val="$(eval ${tmp_exec2} --help 2&>> /dev/null )"  &>> /dev/null && \
+                                        worked="$worked $lc" || \
+                                        failed="$failed $lc"   ;;
+
+                            "ECHO")
+                                    set -x
+                                    tmp_val=${tmp_exec2:-\printf}
+                                    if [[ "xx" ==  "$($tmp_val xx)" ]]
+                                    then
+                                        export ECHO=$tmp_val
+                                        worked="$worked $lc"
+                                    else
+                                        failed="$failed $lc"
+                                        export ECHO="\printf '$1\n'"
+                                    fi   ;;
+                            "PRINTF")
+                                    tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
+                                    [[ $? == 2 ]] && \
+                                            worked="$worked $lc" || \
+                                            failed="$failed $lc"   ;;
+                            "TPUT")
+                                    tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
+                                    [[ $? == 2 ]] && \
+                                            worked="$worked $lc" || \
+                                            failed="$failed $lc"   ;;
+                            "HOSTNAME")
+                                    [[ "$HOSTNAME" == "$(\hostname)" ]] && \
+                                            worked="$worked $lc" || \
+                                            failed="$failed $lc"   ;;
+                            "HOSTNAME_EXEC")
+                                    [[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
+                                            worked="$worked $lc" || \
+                                            failed="$failed $lc"   ;;
+                            "WHICH")
+                                    #set -x
+                                    eval ${tmp_exec2} --help &>> /dev/null  &>> /dev/null
+                                    [[ $? == 2 ]] && \
+                                            worked="$worked $lc" || \
+                                            failed="$failed $lc"   ;;
+                                            *)      #echo failed: $lc : $tmp_exe : $tmp_exec2
+                                    failed="$failed $lc"                    ;;
+                            esac
+                    fi
+                done
+        fi
+
+        unset ${!tmp_*} w W f F
+        for w in $worked
+        do
+            local W=${w^^}
+            $PRINTF "\t$W=${!W}\n" >&1
+        done
+
+        for f in $failed
+        do
+            [ -z "$f" ] && break
+            local F=${f^^}
+            log.msg "$SWARM_MSG_STR_FAILED: \t$F=${!F}" >&2
+        done
+
+        # Abort if something failed
+        [[ ! -z "$failed" ]] && return 1
+        # All good
+        return 0
+    }
+    swarm.sanity.env() { #
+    #
+    #
+        echo yay
+
+
+    }
+#
+# Lets check if environment is 'sane'
+#
+    #set -x
+    if ! swarm.sanity.userconfig
+    then    # It's a Read Only system (or dont have rights)
+            echo hier man
+            log.msg "$SWARM_MSG_INIT_RO_SYSTEM"
+            isRO=true
+    else    # SWARMRC was written successfull
+            if [[ -f "$SWARMRC" ]]
+            then    source "$SWARMRC" #&2> "$SWAR"
+            else    $PRINTF
+            fi
+    fi
+    swarm.sanity.env
+#
+# Check for the users SWARMRC
+#
+
+
+#
+# Prepare LOG and TMP files
+#
+    if [[ 0 -eq ${UID:-0} ]]
+    then    # It's ROOT
+            LOG=/var/log/swarm.log
+            TMP_DIR=/var/tmp
+            TMP=${TMP_DIR}/swarm.tmp
+    else    # It's a user
+            LOG="${SWARM_USER_CONFIG}/swarm.log"
+            TMP_DIR="${SWARM_USER_CONFIG}/tmp"
+            TMP=${TMP_DIR}/swarm.tmp
+    fi
+    # Finalize
+    $TOUCH $LOG
+    [[ ! -d "$TMP_DIR" ]] && $MKDIR $TMP_DIR
+    $TOUCH $TMP

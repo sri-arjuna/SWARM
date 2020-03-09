@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+##############################################
+# SWARM = Shell Wrapper and Runtime Modifier #
+# Author:     Simon Arjuna Erat (sea)        #
+# Copyleft:   1995-2020
+# Created:    2020.01.18                     #
+# Changed:    2020.01.18                     #
+# Build:      1                              #
+##############################################
+#
+# Core Public Variables
+#
+    # SWARM
+    unset SWARM[@] ${!SWARM_DIR_*}
+    declare  -A SWARM
+    SWARM[VERSION]=0.1
+    SWARM[BUILD]=1
+    SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
+    SWARM[GIT]="http://github.com/sri-arjuna/swarm"
+    SWARM[LICENSE]="LGPL"
+    SWARM[THEME]="default-red"
+    SWARM[ROOTDIR]=""
+    SWARM[LANG]="en_GB"
+    SWARM_CODE=$$
+#
+# Set first time default
+#
+#	This is just ment as failsafe if PATH is not set
+#	to get the most elementary basics on/of most systems
+	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}"
+    # Most basic commands ; do not change!
+    PRINTF=${PRINTF:-\printf}
+    ECHO=${ECHO:-\printf}
+    AWK=${AWK:-\gawk}
+    GREP=${GREP:-\grep}
+    SED=${SED:-\sed}
+    LS=${LS:-\ls}
+    PWD_EXEC=${PWD_EXEC:-\pwd}
+
+#
+# Get proper SWARM root dir
+#
+    # Evaluate best chance for the dirs
+    if [[ -z "${SWARM[ROOTDIR]}" ]] && [[ "x" == "x$SWARM_DIR_INSTALLED" ]]
+    then
+        for tmp in ${PWD:-$($PWD_EXEC)} ${PWD:-$($PWD_EXEC)}/.. $0
+        do
+                [[ -d "$tmp/SWARM" ]] && \
+                        SWARM[ROOTDIR]="${tmp}/SWARM" && \
+                        unset tmp && \
+                        break
+        done
+        unset tmp
+    else
+        [[ ! "x" == "x$SWARM_DIR_INSTALLED" ]] && \
+            SWARM[ROOTDIR]="$SWARM_DIR_INSTALLED"
+    fi
+    # Check for its existence
+    if [[ ! -d "${SWARM[ROOTDIR]}" ]]
+    then    # This is the only 'english only' message
+            $PRINTF "Fatal, no SWARM dir found - assumed: ${SWARM[ROOTDIR]}\n"
+            read
+            exit 1 || return 1
+    else    SWARM_DIR_ROOT="${SWARM[ROOTDIR]}"
+    fi
+#
+# SWARM_DIR_* for proper re-use
+#
+    # Minimalistic requirements
+    SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
+    SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
+    SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
+
+#SWARM_DIR_="${SWARM_DIR_ROOT}/"
+    #SWARM_DIR_="${SWARM_DIR_ROOT}/"
+    #SWARM_DIR_="${SWARM_DIR_ROOT}/"
+    #SWARM_DIR_="${SWARM_DIR_ROOT}/"
+#
+# Load default configuration
+# And all english strings as fallback
+#
+    for this in \
+            "${SWARM_DIR_DATA}"/core/* \
+            "${SWARM_DIR_CONF}"/* \
+            "${SWARM_DIR_LIBS}"/*
+    do    [[ ! "${this:0:2}" == "\.[\.]" ]] && source "$this" && $PRINTF '.' || $PRINTF "$SWARM_MSG_INIT_MISSING_FILE $this\n"
+    done
+
+#
+# Perform Sanity checks
+#
+    # Not all terminals support WIDTH and LINES....
+    # And since it's 2020, lets do multi tasking!
+    (
+        [[ "x" == "x$WIDTH" ]] && WIDTH="$(eval $TPUT cols)"
+        [[ "x" == "x$LINES" ]] && LINES="$(eval $TPUT lines)"
+    )
+
+#
+# Initiate Interface
+#

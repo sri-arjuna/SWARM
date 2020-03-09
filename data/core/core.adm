@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# Prepare utility functions
+#
+    init.msg() { $PRINTF "$1\n" ;}
+    log() { ${isRO:-false} && return ; [ -f "$LOG" ] || ( $TOUCH "$LOG" && >"$LOG") ; msg "$DATE_TIME_LOG YASSI :: $1" >> "$LOG" ;}
+    log.msg() { msg "$1"; ! ${isRO:-false} || log "$1";}
+    log.check() { [[ -f "$LOG" ]] && $GREP "$DATE_CUR" "$LOG" >/dev/null  && return 0 || msg "$DATE_CUR" >> "$LOG" 2&>/dev/null ; }
+#
+# Make sure we can differ the date in the log,
+# if this fails, no write access, RO?
+#
+    log.check && isRO=false || isRO=true

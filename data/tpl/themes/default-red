@@ -1,0 +1,22 @@
+# SWARM theme file
+#
+#	header will use SWARM_COLOR_BG as background color,
+#	and SWARM_COLOR_FG as font color.
+#
+#	'title' will use inverted colors
+#
+	SWARM_COLOR_BG="$RED"
+	SWARM_COLOR_FG="$white"
+#
+#	BORDER_RIGHT will be mirrored of BORDER_LEFT
+#	Set it manualy if it needs to be escaped.
+#	BORDER_COLOR is not used for 'header'
+#
+	BORDER_LEFT="# |"
+	BORDER_RIGHT="| #"
+	BORDER_COLOR="$YELLOW$red"
+#
+#	Char indicators / User prompt
+#
+	SWARM_INPUT_CHAR_READ="\076"
+	SWARM_INPUT_CHAR_SELECT="\076"

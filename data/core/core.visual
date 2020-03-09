@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# Prepare variables
+#
+    unset SWARM_THEME[@]    # Use terminal / console / vtr default settings as base
+    swarm_list_theme_options="border-left border-right color-front color-back border-right read select"
+    declare -A SWARM_THEME
+#
+# Theme's
+#
+    # Basic - ironize it later
+    for there in "$SWARM_DIR_TEMPLATES/themes" "$SWARM_DIR_USER_THEMES"
+    do  # check in each dir
+        for theme in "$there"/*
+        do  # for this theme
+            if [[ "${SWARM[THEME]}" == "$theme" ]]
+            then    # This one
+                    source "$there/$theme"
+            fi
+        done
+    done
+
+
+#
+# asdf
+#
+    swarm.core.line.print.border() {
+    # Prints basic border for all lines
+    #
+        set -x
+        len1=${#SWARM_THEME[border-left]}
+        echo $len1
+        set +x
+    }
+    swarm.core.line.print.border

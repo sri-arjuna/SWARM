@@ -7,27 +7,20 @@
 #
 #	'title' will use inverted colors
 #
-	SWARM_THEME[color-back]="$BLUE"
-	SWARM_THEME[color-front]="$white"
-	#SWARM_THEME[color-back]=""
-
-	#SWARM_COLOR_BG="$BLUE"
-	#SWARM_COLOR_FG="$white"
+	SWARM_THEME_DATA[color-back]="$BLUE"
+	SWARM_THEME_DATA[color-front]="$white"
+	#SWARM_THEME_DATA[color-back]=""
 #
-#	BORDER_RIGHT will be mirrored of BORDER_LEFT
-#	Set it manualy if it needs to be escaped.
-#	BORDER_COLOR is not used for 'header'
+#	If 'border-right' is not set,
+#	it will be inveresed from 'border_left'
+#	border-color is not used for 'header'
 #
-	SWARM_THEME[border-left]="# |"
-	#SWARM_THEME[border-right]=""
-
-	#BORDER_LEFT="# |"
-	#BORDER_RIGHT="| #"
-	#BORDER_COLOR="$WHITE$black"
+	SWARM_THEME_DATA[border-left]="# |"
+	#SWARM_THEME_DATA[border-right]=""
+	#SWARM_THEME_DATA[border-color]="$blue$WHITE"
 #
 #	Char indicators / User prompt
 #
-	SWARM_THEME[read]="\076"
-	SWARM_THEME[select]="${SWARM_THEME[read]}"
-	#SWARM_INPUT_CHAR_READ="\076"
-	#SWARM_INPUT_CHAR_SELECT="\076"
+#
+	SWARM_THEME_DATA[read]="\076"
+	SWARM_THEME_DATA[select]="${SWARM_THEME_DATA[read]}"

@@ -2,34 +2,69 @@
 #
 # Prepare variables
 #
-    unset SWARM_THEME[@]    # Use terminal / console / vtr default settings as base
-    swarm_list_theme_options="border-left border-right color-front color-back border-right read select"
-    declare -A SWARM_THEME
+
 #
 # Theme's
 #
-    # Basic - ironize it later
-    for there in "$SWARM_DIR_TEMPLATES/themes" "$SWARM_DIR_USER_THEMES"
-    do  # check in each dir
-        for theme in "$there"/*
-        do  # for this theme
-            if [[ "${SWARM[THEME]}" == "$theme" ]]
-            then    # This one
-                    source "$there/$theme"
+    swarm.theme.update() { # THEME_NAME
+    # This loads the provided THEME_NAME
+    #
+        # This an assigned array containg the theme related data
+        # Lets make sure each theme gets loaded into clear memory
+        unset SWARM_THEME_DATA[@]    # Use terminal / console / vtr default settings as base
+        # These are it's assingments
+        swarm_list_theme_options="border-left border-right color-front color-back border-right read select"
+        # Lets start fresh
+        declare -A SWARM_THEME_DATA
+        local ret=false
+
+        # Always use the user themes first
+        # in case someone wants to pseudo-overwrite the default themes
+        for there in "$SWARM_USER_CONFIG/themes" "$SWARM_DIR_THEMES"
+        do
+            # check in each dir
+            if [[ -d "$there" ]]
+            then    #
+                    if [[ -f "$there/$1" ]]
+                    then    source "$there/$1"
+                            ret=$?
+                    fi
             fi
         done
-    done
 
-
+        # Check if something went wrong
+        if ! $ret
+        then    # The theme could not be Found
+                # Lets fallback to default
+                source "$SWARM_DIR_THEMES/default-blue"
+                init.log.msg "$SWARM_MSG_INIT_THEME : $1"
+        fi
+        return $ret
+    }
+    swarm.theme.list() {
+    # Lists all themes available
+    # Includes SWARM_USER_CONFIG/themes and SWARM_DIR_THEMES alike
+        local d f
+        for d in "$SWARM_USER_CONFIG/themes/" "$SWARM_DIR_THEMES/"
+        do
+            # Check if path exists and handle each file for its own
+            [[ -d "$d" ]] && \
+                for f in $($LS "$d")
+                do
+                    # Output only if it really is a file
+                    [[ -f "$f" ]] && $PRINTF '%s\n' "${f##*/}"
+                done
+        done
+    }
 #
-# asdf
+# Visual outputs
 #
-    swarm.core.line.print.border() {
+    swarm.print.border() {
     # Prints basic border for all lines
     #
-        set -x
+        #echo " ---------------------------------------------- "
+        #set -x
         len1=${#SWARM_THEME[border-left]}
-        echo $len1
-        set +x
+        echo testing $len1
+        #set +x
     }
-    swarm.core.line.print.border

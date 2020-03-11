@@ -5,7 +5,13 @@
     swarm.sanity.userconfig() { #
     # Make sure the basic user environment is ready
     #
-        if [[ ! -f "$SWARMRC" ]]
+        # Default value is failure
+        local RET=1
+
+        # First check wether the variable is not empty
+        [[ -z "$SWARMRC" ]] && return $RET
+
+        if [[ -f "$SWARMRC" ]] || $TOUCH "$SWARMRC"
         then    swarm.sanity.userconfig.write
                 RET=$?
                 [[ ! -d "$HOME/.config" ]] && \
@@ -14,11 +20,21 @@
                     $MKDIR "$HOME/.config/swarm" >>/dev/null
         fi
         return $RET
-
     }
     swarm.sanity.userconfig.write() { #
     # Make sure there is a user config with valid information
     #
+        # Try to get hostname
+        HOST_NAME=${HOSTNAME:-$($HOSTNAME_EXEC)} >>/dev/null
+        # If still empty
+        HOST_NAME=${HOST_NAME:-localhost}
+        # Try to get username
+        USER=${USER:-${SUDO_USER:-${USER:-$($WHOAMI)}}} >>/dev/null
+        # Special handling for root username display
+        [[ "root" = "$USER" ]] && \
+            USER_NAME=".·: ROOT :·." || \
+            USER_NAME="$USER"
+        USER_EMAIL="$USER @ $HOST_NAME"
         cat > $SWARMRC <<EOF
 # Configuration file generated for SWARM (${SWARM[VERSION]} : ${SWARM[BUILD]})
 
@@ -29,12 +45,12 @@
 
 # User Information
     USER_NAME="$USER_NAME"
-    USER_EMAIL="$USER @ $HOSTNAME"
+    USER_EMAIL="$USER @ $HOST_NAME"
     USER_HOMEPAGE=""
 
 # SWARM Settings
-    SWARM_THEME=default
-    SWARM_USER_CONFIG=\$HOME/.config/swarm
+    SWARM_THEME=default-blue
+    SWARM_USER_CONFIG="$SWARM_USER_CONFIG"
 
 
 # Core utils
@@ -42,25 +58,23 @@
 # adjust the paths to the core utils here
 # Specialy SunOS/Solaris users might need to adjust AWK.
 # Otherwise it is not recomended to change anything here.
-    AWK=${AWK:-\gawk}
-    ECHO="${ECHO:-\printf '\$1\n'}"
-    PRINTF=${PRINTF:-\printf}
-    GREP=${GREP:-\grep}
-    SED=${SED:-\sed}
-    WHICH=${WHICH:-\which}
-    LS=${LS:-\ls}
-
-    MKDIR=${MKDIR:-\mkdir}
-    RMDIR=${RMDIR:-\rmdir}
-    RM=${RM:-\rm}
-    TPUT=${TPUT:-\tput}
-
-    LOCATE=${LOCATE:-\locate}
-    WHOAMI=${WHOAMI:-\whoami}
-
-    $(swarm.sanity.coreutils | $GREP -v PWD= -e -v HOSTNAME=)
 EOF
-        # &1>>"$SWARMRC"
+    swarm.sanity.coreutils | $GREP -v HOSTNAME=  >> "$SWARMRC"  #&2>>/dev/zero# | $GREP -v PWD= -e -v HOSTNAME= 2&>>/dev/zero >&1 )
+    #AWK=${AWK:-\gawk}
+    #ECHO="${ECHO:-\printf '\$1\n'}"
+    #PRINTF=${PRINTF:-\printf}
+    #GREP=${GREP:-\grep}
+    #SED=${SED:-\sed}
+    #WHICH=${WHICH:-\which}
+    #LS=${LS:-\ls}
+
+    #MKDIR=${MKDIR:-\mkdir}
+    #RMDIR=${RMDIR:-\rmdir}
+    #RM=${RM:-\rm}
+    #TPUT=${TPUT:-\tput}
+
+    #LOCATE=${LOCATE:-\locate}
+    #WHOAMI=${WHOAMI:-\whoami}
         return $?
     }
     swarm.sanity.coreutils() { #
@@ -71,7 +85,7 @@ EOF
         local failed=""
 
         # Fun question:
-        WHICH=$($WHICH \which 2&> /dev/null)
+        WHICH=$($WHICH \which &2> /dev/null)
 
         if [[ -f "${WHICH:-\which}" ]]
         then    # Ok, lets do it the fast way:
@@ -83,7 +97,6 @@ EOF
                     fi
                 done
         else    # Ok, the complicated way
-
                 for lc in $list_cmd
                 do
                     tmp_exe=${lc^^}
@@ -104,7 +117,6 @@ EOF
                                         failed="$failed $lc"   ;;
 
                             "ECHO")
-                                    set -x
                                     tmp_val=${tmp_exec2:-\printf}
                                     if [[ "xx" ==  "$($tmp_val xx)" ]]
                                     then
@@ -112,6 +124,8 @@ EOF
                                         worked="$worked $lc"
                                     else
                                         failed="$failed $lc"
+                                        # List it as failed since ECHO doesnt exist,
+                                        # but use this code as fallback
                                         export ECHO="\printf '$1\n'"
                                     fi   ;;
                             "PRINTF")
@@ -132,13 +146,14 @@ EOF
                                     [[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
                                             worked="$worked $lc" || \
                                             failed="$failed $lc"   ;;
-                            "WHICH")
-                                    #set -x
-                                    eval ${tmp_exec2} --help &>> /dev/null  &>> /dev/null
-                                    [[ $? == 2 ]] && \
-                                            worked="$worked $lc" || \
-                                            failed="$failed $lc"   ;;
-                                            *)      #echo failed: $lc : $tmp_exe : $tmp_exec2
+                            # If this was installed, we'd be doing the easy way.
+                            #"WHICH")
+                            #        set -x
+                            #        eval ${tmp_exec2} --help &>> /dev/null  &>> /dev/null
+                            #        [[ $? == 0 ]] && \
+                            #                worked="$worked $lc" || \
+                            #                failed="$failed $lc"   ;;
+                            *)      init.log "failed: $lc : $tmp_exe : $tmp_exec2"
                                     failed="$failed $lc"                    ;;
                             esac
                     fi
@@ -149,18 +164,31 @@ EOF
         for w in $worked
         do
             local W=${w^^}
-            $PRINTF "\t$W=${!W}\n" >&1
+            #[[ $W = "WHICH" ]] && echo " ------------- ANFANG " && set -x
+            $PRINTF '\t%s\n' "$W=\\${!W}" | $SED s,'HOSTNAME=\\','HOSTNAME=',g | $SED s,*'=\\','',g  >&1
+            #[[ $W = "WHICH" ]] & set +x
         done
 
         for f in $failed
         do
             [ -z "$f" ] && break
             local F=${f^^}
-            log.msg "$SWARM_MSG_STR_FAILED: \t$F=${!F}" >&2
+            init.log.msg "$SWARM_MSG_STR_FAILED: \t$F=${!F}" >&2
         done
 
         # Abort if something failed
-        [[ ! -z "$failed" ]] && return 1
+        if [[ ! -z "${failed}" ]]
+        then    # Dunno why...
+            #    if [[ -z "$($ECHO $failed | $SED s,"which","",g | $SED s,"pwd_exec","",g  )" ]] && [[ ! -z "$($ECHO ${WHICH}${PWD_EXEC} | $SED s,"\\\\","",g)" ]]
+            #    then    # It's ok to report success, because $WHICH and PWD_EXEC are not empty
+            #            $WHICH $WHICH >/dev/zero &2>/dev/zero && \
+            #                $ECHO " WHICH=$WHICH\n\tPWD_EXEC=$PWD_EXEC" && \
+            #                return 0
+            #            return 1
+            #    else
+                        return 1
+            #    fi
+        fi
         # All good
         return 0
     }
@@ -168,44 +196,23 @@ EOF
     #
     #
         echo yay
-
+        echo "----------------------------"
 
     }
 #
 # Lets check if environment is 'sane'
 #
-    #set -x
-    if ! swarm.sanity.userconfig
-    then    # It's a Read Only system (or dont have rights)
-            echo hier man
-            log.msg "$SWARM_MSG_INIT_RO_SYSTEM"
-            isRO=true
-    else    # SWARMRC was written successfull
-            if [[ -f "$SWARMRC" ]]
-            then    source "$SWARMRC" #&2> "$SWAR"
-            else    $PRINTF
-            fi
+#    set -x
+#echo "nothing"
+    if swarm.sanity.userconfig
+    then    # SWARMRC was written successfull
+            [[ -f "$SWARMRC" ]] && source "$SWARMRC"
+    else
+            # It's a Read Only system (or dont have rights)
+            init.msg "$SWARM_MSG_INIT_RO_SYSTEM"
+            export isRO=true
     fi
-    swarm.sanity.env
+#    set +x
 #
 # Check for the users SWARMRC
 #
-
-
-#
-# Prepare LOG and TMP files
-#
-    if [[ 0 -eq ${UID:-0} ]]
-    then    # It's ROOT
-            LOG=/var/log/swarm.log
-            TMP_DIR=/var/tmp
-            TMP=${TMP_DIR}/swarm.tmp
-    else    # It's a user
-            LOG="${SWARM_USER_CONFIG}/swarm.log"
-            TMP_DIR="${SWARM_USER_CONFIG}/tmp"
-            TMP=${TMP_DIR}/swarm.tmp
-    fi
-    # Finalize
-    $TOUCH $LOG
-    [[ ! -d "$TMP_DIR" ]] && $MKDIR $TMP_DIR
-    $TOUCH $TMP

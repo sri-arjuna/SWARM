@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+#
 # SWARM theme file
 #
 #	header will use SWARM_COLOR_BG as background color,
@@ -5,18 +7,20 @@
 #
 #	'title' will use inverted colors
 #
-	SWARM_COLOR_BG="$RED"
-	SWARM_COLOR_FG="$white"
+	SWARM_THEME_DATA[color-back]="$RED"
+	SWARM_THEME_DATA[color-front]="$white"
+	#SWARM_THEME_DATA[color-back]=""
 #
-#	BORDER_RIGHT will be mirrored of BORDER_LEFT
-#	Set it manualy if it needs to be escaped.
-#	BORDER_COLOR is not used for 'header'
+#	If 'border-right' is not set,
+#	it will be inveresed from 'border_left'
+#	border-color is not used for 'header'
 #
-	BORDER_LEFT="# |"
-	BORDER_RIGHT="| #"
-	BORDER_COLOR="$YELLOW$red"
+	SWARM_THEME_DATA[border-left]="# |"
+	#SWARM_THEME_DATA[border-right]=""
+	#SWARM_THEME_DATA[border-color]=""
 #
 #	Char indicators / User prompt
 #
-	SWARM_INPUT_CHAR_READ="\076"
-	SWARM_INPUT_CHAR_SELECT="\076"
+#
+	SWARM_THEME_DATA[read]="\076"
+	SWARM_THEME_DATA[select]="${SWARM_THEME_DATA[read]}"

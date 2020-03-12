@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+##############################################
+# SWARM = Shell Wrapper and Runtime Modifier #
+# Author:	Simon Arjuna Erat (sea)		 	 #
+# Copyleft:	1995-2020						 #
+# Created:	2020.01.18					 	 #
+# Changed:	2020.03.10					 	 #
+# Build:	2							  	 #
+##############################################
+#
+# Core Public Variables
+#
+	# SWARM
+	unset SWARM[@] ${!SWARM_DIR_*}
+	declare -A SWARM
+	SWARM[VERSION]=0.1
+	SWARM[BUILD]=2
+	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
+	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
+	SWARM[LICENSE]="LGPL"
+	# This is default 'highlighted' MACHINE or ROOT display
+	# Non-root users have 'default-blue' theme
+	SWARM[THEME]="default-red"
+	SWARM[ROOTDIR]=""
+	# Language must be pre-set up until the basic language file was loaded
+	SWARM[LANG]="en_GB"
+	SWARM_CODE=$$
+#
+# Set first time default
+#
+#	This is just ment as failsafe if PATH is not set
+#	to get the most elementary basics on/of most systems
+	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}"
+	# Most basic commands ; do not change!
+	PRINTF=${PRINTF:-\printf}
+	ECHO=${ECHO:-\printf}
+	AWK=${AWK:-\gawk}
+	GREP=${GREP:-\grep}
+	SED=${SED:-\sed}
+	LS=${LS:-\ls}
+	PWD_EXEC=${PWD_EXEC:-\pwd}
+	ID=${ID:-\id}
+	DATE=${DATE:-\date}
+#
+# Some other things
+#
+	DATE_TODAY=$($DATE +'%Y.%m.%d')
+	DATE_TIME=$($DATE +'%H:%M')
+	DATE_TIME_LOG=$($DATE +'%H:%M:%S.%s')
+	init.countdown() { $PRINTF '%s\n' "${1:-Returning in 3}" ; sleep 1; $PRINTF '%s\n' "2" ; sleep 1; $PRINTF '%s\n' "1";sleep 1;$PRINTF '%s\n' "NOW" ; sleep 0.5 ; }
+#
+# Get proper SWARM root dir
+#
+	# If no SWARM_DIR_INSTALLED is provided, it is used in runtime as designed
+	# However, 'SWARM_DIR_INSTALLED=$PWD source SWARM/rc' could be used as a speedbooster,
+	# as it bypasses the multiple physical read attempts
+	if [[ -z "${SWARM[ROOTDIR]}" ]] && [[ "x" == "x$SWARM_DIR_INSTALLED" ]]
+	then
+		# Find the path that holds this script
+		# Evaluate best chance for the dirs
+		for tmp in $0 ${PWD:-$($PWD_EXEC)} .. ${PWD:-$($PWD_EXEC)}/..
+		do
+				if [[ "SWARM" == "${tmp##*/}" ]]
+				then	# We're in it already
+						# Usualy debug or tryout mode
+						SWARM[ROOTDIR]="$tmp"
+						unset tmp
+						break
+				fi
+
+				if [[ -d "${tmp}/SWARM" ]]
+				then	# It's a sub dir
+						# As it should be called
+						SWARM[ROOTDIR]="$tmp/SWARM"
+						unset tmp
+						break
+				fi
+		done
+		# Should not reach this point
+		unset tmp
+	else
+		# Or optionaly, use the installed method
+		if [[ -d "${SWARM_DIR_INSTALLED}" ]]
+		then	# Assign the variable
+				SWARM[ROOTDIR]="$SWARM_DIR_INSTALLED"
+		else	# This is the only hardcoded 'english only' message
+				$PRINTF '%s\n' "Fatal, no SWARM dir found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
+				init.countdown
+				return 1
+		fi
+	fi
+#
+# SWARM_DIR_* for proper re-use
+# source this file and type: SWARM_DIR_<hit tabulator>
+#
+	SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
+	SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
+	SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
+	SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
+	SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
+	SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
+	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
+	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/tpl"
+# Load english strings for overall coverage for error messages.
+	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
+#
+# Load default configuration
+# After this, user specific language can be loaded if available
+#
+	declare tmp_swarm_loading="" \
+			tmp_len=0 \
+			tmp_empty=""
+
+	for this in \
+			"${SWARM_DIR_CONF}"/* \
+			"${SWARM_DIR_DATA}"/core/* \
+			"${SWARM_DIR_LIBS}"/*
+	do
+		if ${doSlowLoading:-false}
+		then
+				# This is off by default because nowaways it's too fast to see the regular way
+				# Only recomended with numbers between 0.5 to 2 for application-like scripts
+				# To have a 'cool intro'
+				$PRINTF '\r%s' "$this"
+				[[ $tmp_len -lt ${#this} ]] && \
+						tmp_len=${#this} && \
+						tmp_empty=$($PRINTF '%*s' $COLUMNS)
+				sleep ${SWARM_INTERVALL_SLOW_LOADING:-0.3}
+				printf  "\r$tmp_empty"
+		fi
+
+		# Minimalistic output
+		tmp_swarm_loading="${tmp_swarm_loading}."
+		[[ ! "${this:0:2}" == "\.[\.]" ]] && source "$this" && $PRINTF '\r%s' "${tmp_swarm_loading}" || $PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+
+		# Start spaming the log file, if desired
+		${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this"
+	done
+	unset tmp_swarm_loading \
+			tmp_len \
+			tmp_empty \
+			this
+#
+# Starting SWARM now
+#
+	swarm.lang.load
+	swarm.init.theme
+#
+# Initiate Interface
+#
+	echo
+	echo " ----------- TEST AREA -----------"
+	## Core sanity
+	# swarm.sanity.env
+	# swarm.theme.list
+	header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
+	title 	"my title"
+
+	swarm.print.border -e
+	$PRINTF "\n"
+
+	swarm.print.border -e
+	swarm.print.text  left middle right
+
+
+	#
+	#swarm.core.line.print.border
+
+	#swarm.sanity.coreutils
+
+	#cat $SWARM_LOG
+	#echo " ----------- TEST AREA -----------"
+
+	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
+	then	# First time caller or arguments
+			echo "TODO: Visuals, then explain, configure and stuff..."
+			init.countdown "Weee"
+	fi

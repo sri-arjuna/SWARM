@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# Prepare language handling
+#
+	swarm.lang.list() { #
+	# Lists all supported languages
+	#
+		$LS -1 "$SWARM_DIR_LANG"
+	}
+	swarm.lang.count() { #
+	# Lists all supported languages
+	#
+		local lang_list=$(swarm.lang.list)
+		local tmp_counter=($lang_list)
+		local lang_count=$( $ECHO ${#tmp_counter[@]} )
+		$ECHO $lang_count
+	}
+
+	swarm.lang.load() { # en_GB
+	# Lists all supported languages
+	#
+		# Use passed language or try to auto-detect
+		local lang_wish=${1:-${LANG/.*}}
+		local lang_short=${lang_wish/_*}
+
+		if [[ -d "$SWARM_DIR_LANG/$lang_wish" ]]
+		then	# Desired language exists
+				# Load all language files
+				source "$SWARM_DIR_LANG/$lang_wish"/*
+		else	# Passed language or auto detection didnt work
+				# Check for 'similar ones'
+				lang_options=$($ECHO $(swarm.lang.list) | $GREP $lang_short)
+				if [[ -z $lang_options ]]
+				then	# No no options found
+						if [[ $(swarm.lang.count) -gt 1 ]]
+						then	# More than language has been found
+								select lang_wish in $(swarm.lang.list);do break;done
+								SWARM[LANG]=$lang_wish
+								source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
+						else	# Only english is available
+								SWARM[LANG]=en_GB
+						fi
+						source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
+				fi
+		fi
+		# Export all messages
+		export ${!SWARM_MSG_*}
+	}

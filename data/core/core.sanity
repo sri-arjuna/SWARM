@@ -2,55 +2,55 @@
 #
 # Prepare some functions
 #
-    swarm.sanity.userconfig() { #
-    # Make sure the basic user environment is ready
-    #
-        # Default value is failure
-        local RET=1
+	swarm.sanity.userconfig() { #
+	# Make sure the basic user environment is ready
+	#
+		# Default value is failure
+		local RET=1
 
-        # First check wether the variable is not empty
-        [[ -z "$SWARMRC" ]] && return $RET
+		# First check wether the variable is not empty
+		[[ -z "$SWARMRC" ]] && return $RET
 
-        if [[ -f "$SWARMRC" ]] || $TOUCH "$SWARMRC"
-        then    swarm.sanity.userconfig.write
-                RET=$?
-                [[ ! -d "$HOME/.config" ]] && \
-                    $MKDIR "$HOME/.config" >>/dev/null
-                [[ ! -d "$HOME/.config/swarm" ]] && \
-                    $MKDIR "$HOME/.config/swarm" >>/dev/null
-        fi
-        return $RET
-    }
-    swarm.sanity.userconfig.write() { #
-    # Make sure there is a user config with valid information
-    #
-        # Try to get hostname
-        HOST_NAME=${HOSTNAME:-$($HOSTNAME_EXEC)} >>/dev/null
-        # If still empty
-        HOST_NAME=${HOST_NAME:-localhost}
-        # Try to get username
-        USER=${USER:-${SUDO_USER:-${USER:-$($WHOAMI)}}} >>/dev/null
-        # Special handling for root username display
-        [[ "root" = "$USER" ]] && \
-            USER_NAME=".·: ROOT :·." || \
-            USER_NAME="$USER"
-        USER_EMAIL="$USER @ $HOST_NAME"
-        cat > $SWARMRC <<EOF
+		if [[ -f "$SWARMRC" ]] || $TOUCH "$SWARMRC"
+		then	swarm.sanity.userconfig.write
+				RET=$?
+				[[ ! -d "$HOME/.config" ]] && \
+					$MKDIR "$HOME/.config" >>/dev/null
+				[[ ! -d "$HOME/.config/swarm" ]] && \
+					$MKDIR "$HOME/.config/swarm" >>/dev/null
+		fi
+		return $RET
+	}
+	swarm.sanity.userconfig.write() { #
+	# Make sure there is a user config with valid information
+	#
+		# Try to get hostname
+		HOST_NAME=${HOSTNAME:-$($HOSTNAME_EXEC)} >>/dev/null
+		# If still empty
+		HOST_NAME=${HOST_NAME:-localhost}
+		# Try to get username
+		USER=${USER:-${SUDO_USER:-${USER:-$($WHOAMI)}}} >>/dev/null
+		# Special handling for root username display
+		[[ "root" = "$USER" ]] && \
+			USER_NAME=".·: ROOT :·." || \
+			USER_NAME="$USER"
+		USER_EMAIL="$USER @ $HOST_NAME"
+		cat > $SWARMRC <<EOF
 # Configuration file generated for SWARM (${SWARM[VERSION]} : ${SWARM[BUILD]})
 
 # Leave empty to use SWARM that was provided with the script. HIGHLY RECOMENDED!
 # If it contains a directory leading to SWARM, this version will be used, always!
 # This might lead to version conflicts if you use different scripts
-    SWARM_DIR_INSTALLED="$SWARM_DIR_INSTALLED"
+	SWARM_DIR_INSTALLED="$SWARM_DIR_INSTALLED"
 
 # User Information
-    USER_NAME="$USER_NAME"
-    USER_EMAIL="$USER @ $HOST_NAME"
-    USER_HOMEPAGE=""
+	USER_NAME="$USER_NAME"
+	USER_EMAIL="$USER @ $HOST_NAME"
+	USER_HOMEPAGE=""
 
 # SWARM Settings
-    SWARM_THEME=default-blue
-    SWARM_USER_CONFIG="$SWARM_USER_CONFIG"
+	SWARM_THEME=default-blue
+	SWARM_USER_CONFIG="$SWARM_USER_CONFIG"
 
 
 # Core utils
@@ -59,160 +59,146 @@
 # Specialy SunOS/Solaris users might need to adjust AWK.
 # Otherwise it is not recomended to change anything here.
 EOF
-    swarm.sanity.coreutils | $GREP -v HOSTNAME=  >> "$SWARMRC"  #&2>>/dev/zero# | $GREP -v PWD= -e -v HOSTNAME= 2&>>/dev/zero >&1 )
-    #AWK=${AWK:-\gawk}
-    #ECHO="${ECHO:-\printf '\$1\n'}"
-    #PRINTF=${PRINTF:-\printf}
-    #GREP=${GREP:-\grep}
-    #SED=${SED:-\sed}
-    #WHICH=${WHICH:-\which}
-    #LS=${LS:-\ls}
+	swarm.sanity.coreutils | $GREP -v HOSTNAME=  >> "$SWARMRC"  #&2>>/dev/zero# | $GREP -v PWD= -e -v HOSTNAME= 2&>>/dev/zero >&1 )
+	#AWK=${AWK:-\gawk}
+	#ECHO="${ECHO:-\printf '\$1\n'}"
+	#PRINTF=${PRINTF:-\printf}
+	#GREP=${GREP:-\grep}
+	#SED=${SED:-\sed}
+	#WHICH=${WHICH:-\which}
+	#LS=${LS:-\ls}
 
-    #MKDIR=${MKDIR:-\mkdir}
-    #RMDIR=${RMDIR:-\rmdir}
-    #RM=${RM:-\rm}
-    #TPUT=${TPUT:-\tput}
+	#MKDIR=${MKDIR:-\mkdir}
+	#RMDIR=${RMDIR:-\rmdir}
+	#RM=${RM:-\rm}
+	#TPUT=${TPUT:-\tput}
 
-    #LOCATE=${LOCATE:-\locate}
-    #WHOAMI=${WHOAMI:-\whoami}
-        return $?
-    }
-    swarm.sanity.coreutils() { #
-    # Verfy all core utils work as expected
-    #
-        local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which whoami pwd_exec hostname hostname_exec date more less"
-        local worked=""
-        local failed=""
+	#LOCATE=${LOCATE:-\locate}
+	#WHOAMI=${WHOAMI:-\whoami}
+		return $?
+	}
+	swarm.sanity.coreutils() { #
+	# Verfy all core utils work as expected
+	#
+		unset ${!tmp_*} #w W f F
+		local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which whoami pwd_exec hostname hostname_exec date more less"
+		local worked=""
+		local failed=""
+		local f="" F="" w="" W=""
 
-        # Fun question:
-        WHICH=$($WHICH \which &2> /dev/null)
+		# Fun question:
+		WHICH=$($WHICH \which &2> /dev/null)
 
-        if [[ -f "${WHICH:-\which}" ]]
-        then    # Ok, lets do it the fast way:
-                for lc in $list_cmd
-                do
-                    if ${WHICH:-\which} ${lc/_exec} > /dev/null
-                    then    worked="$lc $worked"
-                    else    failed="$lc $failed"
-                    fi
-                done
-        else    # Ok, the complicated way
-                for lc in $list_cmd
-                do
-                    tmp_exe=${lc^^}
-                    tmp_exec2=${!tmp_exe}
-                    if $(eval ${tmp_exec2} --help &>> /dev/null )  &>> /dev/null
-                    then
-                            worked="$worked $lc"
-                    else
-                            # Handle possible exceptions
-                            case "$tmp_exe" in
-                            "PWD")
-                                    [[ -d  "${tmp_exec2}" ]] && \
-                                        worked="$worked $lc" || \
-                                        failed="$failed $lc"   ;;
-                            "PWD_EXEC")
-                                    tmp_val="$(eval ${tmp_exec2} --help 2&>> /dev/null )"  &>> /dev/null && \
-                                        worked="$worked $lc" || \
-                                        failed="$failed $lc"   ;;
+		if [[ -f "${WHICH:-\which}" ]]
+		then	# Ok, lets do it the fast way:
+				for lc in $list_cmd
+				do
+					if ${WHICH:-\which} ${lc/_exec} > /dev/null
+					then	worked="$lc $worked"
+					else	failed="$lc $failed"
+					fi
+				done
+		else	# Ok, the complicated way
+				for lc in $list_cmd
+				do
+					tmp_exe=${lc^^}
+					tmp_exec2=${!tmp_exe}
+					if $(eval ${tmp_exec2} --help &>> /dev/null )  &>> /dev/null
+					then
+							worked="$worked $lc"
+					else
+							# Handle possible exceptions
+							case "$tmp_exe" in
+							"PWD")
+									[[ -d  "${tmp_exec2}" ]] && \
+										worked="$worked $lc" || \
+										failed="$failed $lc"   ;;
+							"PWD_EXEC")
+									tmp_val="$(eval ${tmp_exec2} --help 2&>> /dev/null )"  &>> /dev/null && \
+										worked="$worked $lc" || \
+										failed="$failed $lc"   ;;
 
-                            "ECHO")
-                                    tmp_val=${tmp_exec2:-\printf}
-                                    if [[ "xx" ==  "$($tmp_val xx)" ]]
-                                    then
-                                        export ECHO=$tmp_val
-                                        worked="$worked $lc"
-                                    else
-                                        failed="$failed $lc"
-                                        # List it as failed since ECHO doesnt exist,
-                                        # but use this code as fallback
-                                        export ECHO="\printf '$1\n'"
-                                    fi   ;;
-                            "PRINTF")
-                                    tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
-                                    [[ $? == 2 ]] && \
-                                            worked="$worked $lc" || \
-                                            failed="$failed $lc"   ;;
-                            "TPUT")
-                                    tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
-                                    [[ $? == 2 ]] && \
-                                            worked="$worked $lc" || \
-                                            failed="$failed $lc"   ;;
-                            "HOSTNAME")
-                                    [[ "$HOSTNAME" == "$(\hostname)" ]] && \
-                                            worked="$worked $lc" || \
-                                            failed="$failed $lc"   ;;
-                            "HOSTNAME_EXEC")
-                                    [[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
-                                            worked="$worked $lc" || \
-                                            failed="$failed $lc"   ;;
-                            # If this was installed, we'd be doing the easy way.
-                            #"WHICH")
-                            #        set -x
-                            #        eval ${tmp_exec2} --help &>> /dev/null  &>> /dev/null
-                            #        [[ $? == 0 ]] && \
-                            #                worked="$worked $lc" || \
-                            #                failed="$failed $lc"   ;;
-                            *)      init.log "failed: $lc : $tmp_exe : $tmp_exec2"
-                                    failed="$failed $lc"                    ;;
-                            esac
-                    fi
-                done
-        fi
+							"ECHO")
+									tmp_val=${tmp_exec2:-\printf}
+									if [[ "xx" ==  "$($tmp_val xx)" ]]
+									then
+										export ECHO=$tmp_val
+										worked="$worked $lc"
+									else
+										failed="$failed $lc"
+										# List it as failed since ECHO doesnt exist,
+										# but use this code as fallback
+										export ECHO="\printf '$1\n'"
+									fi   ;;
+							"PRINTF")
+									tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
+									[[ $? == 2 ]] && \
+											worked="$worked $lc" || \
+											failed="$failed $lc"   ;;
+							"TPUT")
+									tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
+									[[ $? == 2 ]] && \
+											worked="$worked $lc" || \
+											failed="$failed $lc"   ;;
+							"HOSTNAME")
+									[[ "$HOSTNAME" == "$(\hostname)" ]] && \
+											worked="$worked $lc" || \
+											failed="$failed $lc"   ;;
+							"HOSTNAME_EXEC")
+									[[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
+											worked="$worked $lc" || \
+											failed="$failed $lc"   ;;
+							# If this was installed, we'd be doing the easy way.
+							#"WHICH")
+							#		set -x
+							#		eval ${tmp_exec2} --help &>> /dev/null  &>> /dev/null
+							#		[[ $? == 0 ]] && \
+							#				worked="$worked $lc" || \
+							#				failed="$failed $lc"   ;;
+							*)	  init.log "failed: $lc : $tmp_exe : $tmp_exec2"
+									failed="$failed $lc"					;;
+							esac
+					fi
+				done
+		fi
 
-        unset ${!tmp_*} w W f F
-        for w in $worked
-        do
-            local W=${w^^}
-            #[[ $W = "WHICH" ]] && echo " ------------- ANFANG " && set -x
-            $PRINTF '\t%s\n' "$W=\\${!W}" | $SED s,'HOSTNAME=\\','HOSTNAME=',g | $SED s,*'=\\','',g  >&1
-            #[[ $W = "WHICH" ]] & set +x
-        done
+		for w in $worked
+		do
+			local W=${w^^}
+			#[[ $W = "WHICH" ]] && echo " ------------- ANFANG " && set -x
+			$PRINTF '\t%s\n' "$W=\\${!W}" | $SED s,'HOSTNAME=\\','HOSTNAME=',g | $SED s,*'=\\','',g  >&1
+			#[[ $W = "WHICH" ]] & set +x
+		done
 
-        for f in $failed
-        do
-            [ -z "$f" ] && break
-            local F=${f^^}
-            init.log.msg "$SWARM_MSG_STR_FAILED: \t$F=${!F}" >&2
-        done
+		for f in $failed
+		do
+			[ -z "$f" ] && break
+			F=${f^^}
+			init.log.msg "$SWARM_MSG_STR_FAILED: \t$F=${!F}" >&2
+		done
 
-        # Abort if something failed
-        if [[ ! -z "${failed}" ]]
-        then    # Dunno why...
-            #    if [[ -z "$($ECHO $failed | $SED s,"which","",g | $SED s,"pwd_exec","",g  )" ]] && [[ ! -z "$($ECHO ${WHICH}${PWD_EXEC} | $SED s,"\\\\","",g)" ]]
-            #    then    # It's ok to report success, because $WHICH and PWD_EXEC are not empty
-            #            $WHICH $WHICH >/dev/zero &2>/dev/zero && \
-            #                $ECHO " WHICH=$WHICH\n\tPWD_EXEC=$PWD_EXEC" && \
-            #                return 0
-            #            return 1
-            #    else
-                        return 1
-            #    fi
-        fi
-        # All good
-        return 0
-    }
-    swarm.sanity.env() { #
-    #
-    #
-        echo yay
-        echo "----------------------------"
-
-    }
+		# Abort if something failed
+		[[ ! -z "${failed}" ]] &&  return 1
+		# All good
+		return 0
+	}
+	swarm.sanity.env() { #
+	#
+	#
+		$PRINTF '\n%s\n' "TODO : $FUNCNAME"
+		#echo "----------------------------"
+	}
+	#swarm.sanity.env
 #
 # Lets check if environment is 'sane'
 #
-#    set -x
-#echo "nothing"
-    if swarm.sanity.userconfig
-    then    # SWARMRC was written successfull
-            [[ -f "$SWARMRC" ]] && source "$SWARMRC"
-    else
-            # It's a Read Only system (or dont have rights)
-            init.msg "$SWARM_MSG_INIT_RO_SYSTEM"
-            export isRO=true
-    fi
-#    set +x
 #
-# Check for the users SWARMRC
-#
+	if swarm.sanity.userconfig
+	then	# SWARMRC was written successfull
+			[[ -f "$SWARMRC" ]] && source "$SWARMRC"
+			swarm.sanity.env
+	else
+			# It's a Read Only system (or dont have rights)
+			init.msg "$SWARM_MSG_INIT_RO_SYSTEM"
+			export isRO=true
+	fi

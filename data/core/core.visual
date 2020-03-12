@@ -6,65 +6,172 @@
 #
 # Theme's
 #
-    swarm.theme.update() { # THEME_NAME
-    # This loads the provided THEME_NAME
-    #
-        # This an assigned array containg the theme related data
-        # Lets make sure each theme gets loaded into clear memory
-        unset SWARM_THEME_DATA[@]    # Use terminal / console / vtr default settings as base
-        # These are it's assingments
-        swarm_list_theme_options="border-left border-right color-front color-back border-right read select"
-        # Lets start fresh
-        declare -A SWARM_THEME_DATA
-        local ret=false
 
-        # Always use the user themes first
-        # in case someone wants to pseudo-overwrite the default themes
-        for there in "$SWARM_USER_CONFIG/themes" "$SWARM_DIR_THEMES"
-        do
-            # check in each dir
-            if [[ -d "$there" ]]
-            then    #
-                    if [[ -f "$there/$1" ]]
-                    then    source "$there/$1"
-                            ret=$?
-                    fi
-            fi
-        done
+	swarm.theme.update() { # THEME_NAME
+	# This loads the provided THEME_NAME
+	#
+		# This an assigned array containg the theme related data
+		# Lets make sure each theme gets loaded into clear memory
+		unset SWARM_THEME_DATA[@]	# Use terminal / console / vtr default settings as base
+		# These are it's assingments
+		swarm_list_theme_options="border-left border-right color-font color-back read select"
+		# Lets start fresh
+		declare -GA SWARM_THEME_DATA
+		local ret=false
 
-        # Check if something went wrong
-        if ! $ret
-        then    # The theme could not be Found
-                # Lets fallback to default
-                source "$SWARM_DIR_THEMES/default-blue"
-                init.log.msg "$SWARM_MSG_INIT_THEME : $1"
-        fi
-        return $ret
-    }
-    swarm.theme.list() {
-    # Lists all themes available
-    # Includes SWARM_USER_CONFIG/themes and SWARM_DIR_THEMES alike
-        local d f
-        for d in "$SWARM_USER_CONFIG/themes/" "$SWARM_DIR_THEMES/"
-        do
-            # Check if path exists and handle each file for its own
-            [[ -d "$d" ]] && \
-                for f in $($LS "$d")
-                do
-                    # Output only if it really is a file
-                    [[ -f "$f" ]] && $PRINTF '%s\n' "${f##*/}"
-                done
-        done
-    }
+		# Always use the user themes first
+		# in case someone wants to pseudo-overwrite the default themes
+		for there in "$SWARM_USER_CONFIG/themes" "$SWARM_DIR_THEMES"
+		do
+			# check in each dir
+			if [[ -d "$there" ]]
+			then	if [[ -f "$there/$1" ]]
+					then	source "$there/$1"
+							ret=$?
+					fi
+			fi
+		done
+
+		# Check if something went wrong
+		if [[ $ret != 0 ]]
+		then	# The theme could not be Found
+				# Lets fallback to default
+				source "$SWARM_DIR_THEMES/default-blue"
+				init.log.msg "$SWARM_MSG_INIT_THEME : $1"
+		fi
+		# Export the values now
+		export SWARM_THEME_DATA #[@]
+		# Now, return
+		return $ret
+	}
+	swarm.theme.list() {
+	# Lists all themes available
+	# Includes SWARM_USER_CONFIG/themes and SWARM_DIR_THEMES alike
+		local d f
+		for d in "$SWARM_USER_CONFIG/themes/" "$SWARM_DIR_THEMES/"
+		do
+			# Check if path exists and handle each file for its own
+			[[ -d "$d" ]] && \
+				for f in $($LS "$d")
+				do
+					# Output only if it really is a file
+					[[ -f "$f" ]] && $PRINTF '%s\n' "${f##*/}"
+				done
+		done
+	}
+	swarm.init.theme () { #
+	# Initiate the theme for the first time
+	# This is only a wrapper for the initial loading.
+		swarm.theme.update ${SWARM_THEME:-default-blue}
+	}
 #
-# Visual outputs
+# Visual outputs - core essentials
 #
-    swarm.print.border() {
-    # Prints basic border for all lines
-    #
-        #echo " ---------------------------------------------- "
-        #set -x
-        len1=${#SWARM_THEME[border-left]}
-        echo testing $len1
-        #set +x
-    }
+	swarm.print.border() { # ARGS
+	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
+	# The calling function has to handle the NEWLINE required by 'printe' (-E)
+		local MODE="" #name=""
+		case "${1/-}" in
+		e|p)	MODE="basic"	;;
+		h)		MODE="header"	;;
+		t)		MODE="title"	;;
+		esac
+		# Makes no sense to print visuals on such short lines
+		[[ ${COLUMNS} -lt 25 ]] && return 1
+#set -x
+		# Set basic values
+		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}" BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
+		local clrFRONT="${SWARM_THEME_DATA[color-front]}" clrBACK="${SWARM_THEME_DATA[color-back]}"
+		local clrCL="\e[2K"
+
+		# Check if border-right was set:
+		[ -z "$BORDER_RIGHT" ] && \
+			for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
+
+		# Now prepare the seperate handling
+		case "$MODE" in
+			"basic")
+					PRINT_LEFT=""
+					PRINT_RIGHT=""
+					pos_cor_num=0
+					;;
+			"header")
+					pos_cor_num=0
+					;;
+			"title")
+					pos_cor_num=0
+					;;
+		esac
+
+		# Get some numbers
+		local lenLeft="${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#clrFRONT} lenClrBack=${#clrBACK}
+	#	local identRight=$(( $lenRight + ${#clrCL}  ))
+		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - $pos_cor_num ))G"
+
+#set +x
+		# Well, left aligned it works. isnt too hard
+		printf "\r${clrCL}${BORDER_LEFT} " >&2
+
+		# The right side is much more challenging
+		printf "${posRIGHT}${BORDER_RIGHT}" >&2
+	}
+	swarm.print.text() { # LEFT CENTER RIGHT
+	# This simply puts the text
+	#
+		# Check if it is too short, if so, print fallback mode and return
+		[[ ${COLUMNS} -lt 25 ]] && \
+				$PRINTF "%s\n" "${@}" && \
+				return 1
+
+		# Set basic values
+		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}" BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
+		local clrFRONT="${SWARM_THEME_DATA[color-front]}" clrBACK="${SWARM_THEME_DATA[color-back]}"
+		local clrCL="\e[2K"
+#echo border:$BORDER_LEFT
+		# Check if border-right was set:
+		[ -z "$BORDER_RIGHT" ] && \
+				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
+
+		# Get some numbers
+		local lenLeft"${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#clrFRONT} lenClrBack=${#clrBACK}
+		local identRight=$(( $lenRight + ${#clrCL}  ))
+#echo len:$lenLeft
+
+		# Get the actual string
+		local evalLeft=$($ECHO "$1")
+		local evalMiddle=$($ECHO "$2")
+		local evalRight=$($ECHO "$3")
+
+		# Retrieve their length
+		local lenEvalLeft=${#evalLeft}
+		local lenEvalMiddle=${#evalMiddle}
+		local lenEvalRight=${#evalRight}
+
+
+
+		local posLEFT="\33[$(( ${#BORDER_LEFT} + 2 ))G"
+		local posMIDDLE="\33[$(( $(( $COLUMNS / 2 )) - $(( ${#2} / 2 ))  ))G"
+		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - ${lenEvalRight} - 1  ))G"
+
+		# Output
+		printf "${posLEFT}$1"
+		printf "${posMIDDLE}$2"
+		printf "${posRIGHT}$3"
+	}
+#
+# Visual outputs - 'End user' stuff
+#
+	title() { # Text
+	#
+	#
+		swarm.print.border -t
+		swarm.print.text "" "$1" ""
+		$PRINTF "\n"
+	}
+	header() { # LEFT CENTER RIGHT
+	#
+	#
+		swarm.print.border -h
+		swarm.print.text "$1" "$2" "$3"
+		$PRINTF "\n"
+	}

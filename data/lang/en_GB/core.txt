@@ -17,10 +17,18 @@ SWARM_MSG_INIT_CANT_READ_EXISINTG_SWARMRC="SWARNRC ($SWARMRC) exists, but could 
 SWARM_MSG_INIT_THEME="Fallback to default theme, as the provided theme could not be found/loaded."
 SWARM_MSG_INIT_PID_GEOMETRY="Updating geometrics for SWARM PID"
 SWARM_MSG_INIT_LOG_FAIL="Could not create logfile path and/or file."
-SWARM_MSG_=""
+SWARM_MSG_INIT_NO_ID="Could not determine a user id (UID)"
 SWARM_MSG_=""
 SWARM_MSG_=""
 SWARM_MSG_=""
 #
-#   SWARM ....
+#   SWARM STATUS
 #
+SWARM_MSG_STATUS_DONE="DONE"
+SWARM_MSG_STATUS_FAIL="FAIL"
+SWARM_MSG_STATUS_TODO="TODO"
+SWARM_MSG_STATUS_NEXT="NEXT"
+SWARM_MSG_STATUS_BACK="BACK"
+SWARM_MSG_STATUS_ERROR=" ERR" # This space is required
+SWARM_MSG_STATUS_=""
+SWARM_MSG_STATUS_=""

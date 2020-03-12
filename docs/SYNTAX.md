@@ -9,16 +9,16 @@ Last Changed: 2020.03.13
 Designated Audience
 -------------------
 
-    Code contributors, -patchers and everyone who wants to use the full benefit of SWARM
+	Code contributors, -patchers and everyone who wants to use the full benefit of SWARM
 
 
 
 What this file does and what not
 --------------------------------
 
-    * It is all about the syntax required to work best cross-plattform
-    * It is not about the commands provided with SWARM, but please see
-      the [./MANUAL.md]Manual for that too.
+	* It is all about the syntax required to work best cross-plattform
+	* It is not about the commands provided with SWARM, but please see
+	  the [./MANUAL.md]Manual for that too.
 
 
 

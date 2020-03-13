@@ -155,15 +155,18 @@
 	header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
 	title 	"my title"
 	printe 	left middle right
+	printe
 	# Piped question works
+	title	"Piped input"
 	$ECHO y | ask "Is this cool?"
 	echo $?
 	$ECHO n | ask "Is this cool?"
 	echo $?
+	title	"Piped Output"
 	# Piped regular output, not so much
 	$ECHO 	left middle right | printe -
-	$ECHO	"This is" 	"another piped" 	"test run" | printe -
-
+	printf '%q ' "This is" 	"another piped" 	"test run" | printe -
+	
 #set +x
 	echo " ----------- TEST AREA -----------"
 

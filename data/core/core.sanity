@@ -193,26 +193,18 @@ EOF
 	echo_(){
 	  ( IFS=" "; printf "%s\n" "$*" )
 	}
-
 	# Portable echo -n
 	echo_n() {
 	  ( IFS=" "; printf "%s" "$*" )
 	}
-
 	# Portable echo -e
 	echo_e() {
 	  ( IFS=" "; printf "%b\n" "$*" )
 	}
-
 	# Portable echo -ne
 	echo_ne() {
 	  ( IFS=" "; printf "%b" "$*" )
 	}
-	echo_q() {
-	  #local IFS=" ";
-	  printf '%q ' "$1" "$2" "$3" #"$*"
-	}
-
 	alias echo_en=echo_ne
 #
 # Lets check if environment is 'sane'

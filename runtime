@@ -13,8 +13,8 @@
 	# SWARM
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
 	declare -A SWARM
-	SWARM[VERSION]=0.2
-	SWARM[BUILD]=2
+	SWARM[VERSION]=0.4
+	SWARM[BUILD]=5
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -165,8 +165,27 @@
 	title	"Piped Output"
 	# Piped regular output, not so much
 	$ECHO 	left middle right | printe -
-	printf '%q ' "This is" 	"another piped" 	"test run" | printe -
-	
+	#printf '%q ' "This is" 	"another piped" 	"test run" | printe -
+	title MIG
+
+	#Simple echo
+	echo_(){
+	  ( IFS=" "; printf "%s\n" "$*" )
+	}
+
+	# Used to work
+	echo_ "this is
+	a piped
+	test code" | printe -
+
+	# Works
+	printe "this is" "an argument" "test code"
+
+	# Fails, used to work
+	printf "%s\n" "this was" "an argument" "test code" | printe -
+
+
+
 #set +x
 	echo " ----------- TEST AREA -----------"
 

@@ -231,21 +231,21 @@
 		$PRINTF "$posEND\n"
 	}
 	title() { # Text
-	#
-	#
+	# This prints a single centered string on a line
+	# It has blue borders and fills the inner line with white (Default-{front,back})
 		swarm.print.border -t
 		swarm.print.text -t "" "${c_front}${c_back}${c_invert}$1${c_reset}" ""
 		$PRINTF "$posEND\n"
 	}
-
 	printe() { # STR1 STR2 STR3
-	# Simply prints the strings as passed, end with newline
-	# It requires 3 strings to use the center
+	# Simply prints the strings as passed, it requires 3 strings to use the center
+	# For piping, it expects 3 lines, each representing 1 variable
 		case "$1" in
 		"--"|"-")
-				# Read pipe, expect one line
-				read LEFT CENTER RIGHT
-				set "${LEFT}" "$CENTER" "$RIGHT"
+				# Read pipe, expect 3 lines
+				read LEFT; read CENTER; read RIGHT
+				printe "$LEFT" "$CENTER" "$RIGHT"
+				return
 				;;
 		esac
 		swarm.print.border -e
@@ -257,9 +257,10 @@
 	# It requires 3 strings to use the center
 		case "$1" in
 		"--"|"-")
-				# Read pipe, expect one line
-				read LEFT CENTER RIGHT
-				set "${LEFT}" "$CENTER" "$RIGHT"
+				# Read pipe, expect 3 lines
+				read LEFT; read CENTER; read RIGHT
+				printe "$LEFT" "$CENTER" "$RIGHT"
+				return
 				;;
 		esac
 		swarm.print.border -p

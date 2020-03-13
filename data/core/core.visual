@@ -87,6 +87,11 @@
 		local str=cf_${1:-white}
 		eval $PRINTF \$"${str}"
 	}
+	swarm.print.goto() { # NUM
+	# Returns the positioncode for passed NUM location
+	# Returns number 0 if no argument is passed
+		$PRINTF "\33[${1:-0}G"
+	}
 	swarm.print.border() { # MODE
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
@@ -218,6 +223,13 @@
 #
 # Visual outputs - 'End user' stuff
 #
+	header() { # LEFT CENTER RIGHT
+	# This prints a full line in blue (default-back), with white (default-front) text
+	# TODO long string adjustments TODO
+		swarm.print.border -h
+		swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+		$PRINTF "$posEND\n"
+	}
 	title() { # Text
 	#
 	#
@@ -225,10 +237,73 @@
 		swarm.print.text -t "" "${c_front}${c_back}${c_invert}$1${c_reset}" ""
 		$PRINTF "$posEND\n"
 	}
-	header() { # LEFT CENTER RIGHT
-	#
-	#
-		swarm.print.border -h
-		swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+
+	printe() { # STR1 STR2 STR3
+	# Simply prints the strings as passed, end with newline
+	# It requires 3 strings to use the center
+		case "$1" in
+		"--"|"-")
+				# Read pipe, expect one line
+				read LEFT CENTER RIGHT
+				set "${LEFT}" "$CENTER" "$RIGHT"
+				;;
+		esac
+		swarm.print.border -e
+		swarm.print.text -e "$1" "$2" "$3"
 		$PRINTF "$posEND\n"
+	}
+	printl() { # STR1 STR2 STR3
+	# Simply prints the strings as passed, stays on the same line
+	# It requires 3 strings to use the center
+		case "$1" in
+		"--"|"-")
+				# Read pipe, expect one line
+				read LEFT CENTER RIGHT
+				set "${LEFT}" "$CENTER" "$RIGHT"
+				;;
+		esac
+		swarm.print.border -p
+		swarm.print.text -p "$1" "$2" "$3"
+	}
+#
+# Visual outputs - 'End user' stuff - Core Convenience
+#
+	ask() { # "What question?"
+	# Ask a yes/no question, returns 0/true for yes and 1/false for no
+	# y/n are taken from language file and are used in code
+		# Check if 'yesno' is empty, if so, fill with fallback values
+		case "$1" in
+		"--version")
+			$PRINTF "$SWARM_MSG_HELP_VERSION"
+			$PRINTF "\n"
+			return 0
+			;;
+		"--help")
+			$PRINTF "\r%s" "$SWARM_MSG_HELP_ASK"
+			$PRINTF "\n"
+			return 0
+			;;
+		esac
+		[[ -z "${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO}" ]] && \
+			SWARM_MSG_ASK_YES="+" && \
+			SWARM_MSG_ASK_NO="-"
+
+		swarm.print.border -e
+		# Print the text
+		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO})"
+		# Move the cursor
+		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
+		read -n1 answer
+		$PRINTF "$posEND\n"
+
+		case "$answer" in
+		"+"|"$SWARM_MSG_ASK_YES")
+				return 0
+				;;
+		"-"|"$SWARM_MSG_ASK_NO")
+				return 1
+				;;
+		*)		return 1
+				;;
+		esac
 	}

@@ -11,7 +11,7 @@
 # Core Public Variables
 #
 	# SWARM
-	unset SWARM[@] ${!SWARM_DIR_*}  >/dev/zero
+	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
 	declare -A SWARM
 	SWARM[VERSION]=0.2
 	SWARM[BUILD]=2
@@ -154,12 +154,16 @@
 	# swarm.sanity.env
 	header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
 	title 	"my title"
+	printe 	left middle right
+	# Piped question works
+	$ECHO y | ask "Is this cool?"
+	echo $?
+	$ECHO n | ask "Is this cool?"
+	echo $?
+	# Piped regular output, not so much
+	$ECHO 	left middle right | printe -
+	$ECHO	"This is" 	"another piped" 	"test run" | printe -
 
-	swarm.print.border -e
-	$PRINTF "\n"
-
-	swarm.print.border -e
-	swarm.print.text -e left middle right
 #set +x
 	echo " ----------- TEST AREA -----------"
 

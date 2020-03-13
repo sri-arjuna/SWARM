@@ -6,7 +6,6 @@
 #
 # Theme's
 #
-
 	swarm.theme.update() { # THEME_NAME
 	# This loads the provided THEME_NAME
 	#
@@ -67,7 +66,28 @@
 #
 # Visual outputs - core essentials
 #
-	swarm.print.border() { # ARGS
+	swarm.color.list() { #
+	# Simply lists the color names that can be used in SWARM
+	#
+		local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
+		for r in $raw
+		do
+			$PRINTF '%s\n' "${r/=*}"
+		done
+	}
+	swarm.color.bg() {  # COLORNAME
+	# Returns the color code of provided COLORNAME
+	#
+		local str=cb_${1:-blue}
+		eval $PRINTF \$"${str}"
+	}
+	swarm.color.fg() {  # COLORNAME
+	# Returns the color code of provided COLORNAME
+	#
+		local str=cf_${1:-white}
+		eval $PRINTF \$"${str}"
+	}
+	swarm.print.border() { # MODE
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
 		local MODE="" #name=""
@@ -83,41 +103,69 @@
 		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}" BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
 		local clrFRONT="${SWARM_THEME_DATA[color-front]}" clrBACK="${SWARM_THEME_DATA[color-back]}"
 		local clrCL="\e[2K"
+		c_front=$(swarm.color.fg ${SWARM_THEME_DATA[color-front]})
+		c_back=$(swarm.color.bg ${SWARM_THEME_DATA[color-back]})
 
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
 			for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
 
 		# Now prepare the seperate handling
+		PRINT_RIGHT_OUT="$c_reset"
 		case "$MODE" in
 			"basic")
-					PRINT_LEFT=""
-					PRINT_RIGHT=""
+					PRINT_LEFT_IN="$c_reset"
+					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
+					PRINT_RIGHT_IN="${c_front}${c_back}"
 					pos_cor_num=0
 					;;
 			"header")
+					local filler_num=$(( $(( $COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+					local filler_str=$($PRINTF "%*s" ${filler_num})
+					PRINT_LEFT_IN="$filler_str" #$c_reset"
+					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
+					PRINT_RIGHT_IN="" #${c_front}${c_back}"
 					pos_cor_num=0
 					;;
 			"title")
+					local filler_num=$(( $(( $COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+					local filler_str=$($PRINTF "%*s" ${filler_num})
+					PRINT_LEFT_IN="${c_invert}$filler_str" #$c_reset"
+					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
+					PRINT_RIGHT_IN="${c_reset}${c_front}${c_back}"
 					pos_cor_num=0
 					;;
 		esac
 
 		# Get some numbers
-		local lenLeft="${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#clrFRONT} lenClrBack=${#clrBACK}
+		local lenLeft="${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#c_front} lenClrBack=${#c_back}
 	#	local identRight=$(( $lenRight + ${#clrCL}  ))
+		local posLEFT="\33[$(( ${#BORDER_LEFT} - 2 ))G"
 		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - $pos_cor_num ))G"
+		local posEND="\33[$(( $(( $COLUMNS / 2 * 2 )) ))G"
 
 #set +x
 		# Well, left aligned it works. isnt too hard
-		printf "\r${clrCL}${BORDER_LEFT} " >&2
+		#printf "\r${clrCL}${BORDER_LEFT} " >&2		# ORG
+		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" #>&2
 
 		# The right side is much more challenging
-		printf "${posRIGHT}${BORDER_RIGHT}" >&2
+		#printf "${posRIGHT}${BORDER_RIGHT}" >&2
+		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
+		$PRINTF "${posEND}"
 	}
-	swarm.print.text() { # LEFT CENTER RIGHT
+	swarm.print.text() { # MODE [ LEFT CENTER RIGHT]
 	# This simply puts the text
-	#
+	# according to MODE
+		case ${1/-} in
+			t)	MODE=title	;;
+			h)	MODE=header	;;
+			*)	MODE=basic	;;
+		esac
+		shift
+
+		local fix_title=0
+		local fix_header_r=0
 		# Check if it is too short, if so, print fallback mode and return
 		[[ ${COLUMNS} -lt 25 ]] && \
 				$PRINTF "%s\n" "${@}" && \
@@ -147,16 +195,25 @@
 		local lenEvalMiddle=${#evalMiddle}
 		local lenEvalRight=${#evalRight}
 
+		# Small corrections required
+		case $MODE in
+		"header")	fix_header_r=4 #$(( ${#c_front} + ${#c_back}  ))
+					;;
+		"title")	fix_title=12
+					;;
+		esac
 
-
+		# Calculate positions
 		local posLEFT="\33[$(( ${#BORDER_LEFT} + 2 ))G"
-		local posMIDDLE="\33[$(( $(( $COLUMNS / 2 )) - $(( ${#2} / 2 ))  ))G"
-		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - ${lenEvalRight} - 1  ))G"
+		local posMIDDLE="\33[$(( $(( $COLUMNS / 2 )) - $(( ${#2} / 2 ))  + $fix_title ))G"
+		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - ${lenEvalRight} - 1 + $fix_header_r ))G"
+		posEND="\33[$(( $(( $COLUMNS / 2 * 2 )) ))G"
 
 		# Output
-		printf "${posLEFT}$1"
-		printf "${posMIDDLE}$2"
-		printf "${posRIGHT}$3"
+		$PRINTF "${posLEFT}$1"
+		$PRINTF "${posMIDDLE}$2"
+		$PRINTF "${posRIGHT}$3"
+		$PRINTF "${posEND}"
 	}
 #
 # Visual outputs - 'End user' stuff
@@ -165,13 +222,13 @@
 	#
 	#
 		swarm.print.border -t
-		swarm.print.text "" "$1" ""
-		$PRINTF "\n"
+		swarm.print.text -t "" "${c_front}${c_back}${c_invert}$1${c_reset}" ""
+		$PRINTF "$posEND\n"
 	}
 	header() { # LEFT CENTER RIGHT
 	#
 	#
 		swarm.print.border -h
-		swarm.print.text "$1" "$2" "$3"
-		$PRINTF "\n"
+		swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+		$PRINTF "$posEND\n"
 	}

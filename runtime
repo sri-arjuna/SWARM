@@ -11,9 +11,9 @@
 # Core Public Variables
 #
 	# SWARM
-	unset SWARM[@] ${!SWARM_DIR_*}
+	unset SWARM[@] ${!SWARM_DIR_*}  >/dev/zero
 	declare -A SWARM
-	SWARM[VERSION]=0.1
+	SWARM[VERSION]=0.2
 	SWARM[BUILD]=2
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
@@ -51,10 +51,10 @@
 #
 # Get proper SWARM root dir
 #
-	# If no SWARM_DIR_INSTALLED is provided, it is used in runtime as designed
-	# However, 'SWARM_DIR_INSTALLED=$PWD source SWARM/rc' could be used as a speedbooster,
+	# If no SWARM_INSTALLED_DIR is provided, it is used in runtime as designed
+	# However, 'SWARM_INSTALLED_DIR=$PWD source SWARM/rc' could be used as a speedbooster,
 	# as it bypasses the multiple physical read attempts
-	if [[ -z "${SWARM[ROOTDIR]}" ]] && [[ "x" == "x$SWARM_DIR_INSTALLED" ]]
+	if [[ -z "${SWARM[ROOTDIR]}" ]] && [[ "x" == "x$SWARM_INSTALLED_DIR" ]]
 	then
 		# Find the path that holds this script
 		# Evaluate best chance for the dirs
@@ -80,9 +80,9 @@
 		unset tmp
 	else
 		# Or optionaly, use the installed method
-		if [[ -d "${SWARM_DIR_INSTALLED}" ]]
+		if [[ -d "${SWARM_INSTALLED_DIR}" ]]
 		then	# Assign the variable
-				SWARM[ROOTDIR]="$SWARM_DIR_INSTALLED"
+				SWARM[ROOTDIR]="$SWARM_INSTALLED_DIR"
 		else	# This is the only hardcoded 'english only' message
 				$PRINTF '%s\n' "Fatal, no SWARM dir found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
 				init.countdown
@@ -152,7 +152,6 @@
 	echo " ----------- TEST AREA -----------"
 	## Core sanity
 	# swarm.sanity.env
-	# swarm.theme.list
 	header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
 	title 	"my title"
 
@@ -160,16 +159,9 @@
 	$PRINTF "\n"
 
 	swarm.print.border -e
-	swarm.print.text  left middle right
-
-
-	#
-	#swarm.core.line.print.border
-
-	#swarm.sanity.coreutils
-
-	#cat $SWARM_LOG
-	#echo " ----------- TEST AREA -----------"
+	swarm.print.text -e left middle right
+#set +x
+	echo " ----------- TEST AREA -----------"
 
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments

@@ -9,14 +9,16 @@ Overview
 --------
 
 You want scripts that work nice in GUI and console,
-on different plattforms, therefor with different bash builddirs
-and still work?
+on different plattforms, therefor with different bash builds and bindirs
+and still have them work?
 
 You want the end user to edit files,
-but dont know what applications they might have installed?
+but dont know what applications, like leafpad or gedit,
+they might have installed?
 
 Always thought that such a wide terminal window looks empty?
-Did you ever thought it would be nice to have text left, right and even centered?
+Did you ever thought it would be nice to have text left,
+right and even aligned to the center??
 
 You want to structure your scripts in folders
 and access scripts in there from the command line?
@@ -53,21 +55,61 @@ When actualy using in runtime, you would call it like:
 
 
     #!/usr/bin/env bash
-    source ./SWARM/rc
+    source ./SWARM/runtime
 
 
 And when calling an installed version of SWARM:
 
 
     #!/usr/bin/env bash
-    #swarmrc-<buildnumber>
-    source swarm-2234
+    SWARM_INSTALLED_DIR=/var/opt/swarm-2
+    source $SWARM_INSTALLED_DIR/runtime
 
 
-This way multiple instances of SWARM can be installed in paralell.
+This way multiple instances of SWARM can be installed in paralell,
+to ensure cross-version compatibility.
+The '-2' refers to SWARM's build (Nr. of executed 'git push master').
 
 
+This loads several functions into memory that you can use now.
+I tried to give them short and reasonable names.
 
+All 'color' references are to the __default-blue__ theme!
+
+* header "left" "center" "right" ; All blue background with white text
+* title "my title" ; All white background with blue text, and blue borders
+* printe "left" "center" "right" ; blue borders, next output is on a newline
+* printl "left" "center" "right" ; blue borders, next output overwrites this
+* choose $list or "${ARRAY[@]}" ; 0 (zero) will always be 'Back' and return 1 (back)
+* ask "question?" ; the 'yn' is provided by language file and is supported in code
+* status $? "Left" "Center"
+* rnd _[max | min max ]_ ; prints a random number between 0-100; or 0-max.
+* edit "file" ; opens CLI or GUI appliaction
+* files "path" ; opens CLI or GUI file manager
+* web "url" ; opens CLI or GUI web browser
+
+
+__2nd Iteration__
+* bar _[options]_ min max val ["text"]
+* cfg.list "file" ; Lists all bash-based keys (variables) of the given file
+* cfg.get "file" var
+* cfg.set "file" var "val"
+* configure [path | file]; configures SWARM or the provide file or path
+
+
+__3rd Iteration__
+* download "url"
+* swarm _[options]_ "path" ; THE purpose of doing all this, everything else is just a gimmick ;)
+
+These are the core basics.
+Everything else provided is just for additional convenience.
+
+If strings should become too long to be displayed properly
+within the consoles border, SWARM will break up the strings
+and and try to keep the intended text alignments/orientations.
+
+This ensures that the scripts keeps it's intended look and feel
+even with different sized gui terminal windows.
 
 
 

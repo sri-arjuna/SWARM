@@ -7,8 +7,8 @@
 #
 #	'title' will use inverted colors
 #
-	SWARM_THEME_DATA[color-back]="$BLUE"
-	SWARM_THEME_DATA[color-front]="$white"
+	SWARM_THEME_DATA[color-back]="blue"
+	SWARM_THEME_DATA[color-front]="white"
 	#SWARM_THEME_DATA[color-back]=""
 #
 #	If 'border-right' is not set,

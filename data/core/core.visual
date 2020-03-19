@@ -2,7 +2,62 @@
 #
 # Prepare variables
 #
+#
+# For easier code reusage, lets combine all math into a sub process
+# Should help to speed things up a little more for the end user front ;)
+# This seems useless... TODO remove or fix
+#
+if true
+then
+	unset ${!len*} my_test_var
+	swarm.geometry.update() { #
+		declare -g DATE_TIME=$($DATE +'%H:%M:%S')		# Time on the other hand is
 
+		declare -g  my_test_var="$(date +%T)"
+
+		# Set basic values
+		declare -g BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
+		declare -g BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
+		declare -g clrFRONT="${SWARM_THEME_DATA[color-front]}"
+		declare -g clrBACK="${SWARM_THEME_DATA[color-back]}"
+		declare -g clrCL="\e[2K"
+
+		# Check if border-right was set:
+		[ -z "$BORDER_RIGHT" ] && \
+				declare -g BORDER_RIGHT && \
+				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
+
+		# Get some numbers
+		declare -g lenLeft"${#BORDER_LEFT}"
+		declare -g lenRight="${#BORDER_RIGHT}"
+		declare -g lenClrFont=${#clrFRONT}
+		declare -g lenClrBack=${#clrBACK}
+		export identRight=$(( $lenRight + ${#clrCL}  ))
+		export numEND=$(( $COLUMNS / 2 * 2 ))
+
+		# If user wants extended logs, he shall have it
+		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
+		echo "$my_test_var"  >>2
+	}
+	export -f swarm.geometry.update
+
+	# Sub shell
+	(
+		while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
+		do
+			# Ok, lets keep it simple,
+			#DATE_TODAY=$($DATE +'%Y.%m.%d')	# Cmon, day is not THAT important
+
+			swarm.geometry.update
+			set -x
+			echo runs >/dev/zero
+			set +x
+			# Using 15 secs for fallback mode
+			sleep ${SWARM_INTERVALL_GEOMETRY:-15}
+		done
+	) & >> /dev/zero
+	SWARM_PID_THEME="$SWARM_PID_THEME $!"
+fi
 #
 # Theme's
 #
@@ -69,11 +124,23 @@
 	swarm.color.list() { #
 	# Simply lists the color names that can be used in SWARM
 	#
-		local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
-		for r in $raw
-		do
-			$PRINTF '%s\n' "${r/=*}"
-		done
+		if [[ -z "cb_black" ]]
+		then	# The variables are empty
+				# need to read from file
+				local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
+				for r in $raw
+				do
+					$PRINTF '%s\n' "${r/=*}"
+				done
+		else	# Variables are available
+				local tmp_str=""
+				# Generate an end user optimized list
+				for t in ${!cb_*}
+				do	tmp_str="$tmp_str ${t/cb_}"
+				done
+				# Output
+				$PRINTF '%s\n' $tmp_str
+		fi
 	}
 	swarm.color.bg() {  # COLORNAME
 	# Returns the color code of provided COLORNAME
@@ -91,6 +158,16 @@
 	# Returns the positioncode for passed NUM location
 	# Returns number 0 if no argument is passed
 		$PRINTF "\33[${1:-0}G"
+	}
+	swarm.print.bold() { # "STR"
+	# Returns STR with wrapped code for BOLD
+	#
+		$PRINTF "\033[1m${1}\033[0m"
+	}
+	swarm.print.underline() { # "STR"
+	# Returns STR with wrapped code for UNDERLINE
+	#
+		$PRINTF "\033[4m${1}\033[0m"
 	}
 	swarm.print.border() { # MODE
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
@@ -180,7 +257,7 @@
 		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}" BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
 		local clrFRONT="${SWARM_THEME_DATA[color-front]}" clrBACK="${SWARM_THEME_DATA[color-back]}"
 		local clrCL="\e[2K"
-#echo border:$BORDER_LEFT
+
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
 				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
@@ -188,23 +265,26 @@
 		# Get some numbers
 		local lenLeft"${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#clrFRONT} lenClrBack=${#clrBACK}
 		local identRight=$(( $lenRight + ${#clrCL}  ))
-#echo len:$lenLeft
 
 		# Get the actual string
-		local evalLeft=$($ECHO "$1")
-		local evalMiddle=$($ECHO "$2")
-		local evalRight=$($ECHO "$3")
+		local evalLeft=$($PRINTF "$1")
+		local evalMiddle=$($PRINTF "$2")
+		local evalRight=$($PRINTF "$3")
 
 		# Retrieve their length
 		local lenEvalLeft=${#evalLeft}
 		local lenEvalMiddle=${#evalMiddle}
 		local lenEvalRight=${#evalRight}
+		#local lenEvalLeft=${#1}
+		#local lenEvalMiddle=${#2}
+		#local lenEvalRight=${#3}
 
 		# Small corrections required
 		case $MODE in
 		"header")	fix_header_r=4 #$(( ${#c_front} + ${#c_back}  ))
 					;;
 		"title")	fix_title=12
+					fix_title=21	# This is for bold + underline
 					;;
 		esac
 
@@ -227,14 +307,33 @@
 	# This prints a full line in blue (default-back), with white (default-front) text
 	# TODO long string adjustments TODO
 		swarm.print.border -h
-		swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+		case "$1" in
+		"--default")
+			shift
+			#local today=`$DATE_TODAY`
+			#local time=`$DATE_TIME`
+			swarm.print.text -h \
+				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
+				" " \
+				"${@} | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
+			;;
+		*)
+			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+			;;
+		esac
+
+
+
 		$PRINTF "$posEND\n"
 	}
 	title() { # Text
 	# This prints a single centered string on a line
 	# It has blue borders and fills the inner line with white (Default-{front,back})
 		swarm.print.border -t
-		swarm.print.text -t "" "${c_front}${c_back}${c_invert}$1${c_reset}" ""
+		output="$1"
+		output=$(swarm.print.underline "$output")
+		output=$(swarm.print.bold "$output")
+		swarm.print.text -t "" "${c_front}${c_back}${c_invert}${output}${c_reset}" ""
 		$PRINTF "$posEND\n"
 	}
 	printe() { # STR1 STR2 STR3
@@ -308,3 +407,28 @@
 				;;
 		esac
 	}
+#
+# Not all terminals support WIDTH and LINES....
+#
+	if [[ "x" == "x$LINES" ]] || [[ "x" == "x$COLUMNS" ]]
+	then	# Seems this terminal doesnt provide these variables...
+			# Since it's 2020, lets do multi tasking this in the background!
+		(
+			while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
+			do
+				export COLUMNS="$(eval $TPUT cols)"
+				export LINES="$(eval $TPUT lines)"
+				# If user wants extended logs, he shall have it
+				! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
+				# Using 15 secs for fallback mode
+				sleep ${SWARM_INTERVALL_GEOMETRY:-15}
+			done
+		) & >> /dev/zero
+		# Just in case..
+		# We dont want 100 background process running...
+		SWARM_PID_THEME="$SWARM_PID_THEME $!"
+	fi
+#
+# And for easier code reusage, lets combine all math into a sub process
+# Should help to speed things up a little more ;)
+#

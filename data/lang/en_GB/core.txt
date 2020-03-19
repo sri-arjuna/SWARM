@@ -1,9 +1,15 @@
+#!/usr/bin/env bash
 # SWARM Language File
+# ------------------------------
+# If you want to support your language feel free to translate into a new file.
+#
+#
 #
 # SWARM INIT PROCEDURE
 #
 	SWARM_MSG_STR_FAIL="FAIL"
 	SWARM_MSG_STR_DONE="DONE"
+
 	SWARM_MSG_STR_=""
 	SWARM_MSG_INIT_LOADING="Loading SWARM"
 	SWARM_MSG_INIT_FILE_MISSING="Seems this file could not be loaded:"
@@ -22,11 +28,21 @@
 	SWARM_MSG_=""
 	SWARM_MSG_=""
 #
+# SWARM reused words
+#
+	SWARM_MSG_STR_USAGE="Usage"
+	SWARM_MSG_STR_FILE_NOT_FOUND="File not found:"
+#
 # SWARM ASK
 #
-
 	SWARM_MSG_ASK_YES="y"
 	SWARM_MSG_ASK_NO="n"
+#
+# SWARM cfg.*
+#
+	SWARM_MSG_CFG_LIST="${SWARM_MSG_STR_USAGE}: cfg.list /path/to/file"
+	SWARM_MSG_CFG_GET="${SWARM_MSG_STR_USAGE}: cfg.get /path/to/file VARNAME"
+	SWARM_MSG_CFG_SET="${SWARM_MSG_STR_USAGE}: cfg.get /path/to/file VARNAME VALUE"
 #
 # SWARM STATUS
 #
@@ -38,16 +54,17 @@
 	SWARM_MSG_STATUS_ERROR=" ERR" # This space is required
 	SWARM_MSG_STATUS_=""
 	SWARM_MSG_STATUS_=""
-	#
-	# SWARM HELP
-	#
-		SWARM_MSG_HELP_VERSION="SWARM ${SWARM[VERSION]}, Build ${SWARM[BUILD]}
+#
+# SWARM HELP
+#
+SWARM_MSG_HELP_VERSION="SWARM ${SWARM[VERSION]}, Build ${SWARM[BUILD]}
 	Copyright (C) 2011-2020 by Simon Arjuna Erat (sea)
 	License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 
 	This is free software; you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law."
-		SWARM_MSG_HELP_ASK="NAME
+
+SWARM_MSG_HELP_ASK="NAME
 	  ask - Put a simple yes or no question
 
 	SYNOPSYS
@@ -72,7 +89,7 @@
 
 	AUTHOR
 	  Simon Arjuna Erat"
-	SWARM_MSG_HELP_=""
-	SWARM_MSG_HELP_=""
-	SWARM_MSG_HELP_=""
-	SWARM_MSG_HELP_=""
+SWARM_MSG_HELP_=""
+SWARM_MSG_HELP_=""
+SWARM_MSG_HELP_=""
+SWARM_MSG_HELP_=""

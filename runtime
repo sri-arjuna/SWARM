@@ -4,7 +4,7 @@
 # Author:	Simon Arjuna Erat (sea)		 	 #
 # Copyleft:	1995-2020						 #
 # Created:	2020.01.18					 	 #
-# Changed:	2020.03.10					 	 #
+# Changed:	2020.03.14					 	 #
 # Build:	2							  	 #
 ##############################################
 #
@@ -13,13 +13,15 @@
 	# SWARM
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
 	declare -A SWARM
+	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
+	declare isSWARMfirstTime=true
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=5
+	SWARM[BUILD]=7
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
 	# This is default 'highlighted' MACHINE or ROOT display
-	# Non-root users have 'default-blue' theme
+	# Non-root users (if existing) have very hardcoded 'default-blue' (fallback) theme
 	SWARM[THEME]="default-red"
 	SWARM[ROOTDIR]=""
 	# Language must be pre-set up until the basic language file was loaded
@@ -32,6 +34,7 @@
 #	to get the most elementary basics on/of most systems
 	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}"
 	# Most basic commands ; do not change!
+	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
 	PRINTF=${PRINTF:-\printf}
 	ECHO=${ECHO:-\printf}
 	AWK=${AWK:-\gawk}
@@ -44,8 +47,10 @@
 #
 # Some other things
 #
-	DATE_TODAY=$($DATE +'%Y.%m.%d')
-	DATE_TIME=$($DATE +'%H:%M')
+	# Need to get these updating them self upon call
+	# Use these to set the date variable: `
+	DATE_TODAY="$DATE +%F"
+	DATE_TIME="$DATE +%T"
 	DATE_TIME_LOG=$($DATE +'%H:%M:%S.%s')
 	init.countdown() { $PRINTF '%s\n' "${1:-Returning in 3}" ; sleep 1; $PRINTF '%s\n' "2" ; sleep 1; $PRINTF '%s\n' "1";sleep 1;$PRINTF '%s\n' "NOW" ; sleep 0.5 ; }
 #
@@ -77,6 +82,8 @@
 				fi
 		done
 		# Should not reach this point
+		# Other than while debug testing
+		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD}"
 		unset tmp
 	else
 		# Or optionaly, use the installed method
@@ -126,20 +133,32 @@
 						tmp_len=${#this} && \
 						tmp_empty=$($PRINTF '%*s' $COLUMNS)
 				sleep ${SWARM_INTERVALL_SLOW_LOADING:-0.3}
-				printf  "\r$tmp_empty"
+				$PRINTF  "\r$tmp_empty"
 		fi
 
 		# Minimalistic output
 		tmp_swarm_loading="${tmp_swarm_loading}."
-		[[ ! "${this:0:2}" == "\.[\.]" ]] && source "$this" && $PRINTF '\r%s' "${tmp_swarm_loading}" || $PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
-
+		if [[ ! "${this:0:2}" == "\.[\.]" ]]
+		then	#
+				source "$this" && \
+					$PRINTF '\r%s' "${tmp_swarm_loading}" && \
+					 ( ${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this" ; return 0 ; ) || \
+					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+		else
+				$PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+		fi
 		# Start spaming the log file, if desired
-		${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this"
+
 	done
 	unset tmp_swarm_loading \
 			tmp_len \
 			tmp_empty \
 			this
+
+	# One time verification of installed commands
+	# Execute the ./runtime to configure SWARM
+	# or see the config: ~/.swarmrc
+	#$isSWARMfirstTime && swarm.sanity.env
 #
 # Starting SWARM now
 #
@@ -148,38 +167,47 @@
 #
 # Initiate Interface
 #
-	echo
-	echo " ----------- TEST AREA -----------"
-	## Core sanity
-	# swarm.sanity.env
-	header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
-	title 	"my title"
-	printe 	left middle right
-	printe
-	# Piped question works
-	title	"Piped input"
-	$ECHO y | ask "Is this cool?"
-	echo $?
-	$ECHO n | ask "Is this cool?"
-	echo $?
-	title	"Piped Output"
-	# this is not echo, this is echo_ !
-	echo_ "this is
-	a piped
-	test code" | printe -
-	printe "this is" "an argument" "test code"
-	printf "%s\n" "this was" "an argument" "test code" | printe -
-	# Need a proper 'catcher' for ECHO...
-	$ECHO 	left middle right | printe -
-	# Of course such a hardocded would work too
-	#printf '%q ' "This is" 	"another piped" 	"test run" | printe -
-
-
+if [[ "bash" = "$0" ]]; then
+	#$ECHO
+	intro_show() { #
+		$ECHO " ----------- TEST AREA -----------"
+		## Core sanity
+		# swarm.sanity.env
+		header 	--default #"a b c ${@}" #"SWARM ${SWARM[VERSION]}" " " "`$DATE_TODAY` / `$DATE_TIME`"
+		title 	"my title"
+		printe 	left middle right
+		printe
+		# Piped question works
+		title	"Piped input"
+		$ECHO y | ask "Is this cool?"
+		$PRINTF '%s\n' $?
+		$ECHO n | ask "Is this cool?"
+		$PRINTF '%s\n' $?
+		title	"Piped Output"
+		# this is not echo, this is echo_ !
+		echo_ "this is
+		a piped
+		test code" | printe -
+		printe "this is" "an argument" "test code"
+		printf "%s\n" "this was" "an argument" "test code" | printe -
+		# Need a proper 'catcher' for ECHO...
+		$ECHO 	left middle right | printe -
+		# Of course such a hardocded would work too
+		#printf '%q ' "This is" 	"another piped" 	"test run" | printe -
+		#cfg.get "$SWARMRC" ECHO
+	}
+	#title "This is the actual 'time' result for the display part"
+	time intro_show #"${@}"
+	#echo ; echo "${@}" ; echo
+	#time swarm.color.list
+fi
 #set +x
 	echo " ----------- TEST AREA -----------"
 
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
-			echo "TODO: Visuals, then explain, configure and stuff..."
+			header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
+			title	""
+			printe "TODO: Visuals, then explain, configure and stuff..."
 			init.countdown "Weee"
 	fi

@@ -19,7 +19,7 @@
 	SWARM_MSG_INIT_SWARMRC_PROV_NOT_FOUND="The provided path to the SWARMRC was not found: $SWARMRC"
 	SWARM_MSG_INIT_UNSANE_USERCONFIG="Aborting, userconfig not sane! (default: \$HOME/.swarmrc + \$HOME/.config/swarm)"
 	SWARM_MSG_INIT_RO_SYSTEM="SWARMRC is set but could not be written. Assuming Read-Only System."
-	SWARM_MSG_INIT_CANT_READ_EXISINTG_SWARMRC="SWARNRC ($SWARMRC) exists, but could not be read!"
+	SWARM_MSG_INIT_CANT_READ_EXISINTG_SWARMRC="SWARMRC ($SWARMRC) exists, but could not be read!"
 	SWARM_MSG_INIT_THEME="Fallback to default theme, as the provided theme could not be found/loaded."
 	SWARM_MSG_INIT_PID_GEOMETRY="Updating geometrics for SWARM PID"
 	SWARM_MSG_INIT_LOG_FAIL="Could not create logfile path and/or file."

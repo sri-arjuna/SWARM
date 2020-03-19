@@ -4,19 +4,20 @@
 # Author:	Simon Arjuna Erat (sea)		 	 #
 # Copyleft:	1995-2020						 #
 # Created:	2020.01.18					 	 #
-# Changed:	2020.03.14					 	 #
-# Build:	2							  	 #
+# Changed:	2020.03.19					 	 #
+# Build:	8							  	 #
 ##############################################
 #
 # Core Public Variables
 #
 	# SWARM
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
+	set +x
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	declare isSWARMfirstTime=true
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=7
+	SWARM[BUILD]=8
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -107,7 +108,7 @@
 	SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
 	SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
 	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
-	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/tpl"
+	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 # Load english strings for overall coverage for error messages.
 	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
 #
@@ -120,7 +121,6 @@
 
 	for this in \
 			"${SWARM_DIR_CONF}"/* \
-			"${SWARM_DIR_DATA}"/core/* \
 			"${SWARM_DIR_LIBS}"/*
 	do
 		if ${doSlowLoading:-false}
@@ -142,7 +142,7 @@
 		then	#
 				source "$this" && \
 					$PRINTF '\r%s' "${tmp_swarm_loading}" && \
-					 ( ${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this" ; return 0 ; ) || \
+					 ( ${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this" ; exit 0 ; ) || \
 					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this\n"
 		else
 				$PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
@@ -164,6 +164,27 @@
 #
 	swarm.lang.load
 	swarm.init.theme
+#
+# Load the users functions now
+# if he has some that is
+#
+	if [[ -d "$SWARM_USER_CONFIG" ]]
+	then
+		[[ -d "$SWARM_USER_LIBS" ]] || $MKDIR "$SWARM_USER_LIBS"
+		# Parse and source files
+		for uf in "${SWARM_USER_LIBS}/"*
+		do
+			[[ ! -d "$uf" ]] && [[ -f "$uf" ]] && source "$uf" && $PRINTF "."
+			#if [[ ! -d "$uf" ]]
+			#then # Continue ONLY if it is NOT a directory
+				# Why does this otherwise (cmd && cmd && cmd) show as subprocess output?
+			#	if [[ -f "$uf" ]]
+			#	then
+			#		source "$uf" && $PRINTF "."
+			#	fi
+			#fi
+		done
+	fi
 #
 # Initiate Interface
 #
@@ -206,7 +227,7 @@ fi
 
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
-			header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
+			header 	--default #"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
 			title	""
 			printe "TODO: Visuals, then explain, configure and stuff..."
 			init.countdown "Weee"

@@ -7,7 +7,7 @@
 # Should help to speed things up a little more for the end user front ;)
 # This seems useless... TODO remove or fix
 #
-if true
+if false
 then
 	unset ${!len*} my_test_var
 	swarm.geometry.update() { #
@@ -20,7 +20,7 @@ then
 		declare -g BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
 		declare -g clrFRONT="${SWARM_THEME_DATA[color-front]}"
 		declare -g clrBACK="${SWARM_THEME_DATA[color-back]}"
-		declare -g clrCL="\e[2K"
+		#declare -g clrCL="\e[2K"
 
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
@@ -37,7 +37,6 @@ then
 
 		# If user wants extended logs, he shall have it
 		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
-		echo "$my_test_var"  >>2
 	}
 	export -f swarm.geometry.update
 
@@ -45,18 +44,14 @@ then
 	(
 		while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
 		do
-			# Ok, lets keep it simple,
-			#DATE_TODAY=$($DATE +'%Y.%m.%d')	# Cmon, day is not THAT important
-
+			# Ok, lets keep it simple
 			swarm.geometry.update
-			set -x
-			echo runs >/dev/zero
-			set +x
+
 			# Using 15 secs for fallback mode
 			sleep ${SWARM_INTERVALL_GEOMETRY:-15}
 		done
 	) & >> /dev/zero
-	SWARM_PID_THEME="$SWARM_PID_THEME $!"
+	SWARM_PID_USED="$SWARM_PID_USED $!"
 fi
 #
 # Theme's

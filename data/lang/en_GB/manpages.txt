@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# SWARM Language File
+# ------------------------------
+# If you want to support your language feel free to translate into a new file.
+#
+#
+# SWARM HELP
+#
+SWARM_MSG_MAN_ASK="
+	NAME
+	  ask - Put a simple yes or no question
+
+	SYNOPSYS
+	  ask [-h|--help] [--version] \"Question to user?\"
+
+	OPTIONS
+	  -h|--help	Shows help and exit with 99
+	  --version	Shows version infoand exit with 0
+
+	EXAMPLE
+
+		if ask 'Do you want to do this?'
+		then 	echo 'yes'
+		else 	echo 'no'
+		fi
+
+	BUGS
+	  Report bugs to:
+
+	  SWARM - Homepage:
+
+
+	AUTHOR
+	  Simon Arjuna Erat"

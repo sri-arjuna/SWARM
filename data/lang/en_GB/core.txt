@@ -46,49 +46,25 @@
 #
 # SWARM STATUS
 #
+	SWARM_MSG_STATUS_ARG_INVALID="${SWARM_MSG_STR_USAGE}: status \$? ['Text 1' 'Text 2']"
 	SWARM_MSG_STATUS_DONE="DONE"
 	SWARM_MSG_STATUS_FAIL="FAIL"
+	SWARM_MSG_STATUS_WORK="WORK"
 	SWARM_MSG_STATUS_TODO="TODO"
+	SWARM_MSG_STATUS_SKIP="SKIP"
 	SWARM_MSG_STATUS_NEXT="NEXT"
 	SWARM_MSG_STATUS_BACK="BACK"
-	SWARM_MSG_STATUS_ERROR=" ERR" # This space is required
+	SWARM_MSG_STATUS_ERROR="CANC"
+	SWARM_MSG_STATUS_ON=" ON " # This space is required
+	SWARM_MSG_STATUS_OFF="OFF " # This space is required
+	SWARM_MSG_STATUS_HELP="HELP"
+	SWARM_MSG_STATUS_INFO="INFO"
+	SWARM_MSG_STATUS_NFOUND="NFND"
+	SWARM_MSG_STATUS_CANC="CANC"
 	SWARM_MSG_STATUS_=""
 	SWARM_MSG_STATUS_=""
-#
-# SWARM HELP
-#
-SWARM_MSG_HELP_VERSION="SWARM ${SWARM[VERSION]}, Build ${SWARM[BUILD]}
-	Copyright (C) 2011-2020 by Simon Arjuna Erat (sea)
-	License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+	SWARM_MSG_STATUS_=""
 
-	This is free software; you are free to change and redistribute it.
-	There is NO WARRANTY, to the extent permitted by law."
-
-SWARM_MSG_HELP_ASK="NAME
-	  ask - Put a simple yes or no question
-
-	SYNOPSYS
-	  ask [-h|--help] [--version] \"Question to user?\"
-
-	OPTIONS
-	  -h|--help	Shows help and exit with 99
-	  --version	Shows version infoand exit with 0
-
-	EXAMPLE
-
-		if ask 'Do you want to do this?'
-		then 	echo 'yes'
-		else 	echo 'no'
-		fi
-
-	BUGS
-	  Report bugs to:
-
-	  SWARM - Homepage:
-
-
-	AUTHOR
-	  Simon Arjuna Erat"
 SWARM_MSG_HELP_=""
 SWARM_MSG_HELP_=""
 SWARM_MSG_HELP_=""

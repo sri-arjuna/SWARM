@@ -10,7 +10,7 @@
 if false
 then
 	unset ${!len*} my_test_var
-	swarm.geometry.update() { #
+	swarm.update.geometry() { #
 		declare -g DATE_TIME=$($DATE +'%H:%M:%S')		# Time on the other hand is
 
 		declare -g  my_test_var="$(date +%T)"
@@ -38,14 +38,14 @@ then
 		# If user wants extended logs, he shall have it
 		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
 	}
-	export -f swarm.geometry.update
+	export -f swarm.update.geometry
 
 	# Sub shell
 	(
 		while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
 		do
 			# Ok, lets keep it simple
-			swarm.geometry.update
+			swarm.update.geometry
 
 			# Using 15 secs for fallback mode
 			sleep ${SWARM_INTERVALL_GEOMETRY:-15}
@@ -295,112 +295,140 @@ fi
 		$PRINTF "${posRIGHT}$3"
 		$PRINTF "${posEND}"
 	}
-#
-# Visual outputs - 'End user' stuff
-#
-	header() { # LEFT CENTER RIGHT
-	# This prints a full line in blue (default-back), with white (default-front) text
-	# TODO long string adjustments TODO
-		swarm.print.border -h
-		case "$1" in
-		"--default")
-			shift
-			#local today=`$DATE_TODAY`
-			#local time=`$DATE_TIME`
-			swarm.print.text -h \
-				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
-				" " \
-				"${@} | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
-			;;
-		*)
-			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
-			;;
-		esac
 
+	swarm.str.status() { # ERRNUM
+	# Returns the string to be printed according to ERRNUM
+	# This already takes care of terminal only or GUI visuals
+		#
+		# Colors
+		#
+			local R="${SWARM_COLOR_RESET}"
+			local r="${SWARM_COLOR_FG_RED}"
+			local y="${SWARM_COLOR_FG_YELLOW}"
+			local p="${SWARM_COLOR_FG_PURPLE}"
+			local g="${SWARM_COLOR_FG_GREEN}"
+			local b="${SWARM_FONT_BOLD}"
+			local S="${SWARM_FONT_STROKE}"
+		#
+		# Check wether it is an X session
+		#
+		if [[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]]
+		then 	# Yes it is
+				case "$1" in
+					"0")	value=" ${g}${b}✓${R}  "
+							;;
+					"1")	value=" ${r}${b}✗${R}  "
+							;;
+					"2")	value=" ${y}${b}∞${R}  "
+							;;
+					"3")	value=" ${p}${b}≣${R}  "
+							;;
+					"4")	value=" »  "
+							;;
+					"5")	value=" >  "
+							;;
+					"6")	value=" <  "
+							;;
+					"7")	value=" ${r}${b}✗${R}  "
+							;;
+					"10")	value=" ${g}${b}◆${R}  "
+							;;
+					"11")	value=" ${r}${b}◇${R}  "
+							;;
+					"99")	value=" ⅈⅈ "
+							;;
+					"111")	value=${STATUS_TEXT[111]}""
+							;;
+					"127")	value=" ${r}${b}✗${R}  "
+							;;
+					"130")	value=" ${r}${b}✗${R}  "
+							;;
+				esac
+		else
+				# It's TTY
+				case "$1" in
+					"0")	value=""
+							;;
+					"1")	value=""
+							;;
+					"2")	value=""
+							;;
+					"3")	value=""
+							;;
+					"4")	value=""
+							;;
+					"5")	value=""
+							;;
+					"6")	value=""
+							;;
+					"7")	value=""
+							;;
+					"10")	value=""
+							;;
+					"11")	value=""
+							;;
+					"99")	value=""
+							;;
+					"111")	value=""
+							;;
+					"127")	value=""
+							;;
+					"130")	value=""
+							;;
+				esac
+				value="${STATUS_TEXT[$1]}"
+		fi
+		$PRINTF "[ ${value} ]"
+		## TODO OLD ----------------------------- OLD
+		return
 
+		#
+		#	Displayable 'Status text'
+		#
+			# How to reckognize Wayland?
+			if [ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]
+			then # Prepare GUI values				# ≡≣❑☑☒☐⚠✓✗❑ⅈ×∘∙◆◇√✘
 
-		$PRINTF "$posEND\n"
-	}
-	title() { # Text
-	# This prints a single centered string on a line
-	# It has blue borders and fills the inner line with white (Default-{front,back})
-		swarm.print.border -t
-		output="$1"
-		output=$(swarm.print.underline "$output")
-		output=$(swarm.print.bold "$output")
-		swarm.print.text -t "" "${c_front}${c_back}${c_invert}${output}${c_reset}" ""
-		$PRINTF "$posEND\n"
-	}
-	printe() { # STR1 STR2 STR3
-	# Simply prints the strings as passed, it requires 3 strings to use the center
-	# For piping, it expects 3 lines, each representing 1 variable
-		case "$1" in
-		"--"|"-")
-				# Read pipe, expect 3 lines
-				read LEFT; read CENTER; read RIGHT
-				printe "$LEFT" "$CENTER" "$RIGHT"
-				return
-				;;
-		esac
-		swarm.print.border -e
-		swarm.print.text -e "$1" "$2" "$3"
-		$PRINTF "$posEND\n"
-	}
-	printl() { # STR1 STR2 STR3
-	# Simply prints the strings as passed, stays on the same line
-	# It requires 3 strings to use the center
-		case "$1" in
-		"--"|"-")
-				# Read pipe, expect 3 lines
-				read LEFT; read CENTER; read RIGHT
-				printe "$LEFT" "$CENTER" "$RIGHT"
-				return
-				;;
-		esac
-		swarm.print.border -p
-		swarm.print.text -p "$1" "$2" "$3"
-	}
-#
-# Visual outputs - 'End user' stuff - Core Convenience
-#
-	ask() { # "What question?"
-	# Ask a yes/no question, returns 0/true for yes and 1/false for no
-	# y/n are taken from language file and are used in code
-		# Check if 'yesno' is empty, if so, fill with fallback values
-		case "$1" in
-		"--version")
-			$PRINTF "$SWARM_MSG_HELP_VERSION"
-			$PRINTF "\n"
-			return 0
-			;;
-		"--help")
-			$PRINTF "\r%s" "$SWARM_MSG_HELP_ASK"
-			$PRINTF "\n"
-			return 0
-			;;
-		esac
-		[[ -z "${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO}" ]] && \
-			SWARM_MSG_ASK_YES="+" && \
-			SWARM_MSG_ASK_NO="-"
+				SWARM_DONE="[  ]"	# This brings the cleanest result
+				SWARM_FAIL="[  ]"
+				SWARM_TODO="[  ]"
+				SWARM_WORK="[  ]"
 
-		swarm.print.border -e
-		# Print the text
-		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO})"
-		# Move the cursor
-		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
-		read -n1 answer
-		$PRINTF "$posEND\n"
+				# What colos would apply here?
+				SWARM_SKIP="[  ]"
+				SWARM_NEXT="[  ]"
+				SWARM_BACK="[  ]"
+				SWARM_CANC="$SWARM_FAIL"
 
-		case "$answer" in
-		"+"|"$SWARM_MSG_ASK_YES")
-				return 0
-				;;
-		"-"|"$SWARM_MSG_ASK_NO")
-				return 1
-				;;
-		*)		return 1
-				;;
-		esac
+				SWARM_ON="[  ]"
+				SWARM_OFF="[  ]"
+
+				SWARM_INFO="[  ]"
+				SWARM_HELP="[ HELP ]"
+
+			else	#
+				# Prepare TERMINAL values
+				#
+				SWARM_DONE="[ ${g}${b}${STATUS_TEXT[0]}${R} ]"
+				SWARM_FAIL="[ ${r}${b}${STATUS_TEXT[1]}${R} ]"
+
+				SWARM_WORK="[ ${y}${b}${STATUS_TEXT[2]}${R} ]"
+				SWARM_TODO="[ ${p}${b}${STATUS_TEXT[3]}${R} ]"
+
+				# What colos would apply here? same as above...
+				SWARM_SKIP="[ ${STATUS_TEXT[4]} ]"
+				SWARM_NEXT="[ ${STATUS_TEXT[5]} ]"
+				SWARM_BACK="[ ${STATUS_TEXT[6]} ]"
+				SWARM_CANC="[ ${STATUS_TEXT[7]} ]"
+
+				SWARM_ON="[ ${g}${b}${STATUS_TEXT[10]}${R} ]"
+				SWARM_OFF="[ ${r}${b}${STATUS_TEXT[11]}${R} ]"
+
+				SWARM_INFO="[ ${STATUS_TEXT[111]} ]"
+				SWARM_HELP="[ ${STATUS_TEXT[99]} ]"
+
+			fi
+			SWARM_NFOUND="$SWARM_FAIL"
 	}
 #
 # Not all terminals support WIDTH and LINES....

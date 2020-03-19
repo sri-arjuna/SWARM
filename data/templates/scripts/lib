@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# This is a lib file for SWARM
+# Please only declare functions in this file.
+# If you must use variables,
+# please use them as seperate file,
+# where possible in ${SWARM_USER_CONF}/<yourfile.conf>
+# Those files are loaded before the functions.
+# -----------------------------------------------------
+#
+# SectionA
+#
+	functionnameA() { # ARGS?
+	# Descriptional
+	# Text
+		$ECHO "Some code"
+	}
+#
+# SectionB
+#
+	functionnameB() { # ARGS?
+	# Descriptional
+	# Text
+		$ECHO "Some code"
+	}

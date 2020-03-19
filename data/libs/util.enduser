@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+#
+# Prepare functions
+# that are supposed to be used by 'enduser' script authors
+# Stuff like: ask, choose, printe, header, title and all the rest
+#
+#
+# Visual outputs - 'End user' stuff
+#
+	header() { # LEFT CENTER RIGHT
+	# This prints a full line in blue (default-back), with white (default-front) text
+	# TODO long string adjustments TODO, uses script_{name,version} before it uses its SWARM counterparts
+		swarm.print.border -h
+		case "$1" in
+		"--default")
+			shift
+			#local today=`$DATE_TODAY`
+			#local time=`$DATE_TIME`
+			swarm.print.text -h \
+				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
+				" " \
+				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
+			;;
+		*)
+			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+			;;
+		esac
+		$PRINTF "$posEND\n"
+	}
+	title() { # Text
+	# This prints a single centered string on a line
+	# It has blue borders and fills the inner line with white (Default-{front,back})
+		swarm.print.border -t
+		output="$1"
+		output=$(swarm.print.underline "$output")
+		output=$(swarm.print.bold "$output")
+		swarm.print.text -t "" "${c_front}${c_back}${c_invert}${output}${c_reset}" ""
+		$PRINTF "$posEND\n"
+	}
+	printe() { # STR1 STR2 STR3
+	# Simply prints the strings as passed, it requires 3 strings to use the center
+	# For piping, it expects 3 lines, each representing 1 variable
+		#set -x
+		local MODE="none"
+		# Get args
+		case "$1" in
+		"-1"|"-2")	MODE="${1/-}"
+					shift
+					;;
+		*)			MODE="normal"
+					;;
+		esac
+		# Get pipe?
+		case "$1" in
+		"--"|"-")
+				case "$MODE" in
+					"2")
+						# Read pipe, expect 2 lines
+						while read LEFT
+						do
+							read RIGHT
+							printe "$LEFT" "" "$RIGHT"
+						done
+						return
+						;;
+					"1")
+						# Read pipe, expect 1 lines
+						while read LEFT
+						do
+							printe "$LEFT"
+						done
+						return
+						;;
+					*)
+						# Read pipe, expect 3 lines (default)
+						while read LEFT
+						do
+							read CENTER; read RIGHT
+							printe "$LEFT" "$CENTER" "$RIGHT"
+						done
+						return
+						;;
+					esac
+				;;
+		esac
+		#set +x
+		swarm.print.border -e
+		swarm.print.text -e "$1" "$2" "$3"
+		$PRINTF "$posEND\n"
+	}
+	printl() { # STR1 STR2 STR3
+	# Simply prints the strings as passed, stays on the same line
+	# It requires 3 strings to use the center
+		case "$1" in
+		"--"|"-")
+				# Read pipe, expect 3 lines
+				read LEFT; read CENTER; read RIGHT
+				printe "$LEFT" "$CENTER" "$RIGHT"
+				return
+				;;
+		esac
+		swarm.print.border -p
+		swarm.print.text -p "$1" "$2" "$3"
+	}
+#
+# Visual outputs - 'End user' stuff - Core Convenience
+#
+	ask() { # "What question?"
+	# Ask a yes/no question, returns 0/true for yes and 1/false for no
+	# y/n are taken from language file and are used in code
+		# Check if 'yesno' is empty, if so, fill with fallback values
+		case "$1" in
+		"--version")
+			$PRINTF "$SWARM_MSG_HELP_VERSION"
+			$PRINTF "\n"
+			return 0
+			;;
+		"--help")
+			$PRINTF "\r%s" "$SWARM_MSG_HELP_ASK"
+			$PRINTF "\n"
+			return 0
+			;;
+		esac
+		[[ -z "${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO}" ]] && \
+			SWARM_MSG_ASK_YES="+" && \
+			SWARM_MSG_ASK_NO="-"
+
+		swarm.print.border -e
+		# Print the text
+		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO})"
+		# Move the cursor
+		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
+		read -n1 answer
+		$PRINTF "$posEND\n"
+
+		case "$answer" in
+		"+"|"$SWARM_MSG_ASK_YES")
+				return 0
+				;;
+		"-"|"$SWARM_MSG_ASK_NO")
+				return 1
+				;;
+		*)		return 1
+				;;
+		esac
+	}
+	status() { # $? ["Text Left"] ["Text Center"]
+	# Prints text and exit with passed return code
+	#
+		unset RET TXT1 TXT2
+		# Check for minimal arguments
+		[[ -z "$1" ]] && \
+			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
+			return 99
+		local RET="$1"
+		local value="$(swarm.str.status $RET)"
+
+		swarm.print.border -e
+		swarm.print.text -e "$2" "$3" ""
+
+		# Adjust fixer according to X or TTY
+		[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
+			gui_fixer="7" || gui_fixer=7
+
+		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		$PRINTF "$value"
+
+		$PRINTF "$posEND\n"
+		return $RET
+	}

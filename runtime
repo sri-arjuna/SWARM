@@ -162,7 +162,8 @@
 #
 # Starting SWARM now
 #
-	swarm.lang.load
+	swarm.update.lang
+	swarm.update.lang.status
 	swarm.init.theme
 #
 # Load the users functions now
@@ -201,9 +202,9 @@ if [[ "bash" = "$0" ]]; then
 		# Piped question works
 		title	"Piped input"
 		$ECHO y | ask "Is this cool?"
-		$PRINTF '%s\n' $?
+		status $? "Piped Answer"
 		$ECHO n | ask "Is this cool?"
-		$PRINTF '%s\n' $?
+		status $? "Piped Answer"
 		title	"Piped Output"
 		# this is not echo, this is echo_ !
 		echo_ "this is
@@ -218,9 +219,15 @@ if [[ "bash" = "$0" ]]; then
 		#cfg.get "$SWARMRC" ECHO
 	}
 	#title "This is the actual 'time' result for the display part"
-	time intro_show #"${@}"
-	#echo ; echo "${@}" ; echo
+	time intro_show
 	#time swarm.color.list
+	#swarm.eu.function.list | printe -
+	status 1
+	status 0
+	status 10
+
+	#swarm.eu.function.show --code swarm.print.border #swarm.eu.function.show
+	#header --default a b c
 fi
 #set +x
 	echo " ----------- TEST AREA -----------"

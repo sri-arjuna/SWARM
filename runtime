@@ -12,12 +12,12 @@
 #
 	# SWARM
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
-	set +x
+	#set +x
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	declare isSWARMfirstTime=true
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=8
+	SWARM[BUILD]=9
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -189,8 +189,7 @@
 #
 # Initiate Interface
 #
-if [[ "bash" = "$0" ]]; then
-	#$ECHO
+if [[ "bash" = "${0/-}" ]]; then
 	intro_show() { #
 		$ECHO " ----------- TEST AREA -----------"
 		## Core sanity
@@ -198,9 +197,9 @@ if [[ "bash" = "$0" ]]; then
 		header 	--default #"a b c ${@}" #"SWARM ${SWARM[VERSION]}" " " "`$DATE_TODAY` / `$DATE_TIME`"
 		title 	"my title"
 		printe 	left middle right
-		printe
+		printe	left "and right"
 		# Piped question works
-		title	"Piped input"
+		title	"Piped input" >&1
 		$ECHO y | ask "Is this cool?"
 		status $? "Piped Answer"
 		$ECHO n | ask "Is this cool?"
@@ -218,13 +217,23 @@ if [[ "bash" = "$0" ]]; then
 		#printf '%q ' "This is" 	"another piped" 	"test run" | printe -
 		#cfg.get "$SWARMRC" ECHO
 	}
+#	set +x
 	#title "This is the actual 'time' result for the display part"
+	#set -x
 	time intro_show
 	#time swarm.color.list
 	#swarm.eu.function.list | printe -
-	status 1
-	status 0
-	status 10
+	#list="$(swarm.eu.function.list ${SWARM_DIR_LIBS}/util.enduser | $AWK -v FS='() ' '{print $1}'|$SED s,'()','',g)"
+	#echo $list
+
+	#swarm.eu.function.list ${SWARM_DIR_LIBS}/util.enduser |\
+	# 	$AWK -v FS='() ' '{print $1}' |\
+	#	$SED s,'()','',g |\
+	#	printe -
+
+	#set -x
+	#set +x
+	#set +x
 
 	#swarm.eu.function.show --code swarm.print.border #swarm.eu.function.show
 	#header --default a b c
@@ -234,8 +243,31 @@ fi
 
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
-			header 	--default #"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
-			title	""
-			printe "TODO: Visuals, then explain, configure and stuff..."
-			init.countdown "Weee"
+			if [[ -z "$1" ]]
+			then	# No arguments
+					header 	--default #"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
+					title	"A short intro"
+					printe "TODO: Visuals, then explain, configure and stuff..."
+					status $? "one"
+					status 1 "" two
+					status 127
+					status 130
+					init.countdown "Weee"
+			else	# Has arguments, lets parse
+					while true
+					do
+						case "$1" in
+						"basic")
+							swarm.eu.show.basics
+							;;
+						"config")
+							swarm.eu.show.config
+							;;
+						*)	# Exit the loop
+							break
+							;;
+						esac
+						shift
+					done
+			fi
 	fi

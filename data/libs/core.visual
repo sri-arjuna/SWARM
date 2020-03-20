@@ -7,46 +7,49 @@
 # Should help to speed things up a little more for the end user front ;)
 # This seems useless... TODO remove or fix
 #
-if false
+if true
 then
 	unset ${!len*} my_test_var
 	swarm.update.geometry() { #
-		declare -g DATE_TIME=$($DATE +'%H:%M:%S')		# Time on the other hand is
-
-		declare -g  my_test_var="$(date +%T)"
+		export DATE_TIME=$($DATE +'+%T')		# Time on the other hand is
+		export clrCL="\e[2K"
 
 		# Set basic values
-		declare -g BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
-		declare -g BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
-		declare -g clrFRONT="${SWARM_THEME_DATA[color-front]}"
-		declare -g clrBACK="${SWARM_THEME_DATA[color-back]}"
-		#declare -g clrCL="\e[2K"
+		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
+		BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"	# Do not export just yet
+		export clrFRONT="${SWARM_THEME_DATA[color-front]}"
+		export clrBACK="${SWARM_THEME_DATA[color-back]}"
 
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
-				declare -g BORDER_RIGHT && \
 				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
+		export BORDER_RIGHT
 
 		# Get some numbers
-		declare -g lenLeft"${#BORDER_LEFT}"
-		declare -g lenRight="${#BORDER_RIGHT}"
-		declare -g lenClrFont=${#clrFRONT}
-		declare -g lenClrBack=${#clrBACK}
+		export lenLeft="${#BORDER_LEFT}"
+		export lenRight="${#BORDER_RIGHT}"
+		export lenClrFont=${#clrFRONT}
+		export lenClrBack=${#clrBACK}
 		export identRight=$(( $lenRight + ${#clrCL}  ))
-		export numEND=$(( $COLUMNS / 2 * 2 ))
+
+		# Pre-Calculate positions
+		export numHALF=$(( $COLUMNS / 2 ))
+		export numEND=$(( $numHALF * 2 ))
+		export posEND="\33[${numEND}G"
+		export posLEFT="\33[$(( $lenLeft + 2 ))G"
 
 		# If user wants extended logs, he shall have it
 		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
 	}
 	export -f swarm.update.geometry
-
+fi
+if false
+then
 	# Sub shell
 	(
 		while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
-		do
-			# Ok, lets keep it simple
+		do	# Ok, lets keep it simple
 			swarm.update.geometry
-
 			# Using 15 secs for fallback mode
 			sleep ${SWARM_INTERVALL_GEOMETRY:-15}
 		done
@@ -215,7 +218,11 @@ fi
 		esac
 
 		# Get some numbers
-		local lenLeft="${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#c_front} lenClrBack=${#c_back}
+		local lenLeft="${#BORDER_LEFT}"
+		local lenRight="${#BORDER_RIGHT}"
+		local lenClrFont=${#c_front}
+		local lenClrBack=${#c_back}
+
 	#	local identRight=$(( $lenRight + ${#clrCL}  ))
 		local posLEFT="\33[$(( ${#BORDER_LEFT} - 2 ))G"
 		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - $pos_cor_num ))G"
@@ -234,36 +241,31 @@ fi
 	swarm.print.text() { # MODE [ LEFT CENTER RIGHT]
 	# This simply puts the text
 	# according to MODE
+		local fix_title=0
+		local fix_header_r=0
 		case ${1/-} in
-			t)	MODE=title	;;
-			h)	MODE=header	;;
+			t)	MODE=title
+				fix_title=16	;;
+			h)	MODE=header
+				fix_header_r=4	;;
 			*)	MODE=basic	;;
 		esac
 		shift
 
-		local fix_title=0
-		local fix_header_r=0
 		# Check if it is too short, if so, print fallback mode and return
 		[[ ${COLUMNS} -lt 25 ]] && \
 				$PRINTF "%s\n" "${@}" && \
 				return 1
 
-		# Set basic values
-		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}" BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
-		local clrFRONT="${SWARM_THEME_DATA[color-front]}" clrBACK="${SWARM_THEME_DATA[color-back]}"
-		local clrCL="\e[2K"
-
-		# Check if border-right was set:
-		[ -z "$BORDER_RIGHT" ] && \
-				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
-
-		# Get some numbers
-		local lenLeft"${#BORDER_LEFT}" lenRight="${#BORDER_RIGHT}" lenClrFont=${#clrFRONT} lenClrBack=${#clrBACK}
-		local identRight=$(( $lenRight + ${#clrCL}  ))
+		# Make sure values are udpated
+		swarm.update.geometry
 
 		# Get the actual string
 		local evalLeft=$($PRINTF "$1")
 		local evalMiddle=$($PRINTF "$2")
+		#local evalMiddle=$($PRINTF '%s\n' "$evalMiddle")
+		#local evalMiddle=$($PRINTF $($PRINTF $(eval "$evalMiddle")))
+
 		local evalRight=$($PRINTF "$3")
 
 		# Retrieve their length
@@ -274,25 +276,34 @@ fi
 		#local lenEvalMiddle=${#2}
 		#local lenEvalRight=${#3}
 
-		# Small corrections required
-		case $MODE in
-		"header")	fix_header_r=4 #$(( ${#c_front} + ${#c_back}  ))
-					;;
-		"title")	fix_title=12
-					fix_title=21	# This is for bold + underline
-					;;
+		# Output
+		case ${#@} in
+		0)	# Nothing to print
+			$PRINTF "${posLEFT}"
+			;;
+		1)	# Just left oriented
+			#[[ "$MODE" = "title" ]] && \
+			#	swarm.print.text -t "" "$1" ""|| \
+				#swarm.print.text "$1" "" ""
+				$PRINTF "${posLEFT}$1"
+			#return
+			;;
+		2)	# 2nd arg is right oriented
+			#swarm.print.text "$1" " " "$2"
+			$PRINTF "${posLEFT}$1"
+			local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 + $fix_header_r ))G"
+			$PRINTF "${posRIGHT}$2"
+			#return
+			;;
+		3)	# Default handling
+			local posMIDDLE="\33[$(( $numHALF - $(( ${#2} / 2 ))  + $fix_title ))G"
+			local posRIGHT="\33[$(( $numEND - $lenRight - ${lenEvalRight} - 1 + $fix_header_r ))G"
+			$PRINTF "${posLEFT}$1"
+			$PRINTF "${posMIDDLE}$2"
+			$PRINTF "${posRIGHT}$3"
+			;;
 		esac
 
-		# Calculate positions
-		local posLEFT="\33[$(( ${#BORDER_LEFT} + 2 ))G"
-		local posMIDDLE="\33[$(( $(( $COLUMNS / 2 )) - $(( ${#2} / 2 ))  + $fix_title ))G"
-		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - ${lenEvalRight} - 1 + $fix_header_r ))G"
-		posEND="\33[$(( $(( $COLUMNS / 2 * 2 )) ))G"
-
-		# Output
-		$PRINTF "${posLEFT}$1"
-		$PRINTF "${posMIDDLE}$2"
-		$PRINTF "${posRIGHT}$3"
 		$PRINTF "${posEND}"
 	}
 

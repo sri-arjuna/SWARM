@@ -10,6 +10,7 @@
 	header() { # LEFT CENTER RIGHT
 	# This prints a full line in blue (default-back), with white (default-front) text
 	# TODO long string adjustments TODO, uses script_{name,version} before it uses its SWARM counterparts
+		swarm.protect "${@}" && return 1
 		swarm.print.border -h
 		case "$1" in
 		"--default")
@@ -32,7 +33,7 @@
 	# It has blue borders and fills the inner line with white (Default-{front,back})
 		swarm.print.border -t
 		output="$1"
-		output=$(swarm.print.underline "$output")
+		#output=$(swarm.print.underline "$output")
 		output=$(swarm.print.bold "$output")
 		swarm.print.text -t "" "${c_front}${c_back}${c_invert}${output}${c_reset}" ""
 		$PRINTF "$posEND\n"
@@ -86,6 +87,76 @@
 		#set +x
 		swarm.print.border -e
 		swarm.print.text -e "$1" "$2" "$3"
+		$PRINTF "$posEND\n"
+	}
+	printe.new() { # STR1 STR2 STR3
+	# Simply prints the strings as passed, it requires 3 strings to use the center
+	# For piping, it expects 3 lines, each representing 1 variable
+		#set -x
+		local MODE="none"
+		# Get args
+		case "$1" in
+		"-1"|"-2")	MODE="${1/-}"
+					shift
+					;;
+		*)			MODE="normal"
+					;;
+		esac
+		# Get arg number if not forced yet
+		[[ "normal" == "$MODE" ]] && MODE=${#@}
+		# Get pipe?
+		case "$1" in
+		"--"|"-")
+				case "$MODE" in
+					"2")
+						# Read pipe, expect 2 lines
+						while read LEFT
+						do
+							read RIGHT
+							printe "$LEFT" "" "$RIGHT"
+						done
+						return
+						;;
+					"1")
+						# Read pipe, expect 1 lines
+						while read LEFT
+						do
+							printe "$LEFT"
+						done
+						return
+						;;
+					*)
+						# Read pipe, expect 3 lines (default)
+						while read LEFT
+						do
+							read CENTER; read RIGHT
+							printe "$LEFT" "$CENTER" "$RIGHT"
+						done
+						return
+						;;
+					esac
+				;;
+		esac
+		# Handle 'normal' usage
+		swarm.print.border -e
+		case "$MODE" in
+			"2")
+				# 2 Args, left and right
+				swarm.print.text -e "$1" "" "$2"
+				return
+				;;
+			"1")
+				swarm.print.text -e "$1"
+				return
+				;;
+			*)
+				# Read pipe, expect 3 lines (default)
+				swarm.print.text -e "$1" "$2" "$3"
+				return
+				;;
+			esac
+		#set +x
+		#swarm.print.text -e "$1" "$2" "$3"
 		$PRINTF "$posEND\n"
 	}
 	printl() { # STR1 STR2 STR3
@@ -155,15 +226,15 @@
 		local RET="$1"
 		local value="$(swarm.str.status $RET)"
 
-		swarm.print.border -e
-		swarm.print.text -e "$2" "$3" ""
+		swarm.print.border -e >&2
+		swarm.print.text -e "$2" "$3" "" >&1
 
 		# Adjust fixer according to X or TTY
 		[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
 			gui_fixer="7" || gui_fixer=7
 
 		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
-		$PRINTF "$value"
+		$PRINTF "$value" >&1
 
 		$PRINTF "$posEND\n"
 		return $RET

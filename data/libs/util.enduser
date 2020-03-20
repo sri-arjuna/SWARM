@@ -38,7 +38,7 @@
 		swarm.print.text -t "" "${c_front}${c_back}${c_invert}${output}${c_reset}" ""
 		$PRINTF "$posEND\n"
 	}
-	printe() { # STR1 STR2 STR3
+	printe.original() { # STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
 		#set -x
@@ -51,6 +51,8 @@
 		*)			MODE="normal"
 					;;
 		esac
+		# Get arg number if not forced yet
+		[[ "normal" == "$MODE" ]] && MODE=${#@}
 		# Get pipe?
 		case "$1" in
 		"--"|"-")
@@ -89,7 +91,7 @@
 		swarm.print.text -e "$1" "$2" "$3"
 		$PRINTF "$posEND\n"
 	}
-	printe.new() { # STR1 STR2 STR3
+	printe.new.notworking() { # STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
 		#set -x
@@ -157,6 +159,75 @@
 			esac
 		#set +x
 		#swarm.print.text -e "$1" "$2" "$3"
+		$PRINTF "$posEND\n"
+	}
+	printe() { # STR1 STR2 STR3
+	# Simply prints the strings as passed, it requires 3 strings to use the center
+	# For piping, it expects 3 lines, each representing 1 variable
+		#set -x
+		local MODE="none"
+		# Get args
+		case "$1" in
+		"-1"|"-2")	MODE="${1/-}"
+					shift
+					;;
+		*)			MODE="normal"
+					;;
+		esac
+		# Get arg number if not forced yet
+		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
+		# Get pipe?
+		case "$1" in
+		"--"|"-")
+				case "$MODE" in
+					"2")
+						# Read pipe, expect 2 lines
+						while read LEFT
+						do
+							read RIGHT
+							printe "$LEFT" "" "$RIGHT"
+						done
+						return
+						;;
+					"1")
+						# Read pipe, expect 1 lines
+						while read LEFT
+						do
+							printe "$LEFT"
+						done
+						return
+						;;
+					*)
+						# Read pipe, expect 3 lines (default)
+						while read LEFT
+						do
+							read CENTER; read RIGHT
+							printe "$LEFT" "$CENTER" "$RIGHT"
+						done
+						return
+						;;
+					esac
+				;;
+		esac
+		#set +x
+		case "$MODE" in
+			"0")
+				swarm.print.border -e
+				swarm.print.text -e "" "" ""
+				;;
+			"1")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" ""
+				;;
+			"2")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" "$2"
+				;;
+			"3")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "$2" "$3"
+				;;
+		esac
 		$PRINTF "$posEND\n"
 	}
 	printl() { # STR1 STR2 STR3

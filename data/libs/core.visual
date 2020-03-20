@@ -263,18 +263,12 @@ fi
 		# Get the actual string
 		local evalLeft=$($PRINTF "$1")
 		local evalMiddle=$($PRINTF "$2")
-		#local evalMiddle=$($PRINTF '%s\n' "$evalMiddle")
-		#local evalMiddle=$($PRINTF $($PRINTF $(eval "$evalMiddle")))
-
 		local evalRight=$($PRINTF "$3")
 
 		# Retrieve their length
 		local lenEvalLeft=${#evalLeft}
 		local lenEvalMiddle=${#evalMiddle}
 		local lenEvalRight=${#evalRight}
-		#local lenEvalLeft=${#1}
-		#local lenEvalMiddle=${#2}
-		#local lenEvalRight=${#3}
 
 		# Output
 		case ${#@} in
@@ -282,14 +276,10 @@ fi
 			$PRINTF "${posLEFT}"
 			;;
 		1)	# Just left oriented
-			#[[ "$MODE" = "title" ]] && \
-			#	swarm.print.text -t "" "$1" ""|| \
-				#swarm.print.text "$1" "" ""
-				$PRINTF "${posLEFT}$1"
+			$PRINTF "${posLEFT}$1"
 			#return
 			;;
 		2)	# 2nd arg is right oriented
-			#swarm.print.text "$1" " " "$2"
 			$PRINTF "${posLEFT}$1"
 			local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 + $fix_header_r ))G"
 			$PRINTF "${posRIGHT}$2"
@@ -306,7 +296,6 @@ fi
 
 		$PRINTF "${posEND}"
 	}
-
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM
 	# This already takes care of terminal only or GUI visuals

@@ -10,7 +10,7 @@
 	header() { # LEFT CENTER RIGHT
 	# This prints a full line in blue (default-back), with white (default-front) text
 	# TODO long string adjustments TODO, uses script_{name,version} before it uses its SWARM counterparts
-		swarm.protect "${@}" && return 1
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.print.border -h
 		case "$1" in
 		"--default")
@@ -31,6 +31,7 @@
 	title() { # Text
 	# This prints a single centered string on a line
 	# It has blue borders and fills the inner line with white (Default-{front,back})
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.print.border -t
 		output="$1"
 		#output=$(swarm.print.underline "$output")
@@ -41,6 +42,7 @@
 	printe() { # STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#set -x
 		local MODE="none"
 		# Get args
@@ -110,6 +112,7 @@
 	printl() { # STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		case "$1" in
 		"--"|"-")
 				# Read pipe, expect 3 lines
@@ -124,39 +127,34 @@
 #
 # Visual outputs - 'End user' stuff - Core Convenience
 #
-	ask() { # "What question?"
+	yesno() { # "What question?"
 	# Ask a yes/no question, returns 0/true for yes and 1/false for no
 	# y/n are taken from language file and are used in code
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# Check if 'yesno' is empty, if so, fill with fallback values
 		case "$1" in
-		"--version")
-			$PRINTF "$SWARM_MSG_HELP_VERSION"
-			$PRINTF "\n"
-			return 0
-			;;
-		"--help")
-			$PRINTF "\r%s" "$SWARM_MSG_HELP_ASK"
-			$PRINTF "\n"
-			return 0
+		"--help"|"-h")
+			swarm.help.screen "${SWARM_MSG_HELP_YESNO}"
+			return 99
 			;;
 		esac
-		[[ -z "${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO}" ]] && \
-			SWARM_MSG_ASK_YES="+" && \
-			SWARM_MSG_ASK_NO="-"
+		[[ -z "${SWARM_MSG_YESNO_YES}${SWARM_MSG_YESNO_NO}" ]] && \
+			SWARM_MSG_YESNO_YES="+" && \
+			SWARM_MSG_YESNO_NO="-"
 
 		swarm.print.border -e
 		# Print the text
-		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_ASK_YES}${SWARM_MSG_ASK_NO})"
+		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_YESNO_YES}${SWARM_MSG_YESNO_NO})"
 		# Move the cursor
 		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
 		read -n1 answer
 		$PRINTF "$posEND\n"
 
 		case "$answer" in
-		"+"|"$SWARM_MSG_ASK_YES")
+		"+"|"${SWARM_MSG_YESNO_YES:0:1}")
 				return 0
 				;;
-		"-"|"$SWARM_MSG_ASK_NO")
+		"-"|"${SWARM_MSG_YESNO_NO:0:1}")
 				return 1
 				;;
 		*)		return 1
@@ -166,6 +164,7 @@
 	status() { # $? ["Text Left"] ["Text Center"]
 	# Prints text and exit with passed return code
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		unset RET TXT1 TXT2
 		# Check for minimal arguments
 		[[ -z "$1" ]] && \

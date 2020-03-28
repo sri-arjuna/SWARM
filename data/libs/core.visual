@@ -62,6 +62,7 @@ fi
 	swarm.theme.update() { # THEME_NAME
 	# This loads the provided THEME_NAME
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# This an assigned array containg the theme related data
 		# Lets make sure each theme gets loaded into clear memory
 		unset SWARM_THEME_DATA[@]	# Use terminal / console / vtr default settings as base
@@ -99,6 +100,7 @@ fi
 	swarm.theme.list() {
 	# Lists all themes available
 	# Includes SWARM_USER_CONFIG/themes and SWARM_DIR_THEMES alike
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local d f
 		for d in "$SWARM_USER_CONFIG/themes/" "$SWARM_DIR_THEMES/"
 		do
@@ -114,6 +116,7 @@ fi
 	swarm.init.theme () { #
 	# Initiate the theme for the first time
 	# This is only a wrapper for the initial loading.
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.theme.update ${SWARM_THEME:-default-blue}
 	}
 #
@@ -122,6 +125,7 @@ fi
 	swarm.color.list() { #
 	# Simply lists the color names that can be used in SWARM
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		if [[ -z "cb_black" ]]
 		then	# The variables are empty
 				# need to read from file
@@ -143,33 +147,39 @@ fi
 	swarm.color.bg() {  # COLORNAME
 	# Returns the color code of provided COLORNAME
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local str=cb_${1:-blue}
 		eval $PRINTF \$"${str}"
 	}
 	swarm.color.fg() {  # COLORNAME
 	# Returns the color code of provided COLORNAME
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local str=cf_${1:-white}
 		eval $PRINTF \$"${str}"
 	}
 	swarm.print.goto() { # NUM
 	# Returns the positioncode for passed NUM location
 	# Returns number 0 if no argument is passed
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		$PRINTF "\33[${1:-0}G"
 	}
 	swarm.print.bold() { # "STR"
 	# Returns STR with wrapped code for BOLD
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		$PRINTF "\033[1m${1}\033[0m"
 	}
 	swarm.print.underline() { # "STR"
 	# Returns STR with wrapped code for UNDERLINE
 	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		$PRINTF "\033[4m${1}\033[0m"
 	}
 	swarm.print.border() { # MODE
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local MODE="" #name=""
 		case "${1/-}" in
 		e|p)	MODE="basic"	;;
@@ -231,16 +241,18 @@ fi
 #set +x
 		# Well, left aligned it works. isnt too hard
 		#printf "\r${clrCL}${BORDER_LEFT} " >&2		# ORG
-		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" #>&2
+		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" >&2
 
 		# The right side is much more challenging
 		#printf "${posRIGHT}${BORDER_RIGHT}" >&2
 		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
 		$PRINTF "${posEND}"
 	}
-	swarm.print.text() { # MODE [ LEFT CENTER RIGHT]
+	swarm.print.text() { # MODE [ LEFT ] [ CENTER ] [ RIGHT]
 	# This simply puts the text
 	# according to MODE
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
+		# Had to disable because I sent bold text through this for title... hmm.. disable?
 		local fix_title=0
 		local fix_header_r=0
 		case ${1/-} in
@@ -299,6 +311,7 @@ fi
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM
 	# This already takes care of terminal only or GUI visuals
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Colors
 		#

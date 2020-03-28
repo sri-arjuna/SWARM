@@ -110,7 +110,8 @@
 	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
 	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 # Load english strings for overall coverage for error messages.
-	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
+	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf"
+	source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf"
 #
 # Load default configuration
 # After this, user specific language can be loaded if available

@@ -16,8 +16,9 @@
 		$ECHO $lang_count
 	}
 	swarm.update.lang() { # en_GB
-	# Lists all supported languages
-	#
+	# Updates the current language with passed lang_code
+	# Automaticly checks for all available langs otherwise.
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# Use passed language or try to auto-detect
 		local lang_wish=${1:-${LANG/.*}}
 		local lang_short=${lang_wish/_*}
@@ -35,11 +36,13 @@
 						then	# More than language has been found
 								select lang_wish in $(swarm.lang.list);do break;done
 								SWARM[LANG]=$lang_wish
-								source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
 						else	# Only english is available
 								SWARM[LANG]=en_GB
 						fi
-						source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.txt"
+						# Load the selected language files
+						source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf"
+						source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf"
+						source "$SWARM_DIR_LANG/${SWARM[LANG]}/manpage.conf"
 				fi
 		fi
 		# Export all messages

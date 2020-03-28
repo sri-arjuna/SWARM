@@ -28,4 +28,19 @@ BASIC SYNTAX
 
 As for all shells, there is always the question wether to use single or double brackets ([ , [[).
 
-Always go with the double brackets!
+In case of doubt, always go with the double brackets!
+
+
+
+Functions
+---------
+
+Functions definitions shall take 3 lines,
+with the first one providing the ARGS.
+The last two lines shall be a descriptive text of the function.
+
+	functionname() { # [optionals] ARG1 ARG2
+	# What it does
+	# What it returns, unless covered by "What it does"
+		echo code
+	}

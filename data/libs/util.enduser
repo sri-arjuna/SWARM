@@ -15,12 +15,16 @@
 		case "$1" in
 		"--default")
 			shift
-			#local today=`$DATE_TODAY`
-			#local time=`$DATE_TIME`
+			local today=`$DATE_TODAY`
+			local time=`$DATE_TIME`
+			#swarm.print.text -h \
+			#	"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
+			#	" " \
+			#	"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
 			swarm.print.text -h \
 				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
 				" " \
-				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
+				"$($PRINTF '%s ' ${@}) | ${today} / ${time}${c_reset}"
 			;;
 		*)
 			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
@@ -144,7 +148,7 @@
 
 		swarm.print.border -e
 		# Print the text
-		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_YESNO_YES}${SWARM_MSG_YESNO_NO})"
+		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_YESNO_YES:0:1}${SWARM_MSG_YESNO_NO:0:1})"
 		# Move the cursor
 		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
 		read -n1 answer
@@ -185,4 +189,9 @@
 
 		$PRINTF "$posEND\n"
 		return $RET
+	}
+	bol2str() { # [options] $?
+	# Returns a string from a BOOL input
+	#
+		echo todo
 	}

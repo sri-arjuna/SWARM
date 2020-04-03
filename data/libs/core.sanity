@@ -119,7 +119,7 @@ EOF
 	# Verfy all core utils work as expected
 	#
 		unset ${!tmp_*} #w W f F
-		local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which touch whoami pwd_exec hostname hostname_exec date more less"
+		local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which touch whoami pwd_exec hostname hostname_exec date more less sort"
 		local worked=""
 		local failed=""
 		local f="" F="" w="" W=""
@@ -202,7 +202,7 @@ EOF
 							#		[[ $? == 0 ]] && \
 							#				worked="$worked $lc" || \
 							#				failed="$failed $lc"   ;;
-							*)	  init.log "failed: $lc : $tmp_exe : $tmp_exec2"
+							*)	  init.log "${SWARM_MSG_INIT_SANITY_UNKOWN_CASE} $lc : $tmp_exe : $tmp_exec2"
 									failed="$failed $lc"					;;
 							esac
 					fi
@@ -257,6 +257,7 @@ EOF
 		then	# This is slower but doesnt show up the other values
 			$AWK -F= -v VAR="$VARNAME" '$1 ~ "^[^#]*" VAR "$"{gsub ("#.*$|\"|\047|"$1 FS, ""); print}' "$CONFFILE" | tail -n1
 		else	# This method is about twice the speed of the awk
+				# But alot less secure
 			source "$CONFFILE" && $PRINTF "${!VARNAME}"
 		fi
 	}

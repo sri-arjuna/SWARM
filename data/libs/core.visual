@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-# Prepare variables
+# Prepare 'constant' variables
 #
+	export -r clrCL="\e[2K" 2&>/dev/zero
 #
 # For easier code reusage, lets combine all math into a sub process
 # Should help to speed things up a little more for the end user front ;)
@@ -11,8 +12,8 @@ if true
 then
 	unset ${!len*} my_test_var
 	swarm.update.geometry() { #
-		export DATE_TIME=$($DATE +'+%T')		# Time on the other hand is
-		export clrCL="\e[2K"
+		#export DATE_TIME=$($DATE +'+%T')		# Time on the other hand is
+
 
 		# Set basic values
 		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
@@ -45,6 +46,7 @@ then
 fi
 if false
 then
+	# -- Sadly, this doesnt worked as expected
 	# Sub shell
 	(
 		while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
@@ -124,9 +126,9 @@ fi
 #
 	swarm.color.list() { #
 	# Simply lists the color names that can be used in SWARM
-	#
+	# Reads from the colors.conf file of SWARM if the variables are not found in memory.
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		if [[ -z "cb_black" ]]
+		if [[ -z "$cb_black" ]]
 		then	# The variables are empty
 				# need to read from file
 				local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
@@ -190,9 +192,11 @@ fi
 		[[ ${COLUMNS} -lt 25 ]] && return 1
 #set -x
 		# Set basic values
-		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}" BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
-		local clrFRONT="${SWARM_THEME_DATA[color-front]}" clrBACK="${SWARM_THEME_DATA[color-back]}"
-		local clrCL="\e[2K"
+		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
+		local BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
+		local clrFRONT="${SWARM_THEME_DATA[color-front]}"
+		local clrBACK="${SWARM_THEME_DATA[color-back]}"
+		#local clrCL="\e[2K"
 		c_front=$(swarm.color.fg ${SWARM_THEME_DATA[color-front]})
 		c_back=$(swarm.color.bg ${SWARM_THEME_DATA[color-back]})
 
@@ -255,9 +259,14 @@ fi
 		# Had to disable because I sent bold text through this for title... hmm.. disable?
 		local fix_title=0
 		local fix_header_r=0
+		local title_pre=""
+		local title_end=""
+
 		case ${1/-} in
 			t)	MODE=title
-				fix_title=16	;;
+				fix_title=16
+				title_pre=""
+				title_end=""	;;
 			h)	MODE=header
 				fix_header_r=4	;;
 			*)	MODE=basic	;;
@@ -359,36 +368,6 @@ fi
 				esac
 		else
 				# It's TTY
-				case "$1" in
-					"0")	value=""
-							;;
-					"1")	value=""
-							;;
-					"2")	value=""
-							;;
-					"3")	value=""
-							;;
-					"4")	value=""
-							;;
-					"5")	value=""
-							;;
-					"6")	value=""
-							;;
-					"7")	value=""
-							;;
-					"10")	value=""
-							;;
-					"11")	value=""
-							;;
-					"99")	value=""
-							;;
-					"111")	value=""
-							;;
-					"127")	value=""
-							;;
-					"130")	value=""
-							;;
-				esac
 				value="${STATUS_TEXT[$1]}"
 		fi
 		$PRINTF "[ ${value} ]"

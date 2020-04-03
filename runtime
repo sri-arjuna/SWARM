@@ -4,20 +4,19 @@
 # Author:	Simon Arjuna Erat (sea)		 	 #
 # Copyleft:	1995-2020						 #
 # Created:	2020.01.18					 	 #
-# Changed:	2020.03.19					 	 #
-# Build:	8							  	 #
+# Changed:	2020.04.03					 	 #
+# Build:	11							  	 #
 ##############################################
 #
 # Core Public Variables
 #
 	# SWARM
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
-	#set +x
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	declare isSWARMfirstTime=true
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=10
+	SWARM[BUILD]=11
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -190,58 +189,6 @@
 #
 # Initiate Interface
 #
-if [[ "bash" = "${0/-}" ]]; then
-	intro_show() { #
-		$ECHO " ----------- TEST AREA -----------"
-		## Core sanity
-		# swarm.sanity.env
-		header 	--default #"a b c ${@}" #"SWARM ${SWARM[VERSION]}" " " "`$DATE_TODAY` / `$DATE_TIME`"
-		title 	"my title"
-		printe 	left middle right
-		printe	left "and right"
-		# Piped question works
-		title	"Piped input" >&1
-		$ECHO y | ask "Is this cool?"
-		status $? "Piped Answer"
-		$ECHO n | ask "Is this cool?"
-		status $? "Piped Answer"
-		title	"Piped Output"
-		# this is not echo, this is echo_ !
-		echo_ "this is
-		a piped
-		test code" | printe -
-		printe "this is" "an argument" "test code"
-		printf "%s\n" "this was" "an argument" "test code" | printe -
-		# Need a proper 'catcher' for ECHO...
-		$ECHO 	left middle right | printe -
-		# Of course such a hardocded would work too
-		#printf '%q ' "This is" 	"another piped" 	"test run" | printe -
-		#cfg.get "$SWARMRC" ECHO
-	}
-#	set +x
-	#title "This is the actual 'time' result for the display part"
-	#set -x
-	time intro_show
-	#time swarm.color.list
-	#swarm.eu.function.list | printe -
-	#list="$(swarm.eu.function.list ${SWARM_DIR_LIBS}/util.enduser | $AWK -v FS='() ' '{print $1}'|$SED s,'()','',g)"
-	#echo $list
-
-	#swarm.eu.function.list ${SWARM_DIR_LIBS}/util.enduser |\
-	# 	$AWK -v FS='() ' '{print $1}' |\
-	#	$SED s,'()','',g |\
-	#	printe -
-
-	#set -x
-	#set +x
-	#set +x
-
-	#swarm.eu.function.show --code swarm.print.border #swarm.eu.function.show
-	#header --default a b c
-fi
-#set +x
-	echo " ----------- TEST AREA -----------"
-
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
 			if [[ -z "$1" ]]
@@ -255,20 +202,54 @@ fi
 					status 130
 					init.countdown "Weee"
 			else	# Has arguments, lets parse
-					while true
-					do
-						case "$1" in
+					case "$1" in
 						"basic")
+							shift
 							swarm.eu.show.basics
 							;;
 						"config")
+							shift
 							swarm.eu.show.config
+							;;
+						"help")
+							#echo hallo
+							shift
+							# Lets show a basic menu
+							swarm.eu.help.menu "${@}"
+							#break 2
 							;;
 						*)	# Exit the loop
 							break
 							;;
-						esac
-						shift
-					done
+					esac
 			fi
+	fi
+#
+# Develeoper testings
+#
+	if [[ "bash" = "${0/-}" ]]; then
+		$ECHO " ----------- TEST AREA -----------"
+		intro_show() { #
+			header 	--default
+			title 	"my title"
+			printe 	left middle right
+			printe	left "and right"
+			# Piped question works
+			title	"Piped input" >&1
+			$ECHO y | yesno "Is this cool?"
+			status $? "Piped Answer"
+			$ECHO n | yesno "Is this cool?"
+			status $? "Piped Answer"
+			title	"Piped Output"
+			# this is not echo, this is echo_ !
+			echo_ "this is
+			a piped
+			test code" | printe -
+			printe "this is" "an argument" "test code"
+			$PRINTF "%s\n" "this was" "an argument" "test code" | printe -
+			# Need a proper 'catcher' for ECHO...
+			$ECHO 	left middle right | printe -
+		}
+		time intro_show
+		$ECHO " ----------- TEST AREA -----------"
 	fi

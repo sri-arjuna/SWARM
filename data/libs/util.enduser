@@ -190,8 +190,286 @@
 		$PRINTF "$posEND\n"
 		return $RET
 	}
-	bol2str() { # [options] $?
+	swarm.str.bool2str() { # [options] $?
 	# Returns a string from a BOOL input
 	#
-		echo todo
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#
+		# Defaults
+		#
+			local caps #=false
+			local CAPS #=false
+			local mode #="yes"
+			local out=""
+			echo " ---------- $@ ----------- "
+		#
+		# Catching Arguments
+		#
+			# A ':' after a char indicates that this option requires an argument
+			# Get access to the passed value of the argument by using $OPTARG
+			while getopts "cCdoty" opt
+			do
+			 	case ${opt} in
+				"c")	caps=true
+						shift	;;
+				"C")	CAPS=true
+						shift	;;
+				"d")	mode="done"
+						shift
+						echo " -- SHOULD -- get here"	;;
+				"t")	mode="true"
+						shift	;;
+				"y")	mode="yes"
+						shift	;;
+				"o")	mode="on"
+						shift	;;
+			#	*)	echo opt $opt ; exit 99	;;
+				esac
+			done
+			shift $(($OPTIND - 1))
+		#
+		# Display & Action
+		# This also handles translations
+		#
+			case "${mode}" in
+			"done")	case "$1" in
+				0)	out="$SWARM_MSG_BOOL2STR_DONE"	;;
+				1)	out="$SWARM_MSG_BOOL2STR_FAIL"	;;
+				esac
+				;;
+			"true")	case "$1" in
+				0)	out="$SWARM_MSG_BOOL2STR_TRUE"	;;
+				1)	out="$SWARM_MSG_BOOL2STR_FALSE"	;;
+				esac
+				;;
+			"on")	case "$1" in
+				0)	out="$SWARM_MSG_BOOL2STR_ON"	;;
+				1)	out="$SWARM_MSG_BOOL2STR_OFF"	;;
+				esac
+				;;
+			"yes"|*)	case "$1" in
+				0)	out="$SWARM_MSG_BOOL2STR_YES"	;;
+				1)	out="$SWARM_MSG_BOOL2STR_NO"	;;
+				esac
+				;;
+			esac
+
+			# Show the output
+			if ${CAPS:-false}
+			then	$PRINTF "${out^^}"
+			elif ${caps:-false}
+			then	$PRINTF "${out^}"
+			else	$PRINTF "$out"
+			fi
+	}
+	swarm.str.num2char() { # NUM
+	# Returns a letter string: a-z
+	# Or: aa-az ba-bz, etc
+		num="$1"
+		out=""
+		# Quoting these echo's will break the output
+		[ "$num" -gt 700 ] && \
+			list=( $(builtin echo {a..z} {a..z}{a..z} {a..z}{a..z}{a..z} ))	|| \
+			list=( $(builtin echo {a..z} {a..z}{a..z} )) 	# Be fast for letters in range..
+		out="${list[$num]}"
+		$PRINTF '%s\n' "$out"
+	}
+	swarm.str.num2roman() { # NUM
+	# Returns NUM in roman letters
+	#
+		input="$1"	# input num
+		output=""	# Clear output string
+		len="${#input}"	# Initial length to count down
+		U="\033[4m"	# Underscore, multiplies with 1000
+		R="\033[0m"	# Resets the underscore
+		roman_val() { # NUM one five ten
+		# This sub does the basic 'roman' algorithm
+		#
+			N="$1"
+			one="$2"
+			five="$3"
+			ten="$4"
+			out=""
+			case "$N" in
+			0)	out+=""	;;
+			[123])	while [ "$N" -gt 0 ]
+				do	out+="$one"
+					N="$(($N-1))"
+				done
+				;;
+			4)	out+="$one$five"	;;
+			5)	out+="$five"	;;
+			[678])	out+="$five"
+				N="$(($N-5))"
+				while [ "$N" -gt 0 ]
+				do	out+="$one"
+					N=$(($N-1))
+				done
+				;;
+			9)	while [ "$N" -lt 10 ]
+				do	out+="$one"
+					N="$(($N+1))"
+				done
+				out+="$ten"
+				;;
+			esac
+			echo "$out"
+		}
+		while [ "$len" -gt 0  ]
+		do	# There are letters to add
+			num="${input:0:1}"
+			# Do action according position
+			case "$len" in
+			1)	output+="$(roman_val $num I V X)"	;;
+			2)	output+="$(roman_val $num X L C)"	;;
+			3)	output+="$(roman_val $num C D M)"	;;
+			4)	output+="$(roman_val $num M ${U}V${R} ${U}X${R})"	;;
+			5)	output+="$(roman_val $num ${U}X${R} ${U}L${R} ${U}C${R})"	;;
+			*)	# Count it up
+				Tone="CI\)"
+				Tfive="I\)"
+				Tten="CCI\)\)"
+				DEPTH="$(( $len - 3 ))"	# 1 = 1000 = initial template
+				while [ "$DEPTH" -gt 1 ]
+				do	Tone="C$Tone)"
+					Tfive="C$Tfive)"
+					Tten="C$Tten)"
+					DEPTH="$(($DEPTH-1))"
+				done
+				output+="$(roman_val $num $Tone $Tfive $Tten  )"
+				;;
+			esac
+			input="${input:1}" ; len="${#input}"
+		done
+		$PRINTF "$output"
+	}
+	printlist() { # [options] $LIST or ${ARRAYS[@]}
+	# Prints up to 3 'indexed'/numbered entries per row
+	# Options -12arn ; 1 or 2 rows (instead of 3=default), alpha, roman, num=default
+		#
+		# Variable defaults (options)
+		#
+			MODE=none
+			SEP=""
+			ROWS=3
+		#
+		# Catch arguments
+		#
+			while getopts "anr12" opt
+			do 	case "$opt" in
+				1|2)
+				    ROWS="$opt"	;;
+				a)	MODE=alpha
+					SEP=") "	;;
+				r)	MODE=roman
+					SEP=". "	;;
+				n)	MODE=num
+					SEP=") "	;;
+				esac
+			done
+			shift "$(($OPTIND - 1))"
+			[ -z "$1" ] && \
+				while IFS= read -r ARG
+				do	set -- "$@" "$ARG"
+				done
+			ARGS=( "${@}")
+			#
+			# Action
+			#
+				unset OUT[@]
+				OUT[0]=""
+				shown=false
+				MAX="$(( $ROWS - 1 ))"
+				CUR=0
+				DONE=0
+				for OPT in "${ARGS[@]}"
+				do	DONE="$(( $DONE + 1))"
+					# Do the visible counter
+					case "$MODE" in
+					num)	count="$DONE"
+							;;
+					alpha)	count="$(swarm.str.num2char $(( $DONE - 1 )) )"
+							;;
+					roman)	count="$(swarm.str.num2roman $DONE)"
+							;;
+					none)	count=""
+							;;
+					esac
+
+					# Add the string to array, or print array
+					if [ "$CUR" -le "$MAX" ]
+					then	len=0
+						for O in "${OUT[@]}";do len=$[ $len + ${#O} ];done
+						sum="$(( $len + 2  + ( ${#BORDER_LEFT} * 2 ) ))"
+
+						if [ "$sum" -lt "$COLUMNS" ]
+						then	OUT["$CUR"]="${count}${SEP}${OPT}"
+							shown=false
+							CUR="$(( $CUR + 1 ))"
+						else	printe  "${OUT[@]}" >&2
+							CUR=0 && unset OUT[@]
+							[ -z "$OPT" ] && shown=true
+							OUT["$CUR"]="${count}${SEP}${OPT}"
+							CUR="$(( $CUR + 1 ))"
+						fi
+					else 	printe  "${OUT[@]}" >&2
+						CUR=0 && unset OUT[@]
+						[ -z "$OPT" ] && shown=true
+						OUT["$CUR"]="${count}${SEP}$OPT"
+						CUR="$(( $CUR + 1 ))"
+					fi
+				done
+			#
+			# Display
+			#
+				! $shown && printe  "${OUT[@]}" >&2
+				return 0
+	}
+	pick() { # [options -12a] $LIST or ${ARRAYS[@]}
+	#
+	#
+		#
+		# Variables
+		#
+			local counter=0
+			local AUTO=false
+			local ROWS=""
+			local len="${#ARGS[@]}"
+		#
+		# Catch arguments
+		#
+			trap "exit 130" INT ABRT KILL
+			while getopts "12a" opt
+			do	case "$opt" in
+				a)	AUTO=true			;;
+				1|2)
+				    ROWS="$opt"			;;
+				esac
+			done
+			shift "$(($OPTIND - 1))"
+			ROWS="${ROWS:-3}"
+			# Can not be set earlier because of possible options
+			local ARGS=("${@}")
+		#
+		# Pipe handling
+		# It's different when working with 'read'
+		#
+			wasPipe=false
+			[ -z "$1" ] && \
+				while IFS= read -r ARG
+				do	set -- "$@" "$ARG" && wasPipe=true
+				done
+		#
+		# Handle auto-pick (only 1 option)
+		#
+			"$AUTO" && \
+				[ "$#" -eq 1 ] && \
+				$PRINTF '%s\n' "$ARGS" >&1 && \
+				exit 4
+		#
+		# Show the items to pick from
+		#
+			printlist "${ARGS[@]}"
+			#$PRINTF '%s\n' "${ARGS[@]}" | printe -$ROWS -- >&2
+			#tui-list -n"$ROWS" "${ARGS[@]}" >&2
 	}

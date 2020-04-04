@@ -4,8 +4,8 @@
 # Author:	Simon Arjuna Erat (sea)		 	 #
 # Copyleft:	1995-2020						 #
 # Created:	2020.01.18					 	 #
-# Changed:	2020.04.03					 	 #
-# Build:	11							  	 #
+# Changed:	2020.04.04					 	 #
+# Build:	13							  	 #
 ##############################################
 #
 # Core Public Variables
@@ -16,7 +16,7 @@
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	declare isSWARMfirstTime=true
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=12
+	SWARM[BUILD]=13
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"

@@ -1,4 +1,9 @@
+core.visual
+- fix printl/printe usage
+
 core.sanity
-- pick {EDITOR,TERMINALS,FILEMGR,WEN}_{CLI,GUI}
+- pick {EDITOR,TERMINALS,FILEMGR,WEB}_{CLI,GUI}
 - assign echo_
 
+util.enduser
+- bool2str : getopts ??

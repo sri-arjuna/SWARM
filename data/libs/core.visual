@@ -6,15 +6,12 @@
 	export -r PRINT_RIGHT_OUT="$c_reset" 2&>/dev/zero
 #
 # For easier code reusage, lets combine all math into a sub process
-# Should help to speed things up a little more for the end user front ;)
-# This seems useless... TODO remove or fix
+# This also makes sure COLUMNS and LINES are set and accurate
 #
-if true
-then
-	unset ${!len*} my_test_var
+	unset ${!len*}
 	swarm.update.geometry() { #
-		#export DATE_TIME=$($DATE +'+%T')		# Time on the other hand is
-
+		export COLUMNS="$($TPUT cols)"
+		export LINES="$($TPUT lines)"
 
 		# Set basic values
 		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
@@ -49,21 +46,7 @@ then
 		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
 	}
 	export -f swarm.update.geometry
-fi
-if false
-then
-	# -- Sadly, this doesnt worked as expected
-	# Sub shell
-	(
-		while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
-		do	# Ok, lets keep it simple
-			swarm.update.geometry
-			# Using 15 secs for fallback mode
-			sleep ${SWARM_INTERVALL_GEOMETRY:-15}
-		done
-	) & >> /dev/zero
-	SWARM_PID_USED="$SWARM_PID_USED $!"
-fi
+
 #
 # Theme's
 #
@@ -359,28 +342,3 @@ fi
 		fi
 		$PRINTF "[ ${value} ]"
 	}
-#
-# Not all terminals support WIDTH and LINES....
-#
-	if [[ "x" == "x$LINES" ]] || [[ "x" == "x$COLUMNS" ]]
-	then	# Seems this terminal doesnt provide these variables...
-			# Since it's 2020, lets do multi tasking this in the background!
-		(
-			while ${PS:-\ps} ${PPID:-$PID} | ${GREP:-\grep} ${PPID:-$PID} >> /dev/zero
-			do
-				export COLUMNS="$(eval $TPUT cols)"
-				export LINES="$(eval $TPUT lines)"
-				# If user wants extended logs, he shall have it
-				! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
-				# Using 15 secs for fallback mode
-				sleep ${SWARM_INTERVALL_GEOMETRY:-15}
-			done
-		) & >> /dev/zero
-		# Just in case..
-		# We dont want 100 background process running...
-		SWARM_PID_THEME="$SWARM_PID_THEME $!"
-	fi
-#
-# And for easier code reusage, lets combine all math into a sub process
-# Should help to speed things up a little more ;)
-#

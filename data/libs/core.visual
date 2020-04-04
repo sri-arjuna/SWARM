@@ -3,6 +3,7 @@
 # Prepare 'constant' variables
 #
 	export -r clrCL="\e[2K" 2&>/dev/zero
+	export -r PRINT_RIGHT_OUT="$c_reset" 2&>/dev/zero
 #
 # For easier code reusage, lets combine all math into a sub process
 # Should help to speed things up a little more for the end user front ;)
@@ -37,7 +38,12 @@ then
 		export numHALF=$(( $COLUMNS / 2 ))
 		export numEND=$(( $numHALF * 2 ))
 		export posEND="\33[${numEND}G"
+		# swarm.print.border still needs extra handling for posLEFT
 		export posLEFT="\33[$(( $lenLeft + 2 ))G"
+
+		# Set colors
+		export c_front=$(swarm.color.fg ${SWARM_THEME_DATA[color-front]})
+		export c_back=$(swarm.color.bg ${SWARM_THEME_DATA[color-back]})
 
 		# If user wants extended logs, he shall have it
 		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
@@ -95,7 +101,7 @@ fi
 				init.log.msg "$SWARM_MSG_INIT_THEME : $1"
 		fi
 		# Export the values now
-		export SWARM_THEME_DATA #[@]
+		export SWARM_THEME_DATA
 		# Now, return
 		return $ret
 	}
@@ -182,30 +188,20 @@ fi
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		# Makes no sense to print visuals on such short lines
+		[[ ${COLUMNS} -lt 25 ]] && return 1
+
 		local MODE="" #name=""
 		case "${1/-}" in
 		e|p)	MODE="basic"	;;
 		h)		MODE="header"	;;
 		t)		MODE="title"	;;
 		esac
-		# Makes no sense to print visuals on such short lines
-		[[ ${COLUMNS} -lt 25 ]] && return 1
-#set -x
-		# Set basic values
-		local BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
-		local BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"
-		local clrFRONT="${SWARM_THEME_DATA[color-front]}"
-		local clrBACK="${SWARM_THEME_DATA[color-back]}"
-		#local clrCL="\e[2K"
-		c_front=$(swarm.color.fg ${SWARM_THEME_DATA[color-front]})
-		c_back=$(swarm.color.bg ${SWARM_THEME_DATA[color-back]})
 
-		# Check if border-right was set:
-		[ -z "$BORDER_RIGHT" ] && \
-			for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
+		# Make sure values are udpated
+		swarm.update.geometry
 
 		# Now prepare the seperate handling
-		PRINT_RIGHT_OUT="$c_reset"
 		case "$MODE" in
 			"basic")
 					PRINT_LEFT_IN="$c_reset"
@@ -214,7 +210,7 @@ fi
 					pos_cor_num=0
 					;;
 			"header")
-					local filler_num=$(( $(( $COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+					local filler_num=$(( $numEND - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
 					local filler_str=$($PRINTF "%*s" ${filler_num})
 					PRINT_LEFT_IN="$filler_str" #$c_reset"
 					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
@@ -232,23 +228,14 @@ fi
 		esac
 
 		# Get some numbers
-		local lenLeft="${#BORDER_LEFT}"
-		local lenRight="${#BORDER_RIGHT}"
-		local lenClrFont=${#c_front}
-		local lenClrBack=${#c_back}
-
-	#	local identRight=$(( $lenRight + ${#clrCL}  ))
+		local identRight=$(( $lenRight + ${#clrCL}  ))
 		local posLEFT="\33[$(( ${#BORDER_LEFT} - 2 ))G"
-		local posRIGHT="\33[$(( $(( $COLUMNS / 2 * 2 )) - $lenRight - $pos_cor_num ))G"
-		local posEND="\33[$(( $(( $COLUMNS / 2 * 2 )) ))G"
+		local posRIGHT="\33[$(( $numEND - $lenRight - $pos_cor_num ))G"
 
-#set +x
 		# Well, left aligned it works. isnt too hard
-		#printf "\r${clrCL}${BORDER_LEFT} " >&2		# ORG
 		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" >&2
 
 		# The right side is much more challenging
-		#printf "${posRIGHT}${BORDER_RIGHT}" >&2
 		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
 		$PRINTF "${posEND}"
 	}
@@ -371,56 +358,6 @@ fi
 				value="${STATUS_TEXT[$1]}"
 		fi
 		$PRINTF "[ ${value} ]"
-		## TODO OLD ----------------------------- OLD
-		return
-
-		#
-		#	Displayable 'Status text'
-		#
-			# How to reckognize Wayland?
-			if [ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]
-			then # Prepare GUI values				# ≡≣❑☑☒☐⚠✓✗❑ⅈ×∘∙◆◇√✘
-
-				SWARM_DONE="[  ]"	# This brings the cleanest result
-				SWARM_FAIL="[  ]"
-				SWARM_TODO="[  ]"
-				SWARM_WORK="[  ]"
-
-				# What colos would apply here?
-				SWARM_SKIP="[  ]"
-				SWARM_NEXT="[  ]"
-				SWARM_BACK="[  ]"
-				SWARM_CANC="$SWARM_FAIL"
-
-				SWARM_ON="[  ]"
-				SWARM_OFF="[  ]"
-
-				SWARM_INFO="[  ]"
-				SWARM_HELP="[ HELP ]"
-
-			else	#
-				# Prepare TERMINAL values
-				#
-				SWARM_DONE="[ ${g}${b}${STATUS_TEXT[0]}${R} ]"
-				SWARM_FAIL="[ ${r}${b}${STATUS_TEXT[1]}${R} ]"
-
-				SWARM_WORK="[ ${y}${b}${STATUS_TEXT[2]}${R} ]"
-				SWARM_TODO="[ ${p}${b}${STATUS_TEXT[3]}${R} ]"
-
-				# What colos would apply here? same as above...
-				SWARM_SKIP="[ ${STATUS_TEXT[4]} ]"
-				SWARM_NEXT="[ ${STATUS_TEXT[5]} ]"
-				SWARM_BACK="[ ${STATUS_TEXT[6]} ]"
-				SWARM_CANC="[ ${STATUS_TEXT[7]} ]"
-
-				SWARM_ON="[ ${g}${b}${STATUS_TEXT[10]}${R} ]"
-				SWARM_OFF="[ ${r}${b}${STATUS_TEXT[11]}${R} ]"
-
-				SWARM_INFO="[ ${STATUS_TEXT[111]} ]"
-				SWARM_HELP="[ ${STATUS_TEXT[99]} ]"
-
-			fi
-			SWARM_NFOUND="$SWARM_FAIL"
 	}
 #
 # Not all terminals support WIDTH and LINES....

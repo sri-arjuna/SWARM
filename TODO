@@ -1,0 +1,4 @@
+core.sanity
+- pick {EDITOR,TERMINALS,FILEMGR,WEN}_{CLI,GUI}
+- assign echo_
+

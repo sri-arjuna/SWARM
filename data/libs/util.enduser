@@ -2,7 +2,7 @@
 #
 # Prepare functions
 # that are supposed to be used by 'enduser' script authors
-# Stuff like: ask, choose, printe, header, title and all the rest
+# Stuff like: yeno, pick, printe, header, title and 'all the rest'
 #
 #
 # Visual outputs - 'End user' stuff
@@ -15,16 +15,16 @@
 		case "$1" in
 		"--default")
 			shift
-			local today=`$DATE_TODAY`
-			local time=`$DATE_TIME`
-			#swarm.print.text -h \
-			#	"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
-			#	" " \
-			#	"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
+			#local today=`$DATE_TODAY`
+			#local time=`$DATE_TIME`
 			swarm.print.text -h \
 				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
 				" " \
-				"$($PRINTF '%s ' ${@}) | ${today} / ${time}${c_reset}"
+				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
+			#swarm.print.text -h \
+			#	"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
+			#	" " \
+			#	"$($PRINTF '%s ' ${@}) | ${today} / ${time}${c_reset}"
 			;;
 		*)
 			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"

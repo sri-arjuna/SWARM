@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 #
+# 	swarm.sanity.sys.env
+#			curlwget
+#			moreless
+#			sudoer
+#	swarm.sanity.userconfig.apps
+#				
+#
 # Prepare some functions
 #
 	swarm.sanity.userconfig() { #
@@ -44,18 +51,24 @@
 		CURLWGET=""
 		if [[ ! -z "$MORE$LESS" ]]
 		then
-				[[ -z "$MORE" ]] && \
-					MORELESS=$LESS || \
-					MORELESS=$MORE
+			[[ -z "$MORE" ]] && \
+				MORELESS=$LESS || \
+				MORELESS=$MORE
+		else
+			# Neiter MORE nor LESS is installed
+			# Lets hope PAGER is set to someting working...
+			# Otherwise, use CAT as fallback... 
+			MORELESS=${PAGER:-\cat}
 		fi
 		if [[ ! -z "$CURL$WGET" ]]
 		then
-				[[ -z "$WGET" ]] && \
-					CURLWGET=$CURL || \
-					CURLWGET=$WGET
+			[[ -z "$WGET" ]] && \
+				CURLWGET=$CURL || \
+				CURLWGET=$WGET
 		fi
 		cat > $SWARMRC <<EOF
-# Configuration file generated for SWARM (${SWARM[VERSION]} : ${SWARM[BUILD]})
+#!/usr/bin/env bash
+# Configuration file generated for SWARM (${SWARM[VERSION]} / Build: ${SWARM[BUILD]})
 
 # Leave empty to use SWARM that was provided with the script. HIGHLY RECOMENDED!
 # If it contains a directory leading to SWARM, this version will be used, always!
@@ -91,10 +104,8 @@
 	SWARM_LOG_DIR="$SWARM_LOG_DIR"
 	SWARM_TMP_DIR="$SWARM_TMP_DIR"
 
-	# These 2 are for performance boost as well
-	# Do not change! Really, dont!
+	# Feel free to move te logfile
 	SWARM_LOG="$SWARM_LOG"
-	SWARM_TMP="$SWARM_TMP"
 
 
 # For performance boost, this is required
@@ -110,7 +121,7 @@
 # -> please report so on GITHUB!
 # Specialy SunOS/Solaris users might need to adjust AWK.
 # Otherwise it is not recomended to change anything here,
-# unless absolutly required.
+# unless absolutly required or 'empty'.
 EOF
 		swarm.sanity.coreutils | $GREP -v HOSTNAME=  >> "$SWARMRC"
 		return $?
@@ -119,94 +130,89 @@ EOF
 	# Verfy all core utils work as expected
 	#
 		unset ${!tmp_*} #w W f F
-		local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which touch whoami pwd_exec hostname hostname_exec date more less sort"
+		local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which touch whoami pwd_exec hostname hostname_exec date more less sort curl wget"
 		local worked=""
 		local failed=""
-		local f="" F="" w="" W=""
+		local f=""
+		local F=""
+		local w=""
+		local W=""
 
 		# Fun question:
 		WHICH=$(${WHICH:-\which} \which &2> /dev/null)
-
 		# Let's see if that worked
 		if [[ -f "${WHICH}" ]]
 		then	# Ok, lets do it the easy way:
-				for lc in $list_cmd
-				do
-					if ${WHICH} ${lc/_exec} >/dev/null &2>/dev/null &3>/dev/null
-					then	worked="$lc $worked"
-					else	failed="$lc $failed"
-					fi
-				done
-				# Check for optional mandatories ; set variables with 'which'
-				export CURL=$(${WHICH} curl &2> /dev/null)
-				export WGET=$(${WHICH} wget &2> /dev/null)
-				export MORE=$(${WHICH} more &2> /dev/null)
-				export LESS=$(${WHICH} less &2> /dev/null)
+			for lc in $list_cmd
+			do
+				if ${WHICH} ${lc/_exec} >/dev/null &2>/dev/null &3>/dev/null
+				then	worked="$lc $worked"
+				else	failed="$lc $failed"
+				fi
+			done
+			# Check for optional mandatories ; set variables with 'which'
+			export CURL=$(${WHICH} curl &2>/dev/null)
+			export WGET=$(${WHICH} wget &2>/dev/null)
+			export MORE=$(${WHICH} more &2>/dev/null)
+			export LESS=$(${WHICH} less &2>/dev/null)
 		else	# Ok, the slightly more complicated way
-				for lc in $list_cmd
-				do
-					tmp_exe=${lc^^}
-					tmp_exec2=${!tmp_exe}
-					if $(eval ${tmp_exec2} --help &>> /dev/null )  &>> /dev/null
-					then
-							worked="$worked $lc"
-					else
-							# Handle possible exceptions
-							case "$tmp_exe" in
-							"PWD")
-									[[ -d  "${tmp_exec2}" ]] && \
-										worked="$worked $lc" || \
-										failed="$failed $lc"	;;
-							"CURL"|"WGET")
-									[[ -d  "${tmp_exec2}" ]] && \
-										worked="$worked $lc" 	;;
-							"PWD_EXEC")
-									tmp_val="$(eval ${tmp_exec2} --help 2&>> /dev/null )"  &>> /dev/null && \
-										worked="$worked $lc" || \
-										failed="$failed $lc"   ;;
+			for lc in $list_cmd
+			do
+				tmp_exe=${lc^^}
+				tmp_exec2=${!tmp_exe}
+				if (eval ${tmp_exec2} --help &2>/dev/null )  &>/dev/null
+				then
+					worked="$worked $lc"
+				else
+					# Handle exceptions
+					case "$tmp_exe" in
+					"PWD")
+						[[ -d  "${tmp_exec2}" ]] && \
+							worked="$worked $lc" || \
+							failed="$failed $lc"	;;
+					"CURL"|"WGET")
+						[[ -d  "${tmp_exec2}" ]] && \
+							worked="$worked $lc" 	;;
+					"PWD_EXEC")
+						tmp_val="$(eval ${tmp_exec2} --help &2>> /dev/null )"  &>> /dev/null && \
+							worked="$worked $lc" || \
+							failed="$failed $lc"   ;;
 
-							"ECHO")
-									tmp_val=${tmp_exec2:-\printf}
-									if [[ "xx" ==  "$($tmp_val xx)" ]]
-									then
-										export ECHO=$tmp_val
-										worked="$worked $lc"
-									else
-										failed="$failed $lc"
-										# List it as failed since ECHO doesnt exist,
-										# but use this code as fallback
-										export ECHO="\printf '$1\n'"
-									fi   ;;
-							"PRINTF")
-									tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
-									[[ $? == 2 ]] && \
-											worked="$worked $lc" || \
-											failed="$failed $lc"   ;;
-							"TPUT")
-									tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
-									[[ $? == 2 ]] && \
-											worked="$worked $lc" || \
-											failed="$failed $lc"   ;;
-							"HOSTNAME")
-									[[ "$HOSTNAME" == "$(\hostname)" ]] && \
-											worked="$worked $lc" || \
-											failed="$failed $lc"   ;;
-							"HOSTNAME_EXEC")
-									[[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
-											worked="$worked $lc" || \
-											failed="$failed $lc"   ;;
-							# If this was installed, we'd be doing the easy way.
-							#"WHICH")
-							#		set -x
-							#		eval ${tmp_exec2} --help &>> /dev/null  &>> /dev/null
-							#		[[ $? == 0 ]] && \
-							#				worked="$worked $lc" || \
-							#				failed="$failed $lc"   ;;
-							*)	  init.log "${SWARM_MSG_INIT_SANITY_UNKOWN_CASE} $lc : $tmp_exe : $tmp_exec2"
-									failed="$failed $lc"					;;
-							esac
-					fi
-				done
+					"ECHO")
+						tmp_val=${tmp_exec2:-\printf}
+						if [[ "xx" ==  "$($tmp_val xx)" ]]
+						then
+							export ECHO=$tmp_val
+							worked="$worked $lc"
+						else
+							failed="$failed $lc"
+							# List it as failed since ECHO doesnt exist,
+							# but use this code as fallback
+							export ECHO="\printf '$1\n'"
+						fi   ;;
+					"PRINTF")
+						tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
+						[[ $? == 2 ]] && \
+							worked="$worked $lc" || \
+							failed="$failed $lc"   ;;
+					"TPUT")
+						tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
+						[[ $? == 2 ]] && \
+							worked="$worked $lc" || \
+							failed="$failed $lc"   ;;
+					"HOSTNAME")
+						[[ "$HOSTNAME" == "$(\hostname)" ]] && \
+							worked="$worked $lc" || \
+							failed="$failed $lc"   ;;
+					"HOSTNAME_EXEC")
+						[[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
+							worked="$worked $lc" || \
+							failed="$failed $lc"   ;;
+					*)	init.log "${SWARM_MSG_INIT_SANITY_UNKOWN_CASE} $lc : $tmp_exe : $tmp_exec2"
+						failed="$failed $lc"		;;
+					esac
+				fi
+			done
 		fi
 
 		for w in $worked
@@ -268,12 +274,10 @@ EOF
 		echo "TODO $FUNCNAME"
 	}
 	swarm.sanity.env() { #
-	#
-	#
+	# This is focused on interace applications for CLI and GUI
+	# like web or file browsers, editors or terminals
 		$PRINTF '\n%s\n' "TODO : $FUNCNAME"
-		#echo " ----------------------------"
-		#header 	"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
-		#title	"Initial Sanity Check"
+		read
 		#printe TODO "locate find"
 		local tmp=""
 
@@ -281,36 +285,33 @@ EOF
 		do	# These are filenames to parse
 			for mode in cli gui
 			do	# For these modes to be in
-					tmp="${SWARM_DIR_DATA}/lists/${task}_${mode}"
-					if [[ -f "$tmp" ]]
-					then	# It's everything but terminals
-							while read app
-							do
-								if [[ -f "$WHICH" ]]
-								then	# clear it
-										app_found=""
-										# Set new
-										app_found=$(${WHICH} $app &2>/dev/zero ) >/dev/zero &2>/dev/zero
-										[[ ! -z "$app_found" ]]  && \
-											eval export "${task^^}_${mode^^}=$app_found"
+				tmp="${SWARM_DIR_DATA}/lists/${task}_${mode}"
+				if [[ -f "$tmp" ]]
+				then	while read app
+					do	echo " ---- app:$app --- " >&2
+						if [[ -f "$WHICH" ]]
+						then	# clear it
+							app_found=""
+							# Set new
+							app_found=$(${WHICH} $app &2>/dev/zero ) &2>/dev/zero >/dev/zero
+							# If ssomething was found, export to parent shell
+							[[ -n "$app_found" ]]  && \
+								eval export "${task^^}_${mode^^}=$app_found"
 
-								else	$app --help &2>>/dev/zero >/dev/zero
-										echo $?
-								fi
-							done<${tmp}
+						else	$app --help &2>>/dev/zero &1>/dev/zero
+							[[ -n "$app_found" ]]  && \
+								eval export "${task^^}_${mode^^}=$app"
+						fi
+					done<${tmp}
 
-					else	# It's probably terminals or god behave, an error
-							echo
-					fi
+				else	# It's probably terminals or god behave, an error
+					# 3 mal iher
+					echo TODO 2 $FUNCNAME
+					read
+				fi
 			done
 		done
-		echo " ------------"
-		#set -x
-		cfg.set "$SWARMRC" "EDITOR_CLI" "$EDITOR_CLI"
-		#set +x
-		echo " --------------"
 	}
-	#swarm.sanity.env
 	# Simple echo's, by RudiC @ unix.com
 	echo_(){
 	  ( IFS=" "; printf "%s\n" "$*" )
@@ -329,14 +330,11 @@ EOF
 	}
 	alias echo_en=echo_ne
 #
-# Lets check if environment is 'sane'
-#
-#
 # This is checked only the first time
-
-if $isSWARMfirstTime && swarm.sanity.userconfig
-then	# SWARMRC was written successfull and it is the first time running
+#
+	if $isSWARMfirstTime && swarm.sanity.userconfig
+	then	# SWARMRC was written successfull and it is the first time running
 		[[ -f "$SWARMRC" ]] && \
 			source "$SWARMRC" && \
 			isSourced=true
-fi
+	fi

@@ -7,3 +7,6 @@ core.sanity
 
 util.enduser
 - bool2str : getopts ??
+
+core.env
+- RAMDISK handling

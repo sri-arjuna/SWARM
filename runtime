@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 ##############################################
 # SWARM = Shell Wrapper and Runtime Modifier #
-# Author:	Simon Arjuna Erat (sea)		 	 #
-# Copyleft:	1995-2020						 #
-# Created:	2020.01.18					 	 #
-# Changed:	2020.04.04					 	 #
-# Build:	13							  	 #
+# Author:	Simon Arjuna Erat (sea)	     #
+# Copyleft:	1995-2020		     #
+# Created:	2020.01.18		     #
+# Changed:	2020.04.06	 	     #
+# Build:	15			     #
 ##############################################
 #
 # Core Public Variables
@@ -16,7 +16,7 @@
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	declare isSWARMfirstTime=true
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=13
+	SWARM[BUILD]=14
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -32,7 +32,7 @@
 #
 #	This is just ment as failsafe if PATH is not set
 #	to get the most elementary basics on/of most systems
-	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}"
+	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN"
 	# Most basic commands ; do not change!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
 	PRINTF=${PRINTF:-\printf}
@@ -44,6 +44,13 @@
 	PWD_EXEC=${PWD_EXEC:-\pwd}
 	ID=${ID:-\id}
 	DATE=${DATE:-\date}
+	SORT=${SORT:-\sort}
+	MKDIR=${MKDIR:-\mkdir}
+	TOUCH=${TOUCH:-\touch}
+	PWD_EXEC=${PWD_EXEC:-\pwd}
+	ID=${ID:-\id}
+	SU=${SU:-\su}
+	SUDO=${SUDO:-\sudo}
 #
 # Some other things
 #
@@ -57,7 +64,7 @@
 # Get proper SWARM root dir
 #
 	# If no SWARM_INSTALLED_DIR is provided, it is used in runtime as designed
-	# However, 'SWARM_INSTALLED_DIR=$PWD source SWARM/rc' could be used as a speedbooster,
+	# However, 'SWARM_INSTALLED_DIR=$PWD source SWARM/runtime' could be used as a speedbooster,
 	# as it bypasses the multiple physical read attempts
 	if [[ -z "${SWARM[ROOTDIR]}" ]] && [[ "x" == "x$SWARM_INSTALLED_DIR" ]]
 	then
@@ -65,21 +72,21 @@
 		# Evaluate best chance for the dirs
 		for tmp in $0 ${PWD:-$($PWD_EXEC)} .. ${PWD:-$($PWD_EXEC)}/..
 		do
-				if [[ "SWARM" == "${tmp##*/}" ]]
-				then	# We're in it already
-						# Usualy debug or tryout mode
-						SWARM[ROOTDIR]="$tmp"
-						unset tmp
-						break
-				fi
+			if [[ "SWARM" == "${tmp##*/}" ]]
+			then	# We're in it already
+				# Usualy debug or tryout mode
+				SWARM[ROOTDIR]="$tmp"
+				unset tmp
+				break
+			fi
 
-				if [[ -d "${tmp}/SWARM" ]]
-				then	# It's a sub dir
-						# As it should be called
-						SWARM[ROOTDIR]="$tmp/SWARM"
-						unset tmp
-						break
-				fi
+			if [[ -d "${tmp}/SWARM" ]]
+			then	# It's a sub dir
+				# As it should be called
+				SWARM[ROOTDIR]="$tmp/SWARM"
+				unset tmp
+				break
+			fi
 		done
 		# Should not reach this point
 		# Other than while debug testing
@@ -89,11 +96,11 @@
 		# Or optionaly, use the installed method
 		if [[ -d "${SWARM_INSTALLED_DIR}" ]]
 		then	# Assign the variable
-				SWARM[ROOTDIR]="$SWARM_INSTALLED_DIR"
+			SWARM[ROOTDIR]="$SWARM_INSTALLED_DIR"
 		else	# This is the only hardcoded 'english only' message
-				$PRINTF '%s\n' "Fatal, no SWARM dir found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
-				init.countdown
-				return 1
+			$PRINTF '%s\n' "Fatal, no SWARM dir found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
+			init.countdown
+			return 1
 		fi
 	fi
 #
@@ -120,35 +127,33 @@
 			tmp_empty=""
 
 	for this in \
-			"${SWARM_DIR_CONF}"/* \
-			"${SWARM_DIR_LIBS}"/*
+		"${SWARM_DIR_CONF}"/* \
+		"${SWARM_DIR_LIBS}"/*
 	do
 		if ${doSlowLoading:-false}
 		then
-				# This is off by default because nowaways it's too fast to see the regular way
-				# Only recomended with numbers between 0.5 to 2 for application-like scripts
-				# To have a 'cool intro'
-				$PRINTF '\r%s' "$this"
-				[[ $tmp_len -lt ${#this} ]] && \
-						tmp_len=${#this} && \
-						tmp_empty=$($PRINTF '%*s' $COLUMNS)
-				sleep ${SWARM_INTERVALL_SLOW_LOADING:-0.3}
-				$PRINTF  "\r$tmp_empty"
+			# This is off by default because nowaways it's too fast to see the regular way
+			# Only recomended with numbers between 0.5 to 2 for application-like scripts
+			# To have a 'cool intro'
+			$PRINTF '\r%s' "$this"
+			[[ $tmp_len -lt ${#this} ]] && \
+					tmp_len=${#this} && \
+					tmp_empty=$($PRINTF '%*s' $COLUMNS)
+			sleep ${SWARM_INTERVALL_SLOW_LOADING:-0.3}
+			$PRINTF  "\r$tmp_empty"
 		fi
 
 		# Minimalistic output
 		tmp_swarm_loading="${tmp_swarm_loading}."
 		if [[ ! "${this:0:2}" == "\.[\.]" ]]
 		then	#
-				source "$this" && \
-					$PRINTF '\r%s' "${tmp_swarm_loading}" && \
-					 ( ${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this" ; exit 0 ; ) || \
-					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+			source "$this" && \
+				$PRINTF '\r%s' "${tmp_swarm_loading}" && \
+				 ( ${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this" ; exit 0 ; ) || \
+				 init.log "$SWARM_MSG_INIT_FILE_MISSING $this\n"
 		else
-				$PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+			$PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
 		fi
-		# Start spaming the log file, if desired
-
 	done
 	unset tmp_swarm_loading \
 			tmp_len \
@@ -172,18 +177,10 @@
 	if [[ -d "$SWARM_USER_CONFIG" ]]
 	then
 		[[ -d "$SWARM_USER_LIBS" ]] || $MKDIR "$SWARM_USER_LIBS"
-		# Parse and source files
+		# Parse and source User Files
 		for uf in "${SWARM_USER_LIBS}/"*
 		do
 			[[ ! -d "$uf" ]] && [[ -f "$uf" ]] && source "$uf" && $PRINTF "."
-			#if [[ ! -d "$uf" ]]
-			#then # Continue ONLY if it is NOT a directory
-				# Why does this otherwise (cmd && cmd && cmd) show as subprocess output?
-			#	if [[ -f "$uf" ]]
-			#	then
-			#		source "$uf" && $PRINTF "."
-			#	fi
-			#fi
 		done
 	fi
 #
@@ -191,44 +188,44 @@
 #
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
-			if [[ -z "$1" ]]
-			then	# No arguments
-					header 	--default #"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
-					title	"A short intro"
-					printe "TODO: Visuals, then explain, configure and stuff..."
-					status $? "one"
-					status 1 "" two
-					status 127
-					status 130
-					init.countdown "Weee"
-			else	# Has arguments, lets parse
-					case "$1" in
-						"basic")
-							shift
-							swarm.eu.show.basics
-							;;
-						"config")
-							shift
-							swarm.eu.show.config
-							;;
-						"help")
-							#echo hallo
-							shift
-							# Lets show a basic menu
-							swarm.eu.help.menu "${@}"
-							#break 2
-							;;
-						*)	# Exit the loop
-							break
-							;;
-					esac
-			fi
+		if [[ -z "$1" ]]
+		then	# No arguments
+			header 	--default #"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
+			title	"A short intro"
+			printe "TODO: Visuals, then explain, configure and stuff..."
+			status $? "one"
+			status 1 "" two
+			status 127
+			status 130
+			init.countdown "Weee"
+		else	# Has arguments, lets parse
+			case "$1" in
+			"basic")
+				shift
+				swarm.eu.show.basics
+				;;
+			"config")
+				shift
+				swarm.eu.show.config
+				;;
+			"help")
+				#echo hallo
+				shift
+				# Lets show a basic menu
+				swarm.eu.help.menu "${@}"
+				#break 2
+				;;
+			*)	# Exit the loop
+				break
+					;;
+			esac
+		fi
 	fi
 #
 # Develeoper testings
 #
 	if [[ "bash" = "${0/-}" ]]; then
-		$ECHO " ----------- TEST AREA -----------"
+		$ECHO " ----------- TEST AREA START -----------"
 		intro_show() { #
 			header 	--default
 			title 	"my title"
@@ -251,5 +248,6 @@
 			$ECHO 	left middle right | printe -
 		}
 		time intro_show
-		$ECHO " ----------- TEST AREA -----------"
+		$ECHO " ----------- TEST AREA END -----------"
 	fi
+

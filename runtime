@@ -4,19 +4,66 @@
 # Author:	Simon Arjuna Erat (sea)	     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.04.06	 	     #
-# Build:	15			     #
+# Changed:	2020.04.14	 	     #
+# Build:	18			     #
+##############################################
+#
+#	SWARM is the successor of TUI (Text User Interace) 
+#	It is an interface between script authors and end users.
+#	In doing so, the scripts you write, 
+#	will appear application-like to an end user.
+#
+#	This file is to be called from your script like eiter one of:
+#	source ./runtime
+#	source ./SWARM/runtime
+#
+#	To get started writing scripts, call this file like eiter one of:
+#	./runtime help
+#	./runtime manual
+#	./runtime docs
+#
+#	To change settings, you can use eiter one of:
+#	./runtime config user
+#	swarm.userconfig.edit
+#	edit "$HOME/.swarmrc"
+#
+##############################################
+# Requirements:
+# * BASH 5.0+
+# * GNU Coreutils
+# * 
+#
+# Speed increase:
+# * Make sure '$HOME' is set and exists for all shell login accounts.
+# * Preset SWARMDIR=/path/to/SWARM
+#
+# RAMDISK
+# As root you can force the use of a RAMDISK
+# for configuration, log- and possible tempfiles.
+# If you should enounter a RO-system, logs and
+# config files will be disabled, unless you:
+# * Preset SWARM_RAMDISK=true
+# * Optionaly, you may pass SWARM_RAMDISK_DIR=/path/to/mountpoint
 ##############################################
 #
 # Core Public Variables
 #
 	# SWARM
+	#shopt -i
+	#set -n
+	#shopt -o huponexit globstar
+	
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	declare isSWARMfirstTime=true
+	# hasCOLUMNS is for internal use only
+	[[ -n "$COLUMNS" ]] && \
+		export hasCOLUMNS=true || \
+		export hasCOLUMNS=false
+	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=14
+	SWARM[BUILD]=18
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -33,24 +80,31 @@
 #	This is just ment as failsafe if PATH is not set
 #	to get the most elementary basics on/of most systems
 	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN"
-	# Most basic commands ; do not change!
+	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
-	PRINTF=${PRINTF:-\printf}
-	ECHO=${ECHO:-\printf}
-	AWK=${AWK:-\gawk}
-	GREP=${GREP:-\grep}
-	SED=${SED:-\sed}
-	LS=${LS:-\ls}
-	PWD_EXEC=${PWD_EXEC:-\pwd}
-	ID=${ID:-\id}
-	DATE=${DATE:-\date}
-	SORT=${SORT:-\sort}
-	MKDIR=${MKDIR:-\mkdir}
-	TOUCH=${TOUCH:-\touch}
-	PWD_EXEC=${PWD_EXEC:-\pwd}
-	ID=${ID:-\id}
-	SU=${SU:-\su}
-	SUDO=${SUDO:-\sudo}
+	export PRINTF=${PRINTF:-\printf}
+	export ECHO="swarm.util.echo"		# Defined in core.utils
+	export AWK=${AWK:-\gawk}
+	export GREP=${GREP:-\grep}
+	export SED=${SED:-\sed}
+	export WHICH="swarm.util.which"	# Defined in core.utils
+	export LS=${LS:-\ls}
+	export PWD_EXEC=${PWD_EXEC:-\pwd}
+	export DATE=${DATE:-\date}
+	export MKDIR="swarm.util.mkdir"	# Defined in core.utils
+	export TOUCH=${TOUCH:-\touch}
+	export PWD_EXEC=${PWD_EXEC:-\pwd}
+	export TPUT="${TPUT:-tput}"
+
+	export SU=${SU:-\su}
+	export SUDO=${SUDO:-\sudo}
+	export ID=${ID:-\id}
+	export WHOAMI=${WHOAMI:-\whoami}
+	export SORT=${SORT:-\sort}		# NOT a GNU coreutil
+	export LS=${LS:-\ls}
+	export RM=${RM:-\rm}
+	export RMDIR=${RMDIR:-\rmdir}
+	export FIND=${FIND:-\find}
 #
 # Some other things
 #
@@ -58,15 +112,16 @@
 	# Use these to set the date variable: `
 	DATE_TODAY="$DATE +%F"
 	DATE_TIME="$DATE +%T"
-	DATE_TIME_LOG=$($DATE +'%H:%M:%S.%s')
-	init.countdown() { $PRINTF '%s\n' "${1:-Returning in 3}" ; sleep 1; $PRINTF '%s\n' "2" ; sleep 1; $PRINTF '%s\n' "1";sleep 1;$PRINTF '%s\n' "NOW" ; sleep 0.5 ; }
+	DATE_TIME_LOG="$DATE +%T.%s"
 #
 # Get proper SWARM root dir
 #
-	# If no SWARM_INSTALLED_DIR is provided, it is used in runtime as designed
-	# However, 'SWARM_INSTALLED_DIR=$PWD source SWARM/runtime' could be used as a speedbooster,
+	# If no SWARMDIR is provided, it is used in runtime as designed
+	# However, 'SWARMDIR=$PWD/SWARM source SWARM/runtime' could be used as a speedbooster,
 	# as it bypasses the multiple physical read attempts
-	if [[ -z "${SWARM[ROOTDIR]}" ]] && [[ "x" == "x$SWARM_INSTALLED_DIR" ]]
+	# SWARMDIR - MUST - be provided if you intend to store  
+	# the files in a dir not named SWARM
+	if [[ "x" == "x$SWARMDIR" ]]
 	then
 		# Find the path that holds this script
 		# Evaluate best chance for the dirs
@@ -93,13 +148,14 @@
 		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD}"
 		unset tmp
 	else
-		# Or optionaly, use the installed method
-		if [[ -d "${SWARM_INSTALLED_DIR}" ]]
+		# Or optionaly, use the 'install' method
+		# Verify the location
+		if [[ -f "${SWARMDIR}/runtime" ]]
 		then	# Assign the variable
-			SWARM[ROOTDIR]="$SWARM_INSTALLED_DIR"
+			SWARM[ROOTDIR]="$SWARMDIR"
 		else	# This is the only hardcoded 'english only' message
-			$PRINTF '%s\n' "Fatal, no SWARM dir found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
-			init.countdown
+			$PRINTF '%s\n' "Fatal, provided SWARMDIR=$SWARMDIR dir not found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
+			sleep 3
 			return 1
 		fi
 	fi
@@ -115,24 +171,35 @@
 	SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
 	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
 	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
-# Load english strings for overall coverage for error messages.
-	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf"
-	source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf"
 #
-# Load default configuration
-# After this, user specific language can be loaded if available
+# Load english strings for overall coverage for error messages.
+#
+	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf" ; $PRINTF "."
+	source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf" ; $PRINTF "."
+#
+# Load SWARM settings, core and sanity functions
 #
 	declare tmp_swarm_loading="" \
 			tmp_len=0 \
 			tmp_empty=""
 
-	for this in \
-		"${SWARM_DIR_CONF}"/* \
-		"${SWARM_DIR_LIBS}"/*
+	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.{utils,sanity}
 	do
+		source "$thisCFG"
+		$PRINTF "."
+	done
+#
+# SWARM Environment checks
+#
+	
+	for this in "${SWARM_DIR_LIBS}"/*
+	do
+		# Skip if core.utils or core.sanity
+		( [[ "$this" == "$SWARM_DIR_LIBS/core.utils" ]] || [[ "$this" == "$SWARM_DIR_LIBS/core.sanity" ]] ) && continue
+		# Special handling for slow-mode
 		if ${doSlowLoading:-false}
 		then
-			# This is off by default because nowaways it's too fast to see the regular way
+			# This is off by default because nowadays it's too fast to see the regular way
 			# Only recomended with numbers between 0.5 to 2 for application-like scripts
 			# To have a 'cool intro'
 			$PRINTF '\r%s' "$this"
@@ -147,35 +214,30 @@
 		tmp_swarm_loading="${tmp_swarm_loading}."
 		if [[ ! "${this:0:2}" == "\.[\.]" ]]
 		then	#
-			source "$this" && \
-				$PRINTF '\r%s' "${tmp_swarm_loading}" && \
-				 ( ${doLogExt:-false} && log "$SWARM_MSG_INIT_FILE_FOUND $this" ; exit 0 ; ) || \
-				 init.log "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+			if source "$this" 
+			then	# All good
+				$PRINTF '\r%s' "${tmp_swarm_loading}"
+				 ${doLogExt} && \
+				 	init.msg.log "$SWARM_MSG_INIT_FILE_FOUND $this"
+			else	# Not good
+				 ${doLogExt} &&  \
+					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this"
+			fi
 		else
-			$PRINTF "$SWARM_MSG_INIT_FILE_MISSING $this\n"
+			$PRINTF '%s\n' "$SWARM_MSG_INIT_FILE_MISSING $this"
 		fi
 	done
 	unset tmp_swarm_loading \
 			tmp_len \
 			tmp_empty \
 			this
-
-	# One time verification of installed commands
-	# Execute the ./runtime to configure SWARM
-	# or see the config: ~/.swarmrc
-	#$isSWARMfirstTime && swarm.sanity.env
-#
-# Starting SWARM now
-#
-	swarm.update.lang
-	swarm.update.lang.status
-	swarm.init.theme
 #
 # Load the users functions now
 # if he has some that is
 #
 	if [[ -d "$SWARM_USER_CONFIG" ]]
 	then
+		# Create the dir if not existing yet (first time)
 		[[ -d "$SWARM_USER_LIBS" ]] || $MKDIR "$SWARM_USER_LIBS"
 		# Parse and source User Files
 		for uf in "${SWARM_USER_LIBS}/"*
@@ -184,20 +246,27 @@
 		done
 	fi
 #
+# Starting SWARM now
+#
+	swarm.update.lang
+	swarm.update.lang.status
+	swarm.init.theme
+#
 # Initiate Interface
 #
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
 		if [[ -z "$1" ]]
-		then	# No arguments
-			header 	--default #"SWARM ${SWARM[VERSION]}" " " "$DATE_TODAY : $DATE_TIME"
-			title	"A short intro"
-			printe "TODO: Visuals, then explain, configure and stuff..."
-			status $? "one"
-			status 1 "" two
-			status 127
-			status 130
-			init.countdown "Weee"
+		then	# First Time // No arguments
+			header 	--default
+			title	"$SWARM_MSG_WELCOME_TITLE"
+			printe	"$SWARM_MSG_WELCOME_INFOLINE1"
+			printe	"$SWARM_MSG_WELCOME_INFOLINE2"
+			title	"" # Separator
+			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
+			#status $? "one"
+			
+			#init.countdown "Weee"
 		else	# Has arguments, lets parse
 			case "$1" in
 			"basic")
@@ -215,6 +284,12 @@
 				swarm.eu.help.menu "${@}"
 				#break 2
 				;;
+			"tarball")
+				(
+					cd "${SWARM_DIR_ROOT}/.."
+					tar -acf "$HOME/swarm-${SWARM[BUILD]}.tar.gz" "${SWARM_DIR_ROOT##*/}"
+				)
+				;;
 			*)	# Exit the loop
 				break
 					;;
@@ -226,28 +301,8 @@
 #
 	if [[ "bash" = "${0/-}" ]]; then
 		$ECHO " ----------- TEST AREA START -----------"
-		intro_show() { #
-			header 	--default
-			title 	"my title"
-			printe 	left middle right
-			printe	left "and right"
-			# Piped question works
-			title	"Piped input" >&1
-			$ECHO y | yesno "Is this cool?"
-			status $? "Piped Answer"
-			$ECHO n | yesno "Is this cool?"
-			status $? "Piped Answer"
-			title	"Piped Output"
-			# this is not echo, this is echo_ !
-			echo_ "this is
-			a piped
-			test code" | printe -
-			printe "this is" "an argument" "test code"
-			$PRINTF "%s\n" "this was" "an argument" "test code" | printe -
-			# Need a proper 'catcher' for ECHO...
-			$ECHO 	left middle right | printe -
-		}
-		time intro_show
+		title testing
+		echo ${SWARM_THEME_DATA[@]}
 		$ECHO " ----------- TEST AREA END -----------"
 	fi
 

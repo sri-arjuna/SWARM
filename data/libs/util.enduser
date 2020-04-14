@@ -184,7 +184,8 @@
 		[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
 			gui_fixer="7" || gui_fixer=7
 
-		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		$PRINTF "$value" >&1
 
 		$PRINTF "$posEND\n"

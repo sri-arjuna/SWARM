@@ -1,0 +1,418 @@
+#!/usr/bin/env bash
+# This file must NOT contain PATH or HOME references, they are handled in core.env
+# Here are functions used to make sure the parsing of the environment works (smoother)
+#
+# Some additional possible passed variable parsing
+#
+	# Forced 'ReadOnly' mode?
+	${SWARM_RAMDISK:-false} && \
+		isRO=true || \
+		SWARM_RAMDISK=false
+#
+# Basic utility
+#
+	init.msg() { $PRINTF '%s\n' "$1" ;}
+	init.log() { ${isRO} && return ; init.msg "`$DATE_TIME_LOG` SWARM :: $1" >> "$SWARM_LOG";}
+	init.log.msg() { init.msg "$1"; init.log "$1";}
+	init.log.check() {
+	# Checks for log path and logfile
+	# Creates if required and prints date and or divider line
+		local RET
+		local DT="`$DATE_TODAY`"	# These single quotes are to 'execute'
+		# Check if its the first time
+		if [[ ! -f "$SWARM_LOG" ]]
+		then
+			# Create logfile, return false if this fails
+			! $TOUCH "$SWARM_LOG" && \
+				init.msg "${SWARM_MSG_INIT_LOG_FAIL} -> $SWARM_LOG @ uid:${UID:-$EUID}" && \
+				return 1
+		fi
+		# If todays date was not found, write it
+		if $GREP "$DT" "$SWARM_LOG" >/dev/null
+		then	# Print a visual divider
+			init.msg " -------------------"  >> "$SWARM_LOG"
+			RET=$?
+		else	# Date is missing, print that instead
+			init.msg "$DT" >> "$SWARM_LOG"
+			RET=$?
+		fi
+
+		# Exit function
+		return $RET
+	}
+#
+# Sometimes all that is needed,
+# is a propper Clean Up
+#
+	swarm.cleanup() { #
+	# Clears all known variables and sub routines on terminal exit from memory
+	# This is for security and proper coding alike
+		unset -v ${!USER_*}		# Shelcheck, this fails if I use quotes as suggested
+		local stodo="cleanup color.bg color.fg color.list error init.theme lang.count lang.list lang.load print.bold print.border print.goto print.text print.underline sanity.coreutils sanity.env sanity.userconfig sanity.userconfig.write theme.list theme.update eu.function.list eu.function.show"
+
+		# Clear unused background processes
+		for p in ${SWARM_PID_USED}
+		do
+			kill -s SIGKILL "$p"
+			# Shorten the list by removing the 'done' ones
+			SWARM_PID_USED="${SWARM_PID_USED/$p}"
+		done
+
+		# Delete files
+		! $isRO && \
+			[[ -f "$SWARM_TMP" ]] && $RM "$SWARM_TMP"
+
+		# Keep this one alive : Save
+		local otmp="${SWARM_INSTALLED_DIR}"
+		unset -v ${!SWARM_*}
+		# Keep this one alive : Restore
+		export SWARM_INSTALLED_DIR="$otmp"
+		unset CURL WGET ECHO PRINTF TPUT PWD_EXEC HOSTNAME_EXEC SUDO 
+		unset AWK GREP SED SUDO SU LS MKDIR RM RMDIR WHICH TOUCH WHOAMI
+		unset isRoot isGUI isDir hasWhich
+
+		# Clean up swarm functions
+		for todo in $stodo
+		do
+			eval unset -f swarm."$todo"
+		done
+
+		# Clean up other functions
+		for todo in init.msg init.log init.log.msg init.log.check init.countdown cfg.list. cfg.get. cfg.set
+		do
+			eval unset -f "$todo"
+		done
+
+		traps_restore
+	}
+#
+# Error handling
+#
+	swarm.error() { # CALLER SCRIPT FUNCNAME LINENO [CONTENT]
+	# Prints an error message and exits
+	#
+		caller="\$1" script="\$2" funcname="\$3" lineno="\$4"
+		shift 4 #2 #4
+
+		content=($($ECHO "\${@}"))
+		$PRINTF "\n"
+		# The eval is required for the function to work after export
+		eval $PRINTF '\t%s:\t%s\n' \\
+			"Callerscript" "\$caller" \\
+			"Scriptname" "\$script" \\
+			"Functionname" "\$funcname :: \$FUNCNAME" \\
+			"Linenumber" "\$lineno :: \$LINENO"
+		for cont in "\${content[@]}";do
+			$PRINTF '\t* %s\n' "\$cont"
+		done
+		# Original
+		#trap - HUP INT QUIT ABRT ALRM TERM EXIT
+		# Neu
+		swarm.cleanup
+		traps_restore
+		exit 1
+	}
+	swarm.protect() { # ARGS
+	# Searches for injection subjects
+	# Returns true if it finds some
+		typeset arg ac=0
+		local fname="$1" ; shift
+		for arg do
+		ac="$((ac+=1))"
+		case "$arg" in
+		(*[';´|<&>']*|*':('*|*':-'*)
+			$PRINTF "%s\n" "${SWARM_MSG_INIT_INJECTION:-Aborting, injection detected!} arg\${ac}=\$arg $fname"
+			read
+			return 0
+		;;
+		esac
+		done
+		return 1
+	}
+	function swarm.help.screen() { # "$SWARM_MSG_HELP_???"
+	# Simply shows the help screen
+	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		cat <<-HELP_SCREEN
+	${1}
+	HELP_SCREEN
+	}
+#
+# Traps & Error messages
+#
+	traps_save() { saved_traps="$(trap)" ; export saved_traps;}
+	traps_restore() { eval \$saved_traps;}
+	export -f traps_save traps_restore
+	export -f swarm.error swarm.cleanup
+	traps_save
+	# Start my own traps....
+	trap "swarm.error \${CALLER:-\$0} \$0 \$FUNCNAME \$LINENO '\$($ECHO -E \${@})'" ABRT ALRM QUIT TERM INT STOP HUP SEGV CONT PROF BUS SYS FPE
+	trap "swarm.cleanup" ABRT QUIT TERM KILL HUP ALRM INT STOP EXIT
+#
+# First the most important basics
+#
+	if [[ -z "${UID:-${EUID}}" ]]
+	then	# It's empty, lets get an id otherwise
+		# This should fail actualy, but trying anyway.
+		# I mean, it should never ever get to here....
+		# And if these variables are empty, they should not be readonly to cause an error
+		init.msg "$SWARM_MSG_INIT_NO_ID : uid=$UID euid=$EUID id=$(${ID:-\id})"
+		UID=$(${ID:-\id} -u)
+		EUID=$(${ID:-\id} -u)
+	fi
+#
+# Some tools
+#
+	swarm.util.isRoot() { #
+	# Returns TRUE if user ID is 0
+	# Returns FALSE otherwise ; This function is assigned to: $isRoot
+		if [[ ${UID:-${EUID:-0}} -eq 0 ]]
+		then	$ECHO true
+			return 0
+		else	$ECHO false
+			return 1
+		fi
+	}
+	swarm.util.isGUI() { #
+	# Returns TRUE if XDG_CURRENT_DESKTOP, DESKTOP_SESSION or XAUTHORITY is set
+	# Returns FALSE otherwise ; This function is assigned to: $isGUI
+		if [[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]]
+		then	$ECHO true
+			return 0
+		else	$ECHO false
+			return 1
+		fi
+	}
+	swarm.util.mkdir() { # /path/to/make
+	# Creates full path structures
+	# This function is assigned to: $MKDIR
+		# Cant create dirs if system is read only
+		${isRO:-false} && return 1
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		# Remove any possible args from ARGS
+		while [[ "-" == "${1:0:1}" ]] ; do shift ; done
+		swarm.protect "$FUNCNAME" "${@}" && return 1
+		# Vars
+		local dir_done=""
+		local dir_todo=$($PRINTF "${1:1}" | $SED s,"/","\n",g)
+		# Start pipe
+		$PRINTF '%s\n' "$dir_todo" | while read current
+		do	# Prepare next dir
+			dir_done+="/$current"
+			# Create if not exist
+			[[ -d "$dir_done" ]] || \mkdir "$dir_done"
+		done
+		return 0
+	}
+	swarm.util.echo() { # [-e|-n|-en|-ne] STRING
+	# Simple echo's, by RudiC @ unix.com
+	# This function is assigned to: $ECHO
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		echo_(){
+		  ( IFS=" "; $PRINTF "%s\n" "$*" )
+		}
+		# Portable echo -n
+		echo_n() {
+		  ( IFS=" "; $PRINTF "%s" "$*" )
+		}
+		# Portable echo -e
+		echo_e() {
+		  ( IFS=" "; $PRINTF "%b\n" "$*" )
+		}
+		# Portable echo -ne
+		echo_ne() {
+		  ( IFS=" "; $PRINTF "%b" "$*" )
+		}
+		
+		case "${1/-}" in
+		"n")	shift ; echo_n "${@}"	;;
+		"e")	shift ; echo_e "${@}"	;;
+		"en"|"en")
+			shift ; echo_ne "${@}"	;;
+		*)		echo_ "${@}"	;;
+		esac
+	}
+	swarm.util.isDir() { #  /path/to/dir
+	# Returns true if passed string is a directory
+	# This function is assigned to: $isDir
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		[[ -d "$1" ]] && \
+			RET=0 && \
+			$ECHO true || \
+			$ECHO false
+		return ${RET:-1}
+	}
+	swarm.util.hasWhich() { #
+	# Returns true if system has 'which' installed in PATH
+	# This function is assigned to: $hasWhich
+		${WHICH:-\which} \which &2> /dev/null && \
+			RET=$? && \
+			$ECHO true || \
+			$ECHO false
+		return $RET
+	}
+	swarm.util.which() { # COMMAND
+	# Returns true if COMMAND was found in PATH
+	# This function is assigned to WHICH - IF no 'which' was found.
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		# Get an arry
+		local array=($($PRINTF "$PATH"|$SED s,':','\n',g))
+		# Parse for args
+		case $# in
+		0)	usage swarm.util.which ;;
+		1)	case "$1" in
+			"-"|"--")
+				while read cmd
+				do
+					$FUNCNAME "$cmd"
+				done
+				return 0
+				;;		
+			# *)	continue	;;
+			esac
+			;;
+		*)	for arg in "${@}"
+			do
+				$FUNCNAME "$arg"
+			done
+			return 0
+			;;
+		esac
+		# Parse for application
+		for Arr in "${array[@]}"
+		do
+			[[ -f "$Arr/$1" ]] && \
+				$PRINTF '%s\n' "$Arr/$1" && \
+				return 0
+		done
+		return 1
+	}
+#
+# Short variable access to util functions
+# and to keep file usage to a minimum
+#
+	# Bools
+	hasWhich=$(swarm.util.hasWhich)
+	isDir="swarm.util.isDir"
+	isGUI=$(swarm.util.isGUI)
+	isRoot=$(swarm.util.isRoot)
+#
+# Prepare and make sure of essential environment paths
+#
+	declare isSourced=false
+	# Evalute default home dir
+	HOME="${HOME:-$($ECHO ~$USER)}"
+	# If its still empty, use 'cd' default behaviour to return to the users homedir if invoked without args
+	[ -z "$HOME" ] && HOME=$(cd || return 1;$PWD_EXEC)
+	# Last attempt to check for missing '$HOME'
+	if [[ -z "$HOME" ]] || [[ ! -d "$HOME" ]]
+	then	# HOME is empty, assume machine is still booting
+		if $isRoot
+		then	# Its 'root', check both even though /root is not standard and might not be available
+			known="/root /admin /usr/etc /etc /"
+			for k in $known $($AWK  -v FS=":" '/^root/ {print $6}' /etc/passwd 2>/dev/zero)
+			do 	[[ -d "$k" ]] && HOME="$k" && export HOME && break
+			done
+		else	# Its 'normal' user
+			known="/home /Users /users /Home"
+			for k in $known
+			do 	[[ -d "$k" ]] && HOME="$k" && export HOME && break
+			done
+		fi
+		[[ -z "$HOME" ]] && init.msg "$SWARM_MSG_INIT_HOME_NOT_FOUND : uid = $UID : $known ($k)"
+	fi
+	# So, HOME is (should be) set, lets see if it exists
+	if [[ -d "$HOME" ]]
+	then	# It does exit, 'save' it
+		export HOME
+	else	# HOME was not found, was SWARMRC passed?
+		if [[ -z "$SWARMRC" ]] 
+		then	init.msg "$SWARM_MSG_INIT_HOME_NOT_FOUND"
+		elif [[ -f "$SWARMRC" ]]
+		then	# If SWARMRC was passed and exists,
+			# try to use its directory as HOME
+			tmp_val=${SWARMRC##*/}
+			HOME=${SWARMRC/$tmp_val}
+			[[ ! -d "$HOME" ]] && \
+				HOME="" && \
+				init.msg "$SWARM_MSG_INIT_SWARMRC_PROV_NOT_FOUND" && \
+				unset SWARMRC
+		fi
+		
+		# Set HOME, or use current USER dir if SWARMRC could not be found
+		export HOME=${HOME:-$PWD}
+	fi
+#
+# LOG, TMP and RAMDISK dir handling
+#
+	swarm.sanity.ramdisk.create() { #
+	# Creates a ramdisk if SWARM_RAMDISK=true was set before sourcing SWARM
+	#
+		$isRoot || return 1
+		# System is ReadOnly, no config files can be written
+		$PRINTF "TODO - RAMDISK Act accordingly"
+		# Get basedir and create ramdisk location
+		for ramD in /tmp /var/tmp /usr/tmp ; do [[ -d "$ramD" ]] && RAMDISK="${ramD}/swarm.ramdisk" && break ; done
+		$MKDIR "$RAMDISK"
+		# Create ramdisk
+		${MOUNT:-mount} -t tmpfs -o size=4m SWARM "$RAMDISK"
+		${CHMOD:-\chmod} 777 "$RAMDISK"
+	}
+	# Lets check wether we're in a X-session or on a TTY
+	declare tmp_worker="${XDG_CONFIG_DIR:-$HOME/.config}"
+	# $isRO is only set at this point if SWARM_RAMDISK=true is passed
+	# Regardless, we must have all 3 as true in order to make a RAMDISK.
+	if $isRO && $SWARM_RAMDISK && $isRoot
+	then	SWARM_RAMDISK_DIR="${SWARM_RAMDISK_DIR:-${SWARM_DIR_DATA}/ramdisk.tmp}"
+		export SWARM_USER_CONFIG_DIR="$SWARM_RAMDISK_DIR"		
+		SWARMRC="${SWARM_RAMDISK_DIR}/swarmrc"
+		swarm.sanity.ramdisk.create
+	elif $isRoot
+	then	# Root with RW system ; or SWARM_RAMDISK=false (default)
+		for tDir in /usr/var /var
+		do
+			$isDir "$tDir" && \
+				export SWARM_USER_CONFIG_DIR="$tDir" && \
+				break
+		done
+		unset tDir
+		# Only do this if no SWARM RC was passed
+		if [[ -z "$SWARMRC" ]]
+		then	# Check these dirs for possible SWARM configuration for root/admin user
+			# /root was already checked against HOME
+			# This is to provide fallback if machine is still booting
+			for tDir in $HOME /etc
+			do
+				if $isDir "$tDir"
+				then	# Just in case root as no $HOME
+					# use /etc as fallback dir
+					[[ "$tDir" == "/etc" ]] && \
+						SWARMRC="$tDir/swarmrc" || \
+						SWARMRC="$tDir/.swarmrc"
+					break
+				fi
+			done
+		fi
+	else	# It's a user, make sure we save to the right place
+		export SWARM_USER_CONFIG_DIR="${SWARM_USER_CONFIG_DIR:-$tmp_worker/swarm}"
+	fi
+	# Set vars for root and users, and reuse variables
+	# Dirs
+	# Do not use 'logs' but 'log' for /usr/var compatibility
+	SWARM_LOG_DIR="${SWARM_USER_CONFIG_DIR}/log"	
+	SWARM_TMP_DIR="${SWARM_USER_CONFIG_DIR}/tmp"
+	# Make sure the DIR's exist
+	#set -x
+	for tDir in "$SWARM_LOG_DIR" "$SWARM_TMP_DIR" "$SWARM_USER_CONFIG_DIR"
+	do
+		#set -x
+		$isDir "$tDir" >/dev/zero || $MKDIR "$tDir"
+		#set +x
+	done
+	#set +x
+	
+	# Files
+	SWARMRC="${SWARMRC:-$HOME/.swarmrc}"
+	SWARM_TMP="${SWARM_TMP_DIR}/swarm-${SWARM_CODE}.tmp"
+	SWARM_LOG="${SWARM_LOG_DIR}/swarm-all-internals.log"
+	unset tmp_worker

@@ -4,69 +4,18 @@
 #			curlwget
 #			moreless
 #			sudoer
+#			hostname
+#			apps
 #	swarm.sanity.userconfig.apps
 #				
 #
 # Prepare some functions
 #
-	swarm.sanity.userconfig() { #
-	# Make sure the basic user environment is ready
-	#
-		# Default value is failure
-		local RET=1
-
-		# First check wether the variable is not empty
-		[[ -z "$SWARMRC" ]] && return $RET
-
-		swarm.sanity.env
-
-		swarm.sanity.userconfig.write
-		RET=$?
-
-		# Since $HOME should be checked by now,
-		# lets hope we can rely on that for default dirs
-		[[ ! -d "$HOME/.config" ]] && \
-			$MKDIR "$HOME/.config" >>/dev/null
-		[[ ! -d "$HOME/.config/swarm" ]] && \
-			$MKDIR "$HOME/.config/swarm" >>/dev/null
-
-		return $RET
-	}
 	swarm.sanity.userconfig.write() { #
-	# Make sure there is a user config with valid information
+	# Write the user configuration / SWARMRC
 	#
-		# Try to get hostname
-		HOST_NAME=${HOSTNAME:-$($HOSTNAME_EXEC)} >>/dev/null
-		# If still empty
-		HOST_NAME=${HOST_NAME:-localhost}
-		# Try to get username
-		USER=${USER:-${SUDO_USER:-${USER:-$($WHOAMI)}}} >>/dev/null
-		# Special handling for root username display
-		[[ "root" = "$USER" ]] && \
-			USER_NAME=".·: ROOT :·." || \
-			USER_NAME="$USER"
-		USER_EMAIL="$USER @ $HOST_NAME"
-		# Check for 'optional mandatories'
-		MORELESS=""
-		CURLWGET=""
-		if [[ ! -z "$MORE$LESS" ]]
-		then
-			[[ -z "$MORE" ]] && \
-				MORELESS=$LESS || \
-				MORELESS=$MORE
-		else
-			# Neiter MORE nor LESS is installed
-			# Lets hope PAGER is set to someting working...
-			# Otherwise, use CAT as fallback... 
-			MORELESS=${PAGER:-\cat}
-		fi
-		if [[ ! -z "$CURL$WGET" ]]
-		then
-			[[ -z "$WGET" ]] && \
-				CURLWGET=$CURL || \
-				CURLWGET=$WGET
-		fi
-		cat > $SWARMRC <<EOF
+
+		cat > "$SWARMRC" <<EOF
 #!/usr/bin/env bash
 # Configuration file generated for SWARM (${SWARM[VERSION]} / Build: ${SWARM[BUILD]})
 
@@ -82,8 +31,9 @@
 
 # SWARM Settings
 	SWARM_THEME=default-blue
-	SWARM_USER_CONFIG="$SWARM_USER_CONFIG"
-	SWARM_USER_LIBS="${SWARM_USER_CONFIG}/libs"
+	SWARM_USER_CONFIG_DIR="$SWARM_USER_CONFIG_DIR"
+	SWARM_USER_LIBS="${SWARM_USER_CONFIG_DIR}/libs"
+	SWARM_USER_SCRIPTS="$HOME/bin"
 
 # SWARM Apps GUI
 	EDITOR_GUI="${EDITOR_GUI}"
@@ -95,7 +45,7 @@
 	EDITOR_CLI="${EDITOR:-$EDITOR_CLI}"
 	WEB_CLI="$WEB_CLI"
 	FILEMGR_CLI="$FILEMGR_CLI"
-	CURLWGET="$CURLWGET"
+	CURLWGET="${CURLWGET}"
 	MORELESS="${MORELESS}"
 
 # SWARM Directories
@@ -104,32 +54,53 @@
 	SWARM_LOG_DIR="$SWARM_LOG_DIR"
 	SWARM_TMP_DIR="$SWARM_TMP_DIR"
 
-	# Feel free to move te logfile
+	# Feel free to move or rename the logfile
 	SWARM_LOG="$SWARM_LOG"
 
-
-# For performance boost, this is required
-# You can remove them if your system uses these variables anyway,
-# otherwise SWARM might not work properly
-	USER="$USER"
-	HOME="$HOME"
 
 # Core utils
 # If you should encounter any loading issues of SWARM
 # adjust the paths to the core utils here.
 # -> If you have to preset the variable before source SWARM,
 # -> please report so on GITHUB!
-# Specialy SunOS/Solaris users might need to adjust AWK.
+# SunOS/Solaris users might need to adjust AWK.
 # Otherwise it is not recomended to change anything here,
-# unless absolutly required or 'empty'.
+# unless absolutly required.
+	PRINTF="${PRINTF:-\printf}"
+	ECHO="${ECHO:-\printf}"
+	AWK="${AWK:-\gawk}"
+	GREP="${GREP:-\grep}"
+	SED="${SED:-\sed}"
+	PWD_EXEC="${PWD_EXEC:-\pwd}"
+	DATE="${DATE:-\date}"
+	MKDIR="${MKDIR:-\mkdir}"
+	TOUCH="${TOUCH:-\touch}"
+	PWD_EXEC="${PWD_EXEC:-\pwd}"
+	TPUT="${TPUT:-\tput}"
+	WHICH="${WHICH}"
+	
+	SU="${SU:-\su}"
+	SUDO="${SUDO:-\sudo}"
+	ID="${ID:-\id}"
+	WHOAMI="${WHOAMI:-\whoami}"
+	SORT="${SORT:-\sort}"
+	LS="${LS:-\ls}"
+	RM="${RM:-\rm}"
+	RMDIR="${RMDIR:-\rmdir}"
+	FIND="${FIND:-\find}"
 EOF
-		swarm.sanity.coreutils | $GREP -v HOSTNAME=  >> "$SWARMRC"
+		#swarm.sanity.coreutils | $GREP -v HOSTNAME=  >> "$SWARMRC"
+		$SED -i s,"${SWARM_USER_CONFIG_DIR}/","\${SWARM_USER_CONFIG_DIR}/",g "$SWARMRC"
+		$SED -i s,"${SWARM_USER_CONFIG_DIR}/log/","\${SWARM_LOG_DIR}/",g "$SWARMRC" 
+		$SED -i s,"${SWARM_USER_CONFIG_DIR}/tmp/","\${SWARM_TMP_DIR}/",g  "$SWARMRC"
+		$SED -i s,"\${SWARM_USER_CONFIG_DIR}/log/","\${SWARM_LOG_DIR}/",g  "$SWARMRC"
+		$SED -i s,"${HOME}/","\${HOME}/",g  "$SWARMRC"
 		return $?
 	}
-	swarm.sanity.coreutils() { #
+	swarm.sanity.env.coreutils() { #
 	# Verfy all core utils work as expected
 	#
-		unset ${!tmp_*} #w W f F
+		unset ${!tmp_*}
 		local list_cmd="echo printf awk grep sed su sudo ls mkdir rmdir rm tput which touch whoami pwd_exec hostname hostname_exec date more less sort curl wget"
 		local worked=""
 		local failed=""
@@ -139,87 +110,27 @@ EOF
 		local W=""
 
 		# Fun question:
-		WHICH=$(${WHICH:-\which} \which &2> /dev/null)
-		# Let's see if that worked
-		if [[ -f "${WHICH}" ]]
-		then	# Ok, lets do it the easy way:
-			for lc in $list_cmd
-			do
-				if ${WHICH} ${lc/_exec} >/dev/null &2>/dev/null &3>/dev/null
-				then	worked="$lc $worked"
-				else	failed="$lc $failed"
-				fi
-			done
-			# Check for optional mandatories ; set variables with 'which'
-			export CURL=$(${WHICH} curl &2>/dev/null)
-			export WGET=$(${WHICH} wget &2>/dev/null)
-			export MORE=$(${WHICH} more &2>/dev/null)
-			export LESS=$(${WHICH} less &2>/dev/null)
-		else	# Ok, the slightly more complicated way
-			for lc in $list_cmd
-			do
-				tmp_exe=${lc^^}
-				tmp_exec2=${!tmp_exe}
-				if (eval ${tmp_exec2} --help &2>/dev/null )  &>/dev/null
-				then
-					worked="$worked $lc"
-				else
-					# Handle exceptions
-					case "$tmp_exe" in
-					"PWD")
-						[[ -d  "${tmp_exec2}" ]] && \
-							worked="$worked $lc" || \
-							failed="$failed $lc"	;;
-					"CURL"|"WGET")
-						[[ -d  "${tmp_exec2}" ]] && \
-							worked="$worked $lc" 	;;
-					"PWD_EXEC")
-						tmp_val="$(eval ${tmp_exec2} --help &2>> /dev/null )"  &>> /dev/null && \
-							worked="$worked $lc" || \
-							failed="$failed $lc"   ;;
-
-					"ECHO")
-						tmp_val=${tmp_exec2:-\printf}
-						if [[ "xx" ==  "$($tmp_val xx)" ]]
-						then
-							export ECHO=$tmp_val
-							worked="$worked $lc"
-						else
-							failed="$failed $lc"
-							# List it as failed since ECHO doesnt exist,
-							# but use this code as fallback
-							export ECHO="\printf '$1\n'"
-						fi   ;;
-					"PRINTF")
-						tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
-						[[ $? == 2 ]] && \
-							worked="$worked $lc" || \
-							failed="$failed $lc"   ;;
-					"TPUT")
-						tmp_val="$(eval ${tmp_exec2} --help &>> /dev/null )"  &>> /dev/null
-						[[ $? == 2 ]] && \
-							worked="$worked $lc" || \
-							failed="$failed $lc"   ;;
-					"HOSTNAME")
-						[[ "$HOSTNAME" == "$(\hostname)" ]] && \
-							worked="$worked $lc" || \
-							failed="$failed $lc"   ;;
-					"HOSTNAME_EXEC")
-						[[ "$HOSTNAME" == "${tmp_exec2}" ]] && \
-							worked="$worked $lc" || \
-							failed="$failed $lc"   ;;
-					*)	init.log "${SWARM_MSG_INIT_SANITY_UNKOWN_CASE} $lc : $tmp_exe : $tmp_exec2"
-						failed="$failed $lc"		;;
-					esac
-				fi
-			done
-		fi
+		# Use internal which function if which is not installed
+		$hasWhich && \
+			export WHICH=$(${WHICH:-\which} \which &2> /dev/null) || \
+			export WHICH="swarm.util.which"
+		
+		# Lets do it the easy way:
+		for lc in $list_cmd
+		do
+			if tmp_=$( ${WHICH} ${lc/_exec}) >/dev/null &2>/dev/null &3>/dev/null
+			then	worked="$tmp_ $worked"
+				#echo " ..... ------------------------ "
+			else	failed="$lc $failed"
+			fi
+		done
+		
 
 		for w in $worked
 		do
 			local W=${w^^}
 			#[[ $W = "WHICH" ]] && echo " ------------- ANFANG " && set -x
-			$PRINTF '\t%s\n' "$W=\\${!W}" | $SED s,'HOSTNAME=\\','HOSTNAME=',g | $SED s,*'=\\','',g  >&1
+			$PRINTF '\t%s\n' "$W=${!W}" | $SED s,'HOSTNAME=\\','HOSTNAME=',g | $SED s,*'=\\','',g  >&1
 			#[[ $W = "WHICH" ]] & set +x
 		done
 
@@ -231,7 +142,9 @@ EOF
 		done
 
 		# Abort if something failed
-		[[ ! -z "${failed}" ]] &&  return 1
+		[[ -n "${failed}" ]] && \
+			init.log.msg "Failed: $failed" && \
+			return 1
 		# All good
 		return 0
 	}
@@ -253,7 +166,7 @@ EOF
 		# If VARNAME starts with Pass|password|pw, do not source the conf file but use awk
 		case "${VARNAME,,}" in
 		pw|pass|passwor[dt])
-			beSecure=true
+			local beSecure=true
 			;;
 		esac
 	#
@@ -263,7 +176,7 @@ EOF
 		then	# This is slower but doesnt show up the other values
 			$AWK -F= -v VAR="$VARNAME" '$1 ~ "^[^#]*" VAR "$"{gsub ("#.*$|\"|\047|"$1 FS, ""); print}' "$CONFFILE" | tail -n1
 		else	# This method is about twice the speed of the awk
-				# But alot less secure
+			# But alot less secure
 			source "$CONFFILE" && $PRINTF "${!VARNAME}"
 		fi
 	}
@@ -274,67 +187,63 @@ EOF
 		echo "TODO $FUNCNAME"
 	}
 	swarm.sanity.env() { #
-	# This is focused on interace applications for CLI and GUI
-	# like web or file browsers, editors or terminals
-		$PRINTF '\n%s\n' "TODO : $FUNCNAME"
-		read
-		#printe TODO "locate find"
-		local tmp=""
+	# Some basic internal variables
+	# HOST_NAME, USER_NAME, USER_EMAIL, MORELESS and CURLWGET
+		# Try to get hostname
+		HOST_NAME=${HOSTNAME:-$($HOSTNAME_EXEC)} >>/dev/null
+		# If still empty
+		export HOST_NAME=${HOST_NAME:-localhost}
+		# Try to get username
+		export USER=${USER:-${SUDO_USER:-${USER:-$($WHOAMI)}}} >>/dev/null
+		# Special handling for root username display
+		$isRoot && \
+			export USER_NAME=".·: ROOT :·." || \
+			export USER_NAME="$USER"
+		export USER_EMAIL="$USER @ $HOST_NAME"
+	#
+	# Check for 'optional mandatories'
+	#
+		# Clear handler Variables
+		MORELESS=""
+		CURLWGET=""
+		# Check individual vars
+		set -x
+		MORE=$(swarm.util.which "${MORE:-more}")
+		LESS=$(swarm.util.which "${LESS:-less}")
+		CURL=$(swarm.util.which "${CURL:-curl}")
+		WGET=$(swarm.util.which "${WGET:-wget}")
+		set +x
+		if [[ -n "$MORE$LESS" ]]
+		then
+			[[ -z "$MORE" ]] && \
+				export MORELESS="$LESS" || \
+				export MORELESS="$MORE"
+		else
+			# Neiter MORE nor LESS is installed
+			# Lets hope PAGER is set to someting working...
+			# Otherwise, use CAT as fallback... 
+			init.log.msg "$SWARM_MSG_INIT_MORELESS_NFOUND"
+			export MORELESS=${PAGER:-\cat}
+		fi
+		# Either curl or wget was sound
+		if [[ -n "$CURL$WGET" ]]
+		then
+			# Use curl as main app
+			# use wget only if curl does not exist
+			[[ -z "$CURL" ]] && \
+				export CURLWGET="$WGET" || \
+				export CURLWGET="$CURL"
+		else	init.log.msg "$SWARM_MSG_INIT_CURLWGET_NFOUND"
+		fi
+	}
 
-		for task in editor filemgr terminal web
-		do	# These are filenames to parse
-			for mode in cli gui
-			do	# For these modes to be in
-				tmp="${SWARM_DIR_DATA}/lists/${task}_${mode}"
-				if [[ -f "$tmp" ]]
-				then	while read app
-					do	echo " ---- app:$app --- " >&2
-						if [[ -f "$WHICH" ]]
-						then	# clear it
-							app_found=""
-							# Set new
-							app_found=$(${WHICH} $app &2>/dev/zero ) &2>/dev/zero >/dev/zero
-							# If ssomething was found, export to parent shell
-							[[ -n "$app_found" ]]  && \
-								eval export "${task^^}_${mode^^}=$app_found"
-
-						else	$app --help &2>>/dev/zero &1>/dev/zero
-							[[ -n "$app_found" ]]  && \
-								eval export "${task^^}_${mode^^}=$app"
-						fi
-					done<${tmp}
-
-				else	# It's probably terminals or god behave, an error
-					# 3 mal iher
-					echo TODO 2 $FUNCNAME
-					read
-				fi
-			done
-		done
-	}
-	# Simple echo's, by RudiC @ unix.com
-	echo_(){
-	  ( IFS=" "; printf "%s\n" "$*" )
-	}
-	# Portable echo -n
-	echo_n() {
-	  ( IFS=" "; printf "%s" "$*" )
-	}
-	# Portable echo -e
-	echo_e() {
-	  ( IFS=" "; printf "%b\n" "$*" )
-	}
-	# Portable echo -ne
-	echo_ne() {
-	  ( IFS=" "; printf "%b" "$*" )
-	}
-	alias echo_en=echo_ne
 #
 # This is checked only the first time
 #
-	if $isSWARMfirstTime && swarm.sanity.userconfig
-	then	# SWARMRC was written successfull and it is the first time running
-		[[ -f "$SWARMRC" ]] && \
-			source "$SWARMRC" && \
-			isSourced=true
+	if [[ ! -f "$SWARMRC" ]] #& swarm.sanity.userconfig
+	then	
+		swarm.sanity.env
+		#swarm.sanity.env.apps
+		swarm.sanity.env.coreutils
+		swarm.sanity.userconfig.write
 	fi

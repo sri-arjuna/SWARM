@@ -45,8 +45,7 @@
 		# If user wants extended logs, he shall have it
 		! $isRO && $doLogExt && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
 	}
-	export -f swarm.update.geometry
-
+	#export -f swarm.update.geometry
 #
 # Theme's
 #
@@ -60,8 +59,11 @@
 		# These are it's assingments
 		swarm_list_theme_options="border-left border-right color-font color-back read select"
 		# Lets start fresh
-		declare -GA SWARM_THEME_DATA
+		declare -Ag SWARM_THEME_DATA
 		local ret=false
+		$isRoot && \
+			local this_theme="${1:-default-red}" || \
+			local this_theme="${1:-default-blue}"
 
 		# Always use the user themes first
 		# in case someone wants to pseudo-overwrite the default themes
@@ -69,8 +71,8 @@
 		do
 			# check in each dir
 			if [[ -d "$there" ]]
-			then	if [[ -f "$there/$1" ]]
-					then	source "$there/$1"
+			then	if [[ -f "$there/$this_theme" ]]
+					then	source "$there/$this_theme"
 							ret=$?
 					fi
 			fi
@@ -182,32 +184,34 @@
 		esac
 
 		# Make sure values are udpated
+		#set -x
 		swarm.update.geometry
+		#set +x
 
 		# Now prepare the seperate handling
 		case "$MODE" in
-			"basic")
-					PRINT_LEFT_IN="$c_reset"
-					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
-					PRINT_RIGHT_IN="${c_front}${c_back}"
-					pos_cor_num=0
-					;;
-			"header")
-					local filler_num=$(( $numEND - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
-					local filler_str=$($PRINTF "%*s" ${filler_num})
-					PRINT_LEFT_IN="$filler_str" #$c_reset"
-					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
-					PRINT_RIGHT_IN="" #${c_front}${c_back}"
-					pos_cor_num=0
-					;;
-			"title")
-					local filler_num=$(( $(( $COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
-					local filler_str=$($PRINTF "%*s" ${filler_num})
-					PRINT_LEFT_IN="${c_invert}$filler_str" #$c_reset"
-					PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
-					PRINT_RIGHT_IN="${c_reset}${c_front}${c_back}"
-					pos_cor_num=0
-					;;
+		"basic")
+			PRINT_LEFT_IN="$c_reset"
+			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
+			PRINT_RIGHT_IN="${c_front}${c_back}"
+			pos_cor_num=0
+			;;
+		"header")
+			local filler_num=$(( $numEND - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+			local filler_str=$($PRINTF "%*s" ${filler_num})
+			PRINT_LEFT_IN="$filler_str" #$c_reset"
+			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
+			PRINT_RIGHT_IN="" #${c_front}${c_back}"
+			pos_cor_num=0
+			;;
+		"title")
+			local filler_num=$(( $(( $COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+			local filler_str=$($PRINTF "%*s" ${filler_num})
+			PRINT_LEFT_IN="${c_invert}$filler_str" #$c_reset"
+			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
+			PRINT_RIGHT_IN="${c_reset}${c_front}${c_back}"
+			pos_cor_num=0
+			;;
 		esac
 
 		# Get some numbers
@@ -233,13 +237,13 @@
 		local title_end=""
 
 		case ${1/-} in
-			t)	MODE=title
-				fix_title=16
-				title_pre=""
-				title_end=""	;;
-			h)	MODE=header
-				fix_header_r=4	;;
-			*)	MODE=basic	;;
+		t)	MODE=title
+			fix_title=16
+			title_pre=""
+			title_end=""	;;
+		h)	MODE=header
+			fix_header_r=4	;;
+		*)	MODE=basic	;;
 		esac
 		shift
 
@@ -304,41 +308,40 @@
 		#
 		# Check wether it is an X session
 		#
-		if [[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]]
+		if $isGUI
 		then 	# Yes it is
-				case "$1" in
-					"0")	value=" ${g}${b}✓${R}  "
-							;;
-					"1")	value=" ${r}${b}✗${R}  "
-							;;
-					"2")	value=" ${y}${b}∞${R}  "
-							;;
-					"3")	value=" ${p}${b}≣${R}  "
-							;;
-					"4")	value=" »  "
-							;;
-					"5")	value=" >  "
-							;;
-					"6")	value=" <  "
-							;;
-					"7")	value=" ${r}${b}✗${R}  "
-							;;
-					"10")	value=" ${g}${b}◆${R}  "
-							;;
-					"11")	value=" ${r}${b}◇${R}  "
-							;;
-					"99")	value=" ⅈⅈ "
-							;;
-					"111")	value=${STATUS_TEXT[111]}""
-							;;
-					"127")	value=" ${r}${b}✗${R}  "
-							;;
-					"130")	value=" ${r}${b}✗${R}  "
-							;;
-				esac
-		else
-				# It's TTY
-				value="${STATUS_TEXT[$1]}"
+			case "$1" in
+			"0")	value=" ${g}${b}✓${R}  "
+				;;
+			"1")	value=" ${r}${b}✗${R}  "
+				;;
+			"2")	value=" ${y}${b}∞${R}  "
+				;;
+			"3")	value=" ${p}${b}≣${R}  "
+				;;
+			"4")	value=" »  "
+				;;
+			"5")	value=" >  "
+				;;
+			"6")	value=" <  "
+				;;
+			"7")	value=" ${r}${b}✗${R}  "
+				;;
+			"10")	value=" ${g}${b}◆${R}  "
+				;;
+			"11")	value=" ${r}${b}◇${R}  "
+				;;
+			"99")	value=" ⅈⅈ "
+				;;
+			"111")	value=${STATUS_TEXT[111]}""
+				;;
+			"127")	value=" ${r}${b}✗${R}  "
+				;;
+			"130")	value=" ${r}${b}✗${R}  "
+				;;
+			esac
+		else	# It's TTY / plain console
+			value="${STATUS_TEXT[$1]}"
 		fi
 		$PRINTF "[ ${value} ]"
 	}

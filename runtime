@@ -4,8 +4,8 @@
 # Author:	Simon Arjuna Erat (sea)	     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.04.14	 	     #
-# Build:	18			     #
+# Changed:	2020.04.19	 	     #
+# Build:	20			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace) 
@@ -63,7 +63,7 @@
 		export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=18
+	SWARM[BUILD]=20
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -183,7 +183,7 @@
 			tmp_len=0 \
 			tmp_empty=""
 
-	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.{utils,sanity}
+	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env #{utils,sanity}
 	do
 		source "$thisCFG"
 		$PRINTF "."
@@ -195,7 +195,8 @@
 	for this in "${SWARM_DIR_LIBS}"/*
 	do
 		# Skip if core.utils or core.sanity
-		( [[ "$this" == "$SWARM_DIR_LIBS/core.utils" ]] || [[ "$this" == "$SWARM_DIR_LIBS/core.sanity" ]] ) && continue
+		#( [[ "$this" == "$SWARM_DIR_LIBS/core.utils" ]] || [[ "$this" == "$SWARM_DIR_LIBS/core.sanity" ]] ) && continue
+		[[ "$this" == "$SWARM_DIR_LIBS/core.env" ]] && continue
 		# Special handling for slow-mode
 		if ${doSlowLoading:-false}
 		then
@@ -248,11 +249,14 @@
 #
 # Starting SWARM now
 #
-	swarm.update.lang
-	swarm.update.lang.status
+	source "$SWARMRC"
+	[[ -z "$LC_ALL" ]] && \
+		swarm.update.lang && \
+		swarm.update.lang.status
 	swarm.init.theme
+	swarm.update.geometry
 #
-# Initiate Interface
+# Initiate Interface : Runtime Executed
 #
 	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
 	then	# First time caller or arguments
@@ -266,7 +270,6 @@
 			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
 			#status $? "one"
 			
-			#init.countdown "Weee"
 		else	# Has arguments, lets parse
 			case "$1" in
 			"basic")
@@ -278,16 +281,20 @@
 				swarm.eu.show.config
 				;;
 			"help")
-				#echo hallo
 				shift
 				# Lets show a basic menu
 				swarm.eu.help.menu "${@}"
-				#break 2
 				;;
 			"tarball")
 				(
 					cd "${SWARM_DIR_ROOT}/.."
 					tar -acf "$HOME/swarm-${SWARM[BUILD]}.tar.gz" "${SWARM_DIR_ROOT##*/}"
+				)
+				;;
+			"tar")
+				(
+					cd "${SWARM_DIR_ROOT}/.."
+					tar -acf "$HOME/swarm-${SWARM[BUILD]}-small.tar.gz" --exclude ".git" "${SWARM_DIR_ROOT##*/}"
 				)
 				;;
 			*)	# Exit the loop
@@ -299,10 +306,14 @@
 #
 # Develeoper testings
 #
-	if [[ "bash" = "${0/-}" ]]; then
-		$ECHO " ----------- TEST AREA START -----------"
-		title testing
-		echo ${SWARM_THEME_DATA[@]}
-		$ECHO " ----------- TEST AREA END -----------"
+	if false && [[ "bash" = "${0/-}" ]]; then
+		#$ECHO " ----------- TEST AREA START -----------"
+		printe "Now it will work"
+		#set -x
+		#pick -m one two three four five six
+		#set +x
+		#$ECHO " ----------- TEST AREA END -----------"
 	fi
-
+#val=$(pick -m one two three four five six)
+#echo
+#echo "--> $val"

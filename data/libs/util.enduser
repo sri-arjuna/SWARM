@@ -350,127 +350,219 @@
 		#
 		# Variable defaults (options)
 		#
-			MODE=none
-			SEP=""
-			ROWS=3
+			local MODE=none
+			local SEP=""
+			local ROWS=3
+			local as_menu=false
 		#
 		# Catch arguments
 		#
-			while getopts "anr12" opt
-			do 	case "$opt" in
-				1|2)
-				    ROWS="$opt"	;;
-				a)	MODE=alpha
-					SEP=") "	;;
-				r)	MODE=roman
-					SEP=". "	;;
-				n)	MODE=num
-					SEP=") "	;;
+			for opt in "${@}"
+			do 	[[ "-" == "${opt:0:1}" ]] && \
+				case "${opt/-}" in
+				"1" | "2" | "3")
+					ROWS="${opt/-}"
+					shift
+					;;
+				"0")	as_menu=true
+					shift
+					;;
+				"a")	MODE=alpha
+					SEP=") "
+					shift
+					;;
+				"r")	MODE=roman
+					SEP=". "
+					shift
+					;;
+				"n")	MODE=num
+					SEP=") "
+					shift
+					;;
 				esac
 			done
-			shift "$(($OPTIND - 1))"
 			[ -z "$1" ] && \
 				while IFS= read -r ARG
 				do	set -- "$@" "$ARG"
 				done
 			ARGS=( "${@}")
-			#
-			# Action
-			#
-				unset OUT[@]
-				OUT[0]=""
-				shown=false
-				MAX="$(( $ROWS - 1 ))"
-				CUR=0
-				DONE=0
-				for OPT in "${ARGS[@]}"
-				do	DONE="$(( $DONE + 1))"
-					# Do the visible counter
-					case "$MODE" in
-					num)	count="$DONE"
-							;;
-					alpha)	count="$(swarm.str.num2char $(( $DONE - 1 )) )"
-							;;
-					roman)	count="$(swarm.str.num2roman $DONE)"
-							;;
-					none)	count=""
-							;;
-					esac
+			# Update geometry
+			swarm.update.geometry
+		#
+		# Action
+		#
+			unset OUT[@]
+			OUT[0]=""
+			local shown=false
+			local MAX="$(( $ROWS - 1 ))"
+			local CUR=0
+			local DONE=0
+			local count=""
+			for OPT in "${ARGS[@]}"
+			do	$as_menu || DONE="$(( $DONE + 1))"
+				# Do the visible counter
+				case "$MODE" in
+				num)	count="$DONE"
+					;;
+				alpha)	count="$(swarm.str.num2char $(( $DONE - 1 )) )"
+					;;
+				roman)	count="$(swarm.str.num2roman $DONE)"
+					;;
+				esac
 
-					# Add the string to array, or print array
-					if [ "$CUR" -le "$MAX" ]
-					then	len=0
-						for O in "${OUT[@]}";do len=$[ $len + ${#O} ];done
-						sum="$(( $len + 2  + ( ${#BORDER_LEFT} * 2 ) ))"
+				# Add the string to array, or print array
+				if [ "$CUR" -le "$MAX" ]
+				then	len=0
+					for O in "${OUT[@]}";do len=$[ $len + ${#O} ];done
+					sum="$(( $len + 2  + ( ${#BORDER_LEFT} * 2 ) ))"
 
-						if [ "$sum" -lt "$COLUMNS" ]
-						then	OUT["$CUR"]="${count}${SEP}${OPT}"
-							shown=false
-							CUR="$(( $CUR + 1 ))"
-						else	printe  "${OUT[@]}" >&2
-							CUR=0 && unset OUT[@]
-							[ -z "$OPT" ] && shown=true
-							OUT["$CUR"]="${count}${SEP}${OPT}"
-							CUR="$(( $CUR + 1 ))"
-						fi
-					else 	printe  "${OUT[@]}" >&2
+					if [ "$sum" -lt "$COLUMNS" ]
+					then	OUT["$CUR"]="${count}${SEP}${OPT}"
+						shown=false
+						CUR="$(( $CUR + 1 ))"
+					else	printe  "${OUT[@]}" >&2
 						CUR=0 && unset OUT[@]
 						[ -z "$OPT" ] && shown=true
-						OUT["$CUR"]="${count}${SEP}$OPT"
+						OUT["$CUR"]="${count}${SEP}${OPT}"
 						CUR="$(( $CUR + 1 ))"
 					fi
-				done
-			#
-			# Display
-			#
-				! $shown && printe  "${OUT[@]}" >&2
-				return 0
+				else 	printe  "${OUT[@]}" >&2
+					CUR=0 && unset OUT[@]
+					[ -z "$OPT" ] && shown=true
+					OUT["$CUR"]="${count}${SEP}$OPT"
+					CUR="$(( $CUR + 1 ))"
+				fi
+				$as_menu && DONE="$(( $DONE + 1))"
+			done
+		#
+		# Display
+		#
+			! $shown && printe  "${OUT[@]}" >&2
+			return 0
 	}
-	pick() { # [options -12a] $LIST or ${ARRAYS[@]}
-	#
-	#
+	pick() { # [-1 -2 -a -m] $LIST or ${ARRAYS[@]}
+	# Select an item of a LIST or an ARRAY
+	# Returns the value
 		#
 		# Variables
 		#
 			local counter=0
 			local AUTO=false
-			local ROWS=""
-			local len="${#ARGS[@]}"
+			local ROWS="3"
+			local as_menu=false
 		#
 		# Catch arguments
 		#
-			trap "exit 130" INT ABRT KILL
-			while getopts "12a" opt
-			do	case "$opt" in
-				a)	AUTO=true			;;
-				1|2)
-				    ROWS="$opt"			;;
-				esac
+			for opt in "${@}"
+			do	if [[ "-" == "${opt:0:1}" ]] 
+				then	case "${opt/-}" in
+					1|2|3)	ROWS="${opt/-}"
+						shift
+						;;
+					"a")	AUTO=true
+						shift
+						;;
+					"m")	trap "return 130" INT ABRT KILL
+						as_menu=true
+						shift
+						;;
+					"-")	wasPipe=true
+						;;
+					esac
+				fi
 			done
-			shift "$(($OPTIND - 1))"
-			ROWS="${ROWS:-3}"
 			# Can not be set earlier because of possible options
-			local ARGS=("${@}")
+			# Which state wether it is 'as menu' or default
+			$as_menu && \
+				local ARGS=( "${SWARM_MSG_PICK_BACK}" "${@}" ) || \
+				local ARGS=("${@}")
 		#
 		# Pipe handling
 		# It's different when working with 'read'
 		#
-			wasPipe=false
-			[ -z "$1" ] && \
-				while IFS= read -r ARG
-				do	set -- "$@" "$ARG" && wasPipe=true
-				done
-		#
+			#wasPipe=false
+			#[ -z "$1" ] && \
+			#	while IFS= read -r ARG
+			#	do	set -- "$@" "$ARG" && wasPipe=true
+			#	done
 		# Handle auto-pick (only 1 option)
-		#
 			"$AUTO" && \
 				[ "$#" -eq 1 ] && \
 				$PRINTF '%s\n' "$ARGS" >&1 && \
-				exit 4
-		#
+				return 4
 		# Show the items to pick from
+			#set +x
+			$as_menu && \
+				printlist -n -$ROWS -0 ${ARGS[@]} || \
+				printlist -n -$ROWS "${ARGS[@]}"
+			#set -x
+		# Set dynamic values
+			# Amount of arguments
+			local pick_count=${#ARGS[@]}
+			# Character length of the amount
+			local pick_len=${#pick_count}
+			#Special handling
+			local invalid=true
+			local NUM=""
+			local POS="$(swarm.print.goto $(( $identRight + 2 )))${SWARM_THEME_DATA[read]} "
+			$as_menu && \
+				local min=0 || \
+				local min=1
 		#
-			printlist "${ARGS[@]}"
-			#$PRINTF '%s\n' "${ARGS[@]}" | printe -$ROWS -- >&2
-			#tui-list -n"$ROWS" "${ARGS[@]}" >&2
+		# Visuals
+		#
+		while $invalid
+		do
+			# Except the best, prepare for the worst
+			#invalid=false
+		# Print the input line:
+			swarm.print.border
+			$PRINTF "$POS      $POS" >&2
+		# Read the input 
+			builtin read -n $pick_len NUM
+		# Catch invalid inputs
+			# Keep reading if NUM is empty
+			[[ -z "$NUM" ]] && continue
+			# Check if NUM is numeric
+			if [[ ${#NUM} -ge 0 ]] &2>/dev/null
+			then
+				# If it's exactly 0, it's BACK
+				[[ ${#NUM} -eq 0 ]] && $ECHO "${ARGS[$NUM]}" && return
+				# It's not zero but some other numeric input
+				
+				# Keep reading if it is not greater than 'min'-imum
+				[[ ${NUM} -ge $min ]] &2>/dev/zero || continue
+				# Keep reading if it is greater than pick_count
+				[[ $NUM -gt $pick_count ]] && continue
+				
+				# Exit the loop
+				invalid=false
+			else
+				# It's not a number, catch other cases
+				continue
+			# Actualy, all checks below are (can be) left out....	
+				# Keep reading if NUM contains letters
+				# Using builtin echo for speed and less disk usage
+				builtin echo "$NUM" | $GREP -E -q "[a-zA-Z]"  && continue	# &2>/dev/zero
+				# Check for arrow keys
+				#builtin echo "$NUM" | $GREP -E -q "^\[\[" && continue
+				[[ "$NUM" =~ '^[[' ]] && continue
+				# Keep reading if NUM is longer than $pick_len
+				# ?? This SHOULD catch arrow-keys in most real usage cases
+				[[ ${#NUM} -gt ${pick_len} ]] &2>/dev/zero && continue
+			fi
+		done
+		# Make 'nice to have' line break when read automatically stops reading
+		if [ "${#NUM}" -eq "${#len}" ] 
+		then	# Only print newline character if the entered number as the longest number
+			# But not sub zero
+			[ "${NUM}" -ne -1 ] && $PRINTF "\n" >&2
+		else	# Since arrays are 0 indexed, 10 becomes 9 and need special treatment
+			[ "${NUM}" -eq 9 ] && $PRINTF "\n" >&2
+		fi
+		$as_menu || NUM=$(( $NUM - 1))
+		
+		# Prepare output
+		$ECHO "${ARGS[$NUM]}"
+		unset opt
 	}

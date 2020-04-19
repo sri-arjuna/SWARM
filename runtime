@@ -233,22 +233,34 @@
 			tmp_empty \
 			this
 #
+# CORE is loaded, lets adapt the user settings
+#
+	source "$SWARMRC"
+#
+# Prepare language for user caused errors
+# As well as for all helpfiles and manpages
+# that the user may call/ask by ./runtime help
+#
+	# Only update language if LC_ALL is empty
+	[[ -z "$LC_ALL" ]] && \
+		swarm.update.lang && \
+		swarm.update.lang.status
+#
 # Load the users functions now
 # if he has some that is
 #
-	# SWARM_USER_DIR_CONFIG was defined the the lib-functions
+	# SWARM_USER_DIR_BASE was defined the the lib-functions
 	# The following the dirs should be kept to default, but can be overwritten
-	# by the SWARMRC, also, SWARM_USER_DIR_CONFIG might have been customized
-	source "$SWARMRC"
-	SWARM_USER_DIR_CONF="${SWARM_USER_DIR_CONF:-${SWARM_USER_DIR_CONFIG}/conf}"
-	SWARM_USER_DIR_LIBS="${SWARM_USER_DIR_LIBS:-${SWARM_USER_DIR_CONFIG}/libs}"
+	# by the SWARMRC, also, SWARM_USER_DIR_BASE might have been customized
+	SWARM_USER_DIR_CONF="${SWARM_USER_DIR_CONF:-${SWARM_USER_DIR_BASE}/conf}"
+	SWARM_USER_DIR_LIBS="${SWARM_USER_DIR_LIBS:-${SWARM_USER_DIR_BASE}/libs}"
 	
-	if [[ -d "$SWARM_USER_DIR_CONFIG" ]]
+	if [[ -d "$SWARM_USER_DIR_BASE" ]]
 	then
 		# Create the dir if not existing yet (first time)
 		for tDir in "$SWARM_USER_DIR_CONF" "$SWARM_USER_DIR_LIBS"
 		do
-			[[ -d "$tDir" ]] || $MKDIR "$tDir"
+			$isDir >/dev/null || $MKDIR "$tDir"
 		done
 		# Parse and source User Files, if files exist
 		# Read configuration files before functions
@@ -260,10 +272,6 @@
 #
 # Starting SWARM now
 #
-	# Only update language if LC_ALL is empty
-	[[ -z "$LC_ALL" ]] && \
-		swarm.update.lang && \
-		swarm.update.lang.status
 	swarm.init.theme
 	swarm.update.geometry
 #
@@ -291,9 +299,9 @@
 				shift
 				swarm.eu.show.config
 				;;
-			"help")
+			"help" | "--help")
 				shift
-				# Lets show a basic menu
+				# Lets show a basic help menu
 				swarm.eu.help.menu "${@}"
 				;;
 			"tarball")

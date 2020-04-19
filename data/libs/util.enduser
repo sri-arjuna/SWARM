@@ -52,45 +52,45 @@
 		# Get args
 		case "$1" in
 		"-1"|"-2")	MODE="${1/-}"
-					shift
-					;;
-		*)			MODE="normal"
-					;;
+				shift
+				;;
+		*)		MODE="normal"
+				;;
 		esac
 		# Get arg number if not forced yet
 		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
 		# Get pipe?
 		case "$1" in
 		"--"|"-")
-				case "$MODE" in
-					"2")
-						# Read pipe, expect 2 lines
-						while read LEFT
-						do
-							read RIGHT
-							printe "$LEFT" "" "$RIGHT"
-						done
-						return
-						;;
-					"1")
-						# Read pipe, expect 1 lines
-						while read LEFT
-						do
-							printe "$LEFT"
-						done
-						return
-						;;
-					*)
-						# Read pipe, expect 3 lines (default)
-						while read LEFT
-						do
-							read CENTER; read RIGHT
-							printe "$LEFT" "$CENTER" "$RIGHT"
-						done
-						return
-						;;
-					esac
-				;;
+			case "$MODE" in
+				"2")
+					# Read pipe, expect 2 lines
+					while read LEFT
+					do
+						read RIGHT
+						printe "$LEFT" "" "$RIGHT"
+					done
+					return
+					;;
+				"1")
+					# Read pipe, expect 1 lines
+					while read LEFT
+					do
+						printe "$LEFT"
+					done
+					return
+					;;
+				*)
+					# Read pipe, expect 3 lines (default)
+					while read LEFT
+					do
+						read CENTER; read RIGHT
+						printe "$LEFT" "$CENTER" "$RIGHT"
+					done
+					return
+					;;
+				esac
+			;;
 		esac
 		#set +x
 		case "$MODE" in

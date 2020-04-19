@@ -63,7 +63,7 @@
 		export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=20
+	SWARM[BUILD]=21
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -236,12 +236,23 @@
 # Load the users functions now
 # if he has some that is
 #
-	if [[ -d "$SWARM_USER_CONFIG" ]]
+	# SWARM_USER_DIR_CONFIG was defined the the lib-functions
+	# The following the dirs should be kept to default, but can be overwritten
+	# by the SWARMRC, also, SWARM_USER_DIR_CONFIG might have been customized
+	source "$SWARMRC"
+	SWARM_USER_DIR_CONF="${SWARM_USER_DIR_CONF:-${SWARM_USER_DIR_CONFIG}/conf}"
+	SWARM_USER_DIR_LIBS="${SWARM_USER_DIR_LIBS:-${SWARM_USER_DIR_CONFIG}/libs}"
+	
+	if [[ -d "$SWARM_USER_DIR_CONFIG" ]]
 	then
 		# Create the dir if not existing yet (first time)
-		[[ -d "$SWARM_USER_LIBS" ]] || $MKDIR "$SWARM_USER_LIBS"
-		# Parse and source User Files
-		for uf in "${SWARM_USER_LIBS}/"*
+		for tDir in "$SWARM_USER_DIR_CONF" "$SWARM_USER_DIR_LIBS"
+		do
+			[[ -d "$tDir" ]] || $MKDIR "$tDir"
+		done
+		# Parse and source User Files, if files exist
+		# Read configuration files before functions
+		for uf in "${SWARM_USER_DIR_CONF}/"* "${SWARM_USER_DIR_LIBS}/"*
 		do
 			[[ ! -d "$uf" ]] && [[ -f "$uf" ]] && source "$uf" && $PRINTF "."
 		done
@@ -249,7 +260,7 @@
 #
 # Starting SWARM now
 #
-	source "$SWARMRC"
+	# Only update language if LC_ALL is empty
 	[[ -z "$LC_ALL" ]] && \
 		swarm.update.lang && \
 		swarm.update.lang.status

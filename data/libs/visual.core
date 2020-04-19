@@ -72,18 +72,18 @@
 			# check in each dir
 			if [[ -d "$there" ]]
 			then	if [[ -f "$there/$this_theme" ]]
-					then	source "$there/$this_theme"
-							ret=$?
-					fi
+				then	source "$there/$this_theme"
+						ret=$?
+				fi
 			fi
 		done
 
 		# Check if something went wrong
 		if [[ $ret != 0 ]]
 		then	# The theme could not be Found
-				# Lets fallback to default
-				source "$SWARM_DIR_THEMES/default-blue"
-				init.log.msg "$SWARM_MSG_INIT_THEME : $1"
+			# Lets fallback to default
+			source "$SWARM_DIR_THEMES/default-blue"
+			init.log.msg "$SWARM_MSG_INIT_THEME : $1"
 		fi
 		# Export the values now
 		export SWARM_THEME_DATA
@@ -121,20 +121,20 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		if [[ -z "$cb_black" ]]
 		then	# The variables are empty
-				# need to read from file
-				local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
-				for r in $raw
-				do
-					$PRINTF '%s\n' "${r/=*}"
-				done
+			# need to read from file
+			local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
+			for r in $raw
+			do
+				$PRINTF '%s\n' "${r/=*}"
+			done
 		else	# Variables are available
-				local tmp_str=""
-				# Generate an end user optimized list
-				for t in ${!cb_*}
-				do	tmp_str="$tmp_str ${t/cb_}"
-				done
-				# Output
-				$PRINTF '%s\n' $tmp_str
+			local tmp_str=""
+			# Generate an end user optimized list
+			for t in ${!cb_*}
+			do	tmp_str="$tmp_str ${t/cb_}"
+			done
+			# Output
+			$PRINTF '%s\n' $tmp_str
 		fi
 	}
 	swarm.color.bg() {  # COLORNAME
@@ -179,14 +179,12 @@
 		local MODE="" #name=""
 		case "${1/-}" in
 		e|p)	MODE="basic"	;;
-		h)		MODE="header"	;;
-		t)		MODE="title"	;;
+		h)	MODE="header"	;;
+		t)	MODE="title"	;;
 		esac
 
 		# Make sure values are udpated
-		#set -x
 		swarm.update.geometry
-		#set +x
 
 		# Now prepare the seperate handling
 		case "$MODE" in

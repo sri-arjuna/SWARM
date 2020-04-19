@@ -523,8 +523,11 @@
 		# Catch invalid inputs
 			# Keep reading if NUM is empty
 			[[ -z "$NUM" ]] && continue
+			#set -x
+			# Check for arrow keys
+			#set +x
 			# Check if NUM is numeric
-			if [[ ${#NUM} -ge 0 ]] &2>/dev/null
+			if [[ ${#NUM} -ge 0 ]] >/dev/null
 			then
 				# If it's exactly 0, it's BACK
 				[[ ${#NUM} -eq 0 ]] && $ECHO "${ARGS[$NUM]}" && return
@@ -545,6 +548,7 @@
 				# Using builtin echo for speed and less disk usage
 				builtin echo "$NUM" | $GREP -E -q "[a-zA-Z]"  && continue	# &2>/dev/zero
 				# Check for arrow keys
+				[[ "$NUM" =~ ^\[\[ ]] && continue
 				#builtin echo "$NUM" | $GREP -E -q "^\[\[" && continue
 				[[ "$NUM" =~ '^[[' ]] && continue
 				# Keep reading if NUM is longer than $pick_len

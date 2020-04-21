@@ -507,15 +507,17 @@
 		# Print the input line:
 			swarm.print.border >&2
 			$PRINTF "$POS      $POS" >&2
+		# Reset 'enter' check
+			todo=true
 		# Read the input 
 			builtin read -n $pick_len NUM
 		# Catch invalid inputs
 			# Keep reading if NUM is empty
 			[[ -z "$NUM" ]] && continue
-			# Check for arrow keys, and make sure NUM is numeric only
+			# Check for arrow keys, and make sure NUM is numeric only : Thank you MIG
 			[[ $NUM =~ ^[0-9]+$ ]] || continue
 			# If it's exactly 0, it's BACK
-			[[ ${#NUM} -eq 0 ]] && $PRINTF "${ARGS[$NUM]}" && return 4
+			[[ ${NUM} -lt $pick_len ]] && todo=false #$PRINTF "\n" && $PRINTF "${ARGS[$NUM]}" >&1 && return 4
 			# Keep reading if it is not greater than 'min'-imum
 			[[ ${NUM} -ge $min ]] || continue
 			# Check if the 0 index is missing
@@ -527,7 +529,8 @@
 		done		
 		
 		# Output
-		$ECHO ${ARGS[$NUM]}
+		$ECHO ${ARGS[$NUM]} >&1
+		$todo && $PRINTF "${POS_END}\n" >&2
 		unset opt
 	}
 	ask() { # "A question?"

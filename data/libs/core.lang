@@ -41,8 +41,9 @@
 						fi
 						# Load the selected language files
 						source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf"
-						source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf"
-						source "$SWARM_DIR_LANG/${SWARM[LANG]}/manpages.conf"
+						source "$SWARM_DIR_LANG/${SWARM[LANG]}/usage.conf"
+						#source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf"
+						#source "$SWARM_DIR_LANG/${SWARM[LANG]}/manpages.conf"
 				fi
 		fi
 		# Export all messages

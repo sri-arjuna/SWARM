@@ -18,7 +18,7 @@
 			#local today=`$DATE_TODAY`
 			#local time=`$DATE_TIME`
 			swarm.print.text -h \
-				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
+				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro))" \
 				" " \
 				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
 			#swarm.print.text -h \
@@ -216,8 +216,7 @@
 				"C")	CAPS=true
 						shift	;;
 				"d")	mode="done"
-						shift
-						echo " -- SHOULD -- get here"	;;
+						shift	;;
 				"t")	mode="true"
 						shift	;;
 				"y")	mode="yes"
@@ -458,7 +457,7 @@
 		# Catch arguments
 		#
 			for opt in "${@}"
-			do	if [[ "-" == "${opt:0:1}" ]] 
+			do	if [[ "-" == "${opt:0:1}" ]]
 				then	case "${opt/-}" in
 					1|2|3)	ROWS="${opt/-}"
 						shift
@@ -495,7 +494,7 @@
 			# Special handling
 			local invalid=true
 			local NUM=""
-			local POS="$(swarm.print.goto $(( $identRight + 2 )))${SWARM_THEME_DATA[read]} "
+			local POS="$(swarm.print.goto $(( $identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
 			$as_menu && \
 				local min=0 || \
 				local min=1
@@ -506,10 +505,10 @@
 		do
 		# Print the input line:
 			swarm.print.border >&2
-			$PRINTF "$POS      $POS" >&2
+			$PRINTF "$POS      $POS " >&2
 		# Reset 'enter' check
 			todo=true
-		# Read the input 
+		# Read the input
 			builtin read -n $pick_len NUM
 		# Catch invalid inputs
 			# Keep reading if NUM is empty
@@ -526,16 +525,62 @@
 			[[ $NUM -gt $pick_count ]] && continue
 		# Exit the loop
 			invalid=false
-		done		
-		
+		done
+
 		# Output
 		$ECHO ${ARGS[$NUM]} >&1
 		$todo && $PRINTF "${POS_END}\n" >&2
 		unset opt
 	}
+	press() { # [-c -l -r] [STR]
+	# Requires the user to press [Enter/Return] before script continues
+	# c=center ,l=left , r=right
+		# Vars
+		local mode=""
+		# Catch arguments
+		for opt in "${@}"
+		do	if [[ "-" == "${opt:0:1}" ]]
+			then	case "${opt/-}" in
+				"c")	mode="center"
+					shift
+					;;
+				"l")	mode="left"
+					shift
+					;;
+				"r")	mode="right"
+					shift
+					;;
+				esac
+			fi
+		done
+	# Display
+		case "$mode" in
+		"center")
+			printl "" "${1:-$SWARM_MSG_PRESS_ENTER}" ""
+			;;
+		"left")
+			printl "${1:-$SWARM_MSG_PRESS_ENTER}"
+			;;
+		"right")
+			printl "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+			;;
+		*)
+			printl "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+			;;
+		esac
+	# Action :p
+		builtin read
+	}
 	ask() { # "A question?"
-	# Ask a question
-	# Returns the answer
+	# Reads a user's input
+	# Returns the buffer
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		
+		[[ -z "$1" ]] && \
+			local STR="$(swarm.print.goto $(( $identRight + 1 ))) ${SWARM_THEME_DATA[read]}" || \
+			local STR="$(swarm.print.goto $(( $identRight + 1 ))) $1 ${SWARM_THEME_DATA[read]}"
+
+		swarm.print.border >&2
+		$PRINTF "$STR " >&2
+		builtin read buffer
+		$ECHO "$buffer" >&1
 	}

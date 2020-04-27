@@ -4,13 +4,13 @@
 # Author:	Simon Arjuna Erat (sea)	     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.04.19	 	     #
-# Build:	22			     #
+# Changed:	2020.04.27	 	     #
+# Build:	25			     #
 ##############################################
 #
-#	SWARM is the successor of TUI (Text User Interace) 
+#	SWARM is the successor of TUI (Text User Interace)
 #	It is an interface between script authors and end users.
-#	In doing so, the scripts you write, 
+#	In doing so, the scripts you write,
 #	will appear application-like to an end user.
 #
 #	This file is to be called from your script like eiter one of:
@@ -31,7 +31,7 @@
 # Requirements:
 # * BASH 5.0+
 # * GNU Coreutils
-# * 
+# *
 #
 # Speed increase:
 # * Make sure '$HOME' is set and exists for all shell login accounts.
@@ -49,21 +49,20 @@
 # Core Public Variables
 #
 	# SWARM
-	#shopt -i
-	#set -n
-	#shopt -o huponexit globstar
-	
+	${DEBUG:-false} && set -x
+	# shellcheck disable=SC2086 disable=SC2184
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
-	declare isSWARMfirstTime=true
+	export isSWARMfirstTime=true
 	# hasCOLUMNS is for internal use only
+	# shellcheck disable=SC2015
 	[[ -n "$COLUMNS" ]] && \
 		export hasCOLUMNS=true || \
 		export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=22
+	SWARM[BUILD]=25
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -73,7 +72,7 @@
 	SWARM[ROOTDIR]=""
 	# Language must be pre-set up until the basic language file was loaded
 	SWARM[LANG]="en_GB"
-	SWARM_CODE=$$
+	export SWARM_CODE=$$
 #
 # Set first time default
 #
@@ -110,16 +109,16 @@
 #
 	# Need to get these updating them self upon call
 	# Use these to set the date variable: `
-	DATE_TODAY="$DATE +%F"
-	DATE_TIME="$DATE +%T"
-	DATE_TIME_LOG="$DATE +%T.%s"
+	export DATE_TODAY="$DATE +%F"
+	export DATE_TIME="$DATE +%T"
+	export DATE_TIME_LOG="$DATE +%T.%s"
 #
 # Get proper SWARM root dir
 #
 	# If no SWARMDIR is provided, it is used in runtime as designed
 	# However, 'SWARMDIR=$PWD/SWARM source SWARM/runtime' could be used as a speedbooster,
 	# as it bypasses the multiple physical read attempts
-	# SWARMDIR - MUST - be provided if you intend to store  
+	# SWARMDIR - MUST - be provided if you intend to store
 	# the files in a dir not named SWARM
 	if [[ "x" == "x$SWARMDIR" ]]
 	then
@@ -145,7 +144,7 @@
 		done
 		# Should not reach this point
 		# Other than while debug testing
-		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD}"
+		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD:-${PWD_EXEC}}"
 		unset tmp
 	else
 		# Or optionaly, use the 'install' method
@@ -163,19 +162,23 @@
 # SWARM_DIR_* for proper re-use
 # source this file and type: SWARM_DIR_<hit tabulator>
 #
-	SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
-	SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
-	SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
-	SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
-	SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
-	SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
-	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
-	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
+	export SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
+	export SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
+	export SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
+	export SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
+	export SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
+	export SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
+	export SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
+	export SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 #
 # Load english strings for overall coverage for error messages.
 #
-	source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf" ; $PRINTF "."
-	source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf" ; $PRINTF "."
+	for lang_file in "$SWARM_DIR_LANG/en_GB"/{core,usage}.conf
+	do
+		# shellcheck disable=SC1090
+		source "$lang_file"
+		$PRINTF "."
+	done
 #
 # Load SWARM settings, core and sanity functions
 #
@@ -185,13 +188,14 @@
 
 	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env #{utils,sanity}
 	do
+		# shellcheck disable=SC1090
 		source "$thisCFG"
 		$PRINTF "."
 	done
 #
 # SWARM Environment checks
 #
-	
+
 	for this in "${SWARM_DIR_LIBS}"/*
 	do
 		# Skip if core.utils or core.sanity
@@ -207,21 +211,21 @@
 			[[ $tmp_len -lt ${#this} ]] && \
 					tmp_len=${#this} && \
 					tmp_empty=$($PRINTF '%*s' $COLUMNS)
-			sleep ${SWARM_INTERVALL_SLOW_LOADING:-0.3}
+			sleep "${SWARM_INTERVALL_SLOW_LOADING:-0.3}"
 			$PRINTF  "\r$tmp_empty"
 		fi
 
 		# Minimalistic output
 		tmp_swarm_loading="${tmp_swarm_loading}."
 		if [[ ! "${this:0:2}" == "\.[\.]" ]]
-		then	#
-			if source "$this" 
+		then	# shellcheck disable=SC1090
+			if source "$this"
 			then	# All good
 				$PRINTF '\r%s' "${tmp_swarm_loading}"
-				 ${doLogExt} && \
+				 ${doLogExt:-false} && \
 				 	init.msg.log "$SWARM_MSG_INIT_FILE_FOUND $this"
 			else	# Not good
-				 ${doLogExt} &&  \
+				 ${doLogExt:-false} &&  \
 					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this"
 			fi
 		else
@@ -235,6 +239,7 @@
 #
 # CORE is loaded, lets adapt the user settings
 #
+	# shellcheck disable=SC1090
 	source "$SWARMRC"
 #
 # Prepare language for user caused errors
@@ -254,18 +259,20 @@
 	# by the SWARMRC, also, SWARM_USER_DIR_BASE might have been customized
 	SWARM_USER_DIR_CONF="${SWARM_USER_DIR_CONF:-${SWARM_USER_DIR_BASE}/conf}"
 	SWARM_USER_DIR_LIBS="${SWARM_USER_DIR_LIBS:-${SWARM_USER_DIR_BASE}/libs}"
-	
+
 	if [[ -d "$SWARM_USER_DIR_BASE" ]]
 	then
 		# Create the dir if not existing yet (first time)
 		for tDir in "$SWARM_USER_DIR_CONF" "$SWARM_USER_DIR_LIBS"
 		do
+			# shellcheck disable=SC2154
 			$isDir >/dev/null || $MKDIR "$tDir"
 		done
 		# Parse and source User Files, if files exist
 		# Read configuration files before functions
 		for uf in "${SWARM_USER_DIR_CONF}/"* "${SWARM_USER_DIR_LIBS}/"*
 		do
+			# shellcheck disable=SC1090
 			[[ ! -d "$uf" ]] && [[ -f "$uf" ]] && source "$uf" && $PRINTF "."
 		done
 	fi
@@ -288,46 +295,52 @@
 			title	"" # Separator
 			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
 			#status $? "one"
-			
+
 		else	# Has arguments, lets parse
 			case "$1" in
 			"basic")
 				shift
 				swarm.eu.show.basics
+				exit $?
 				;;
 			"config")
 				shift
 				swarm.eu.show.config
+				exit $?
 				;;
-			"help" | "--help")
+			"help" | "--help" | "-h")
 				shift
 				# Lets show a basic help menu
 				swarm.eu.help.menu "${@}"
+				exit $?
 				;;
 			"tarball")
 				(
+					# shellcheck disable=SC2164
 					cd "${SWARM_DIR_ROOT}/.."
 					tar -acf "$HOME/swarm-${SWARM[BUILD]}.tar.gz" "${SWARM_DIR_ROOT##*/}"
 				)
 				;;
 			"tar")
 				(
+					# shellcheck disable=SC2164
 					cd "${SWARM_DIR_ROOT}/.."
 					tar -acf "$HOME/swarm-${SWARM[BUILD]}-small.tar.gz" --exclude ".git" "${SWARM_DIR_ROOT##*/}"
 				)
 				;;
-			*)	# Exit the loop
-				break
-					;;
+			# *)	# Exit the loop
+			#	return
+			#		;;
 			esac
 		fi
 	fi
 #
 # Develeoper testings
 #
-	if false && [[ "bash" = "${0/-}" ]]; then
+	if true && [[ "bash" = "${0/-}" ]]; then
 		#$ECHO " ----------- TEST AREA START -----------"
-		printe "Now it will work"
+		#printe "Now it will work"
+		ask "something blab?"
 		#set -x
 		#pick -m one two three four five six
 		#set +x
@@ -336,3 +349,4 @@
 #val=$(pick -m one two three four five six)
 #echo
 #echo "--> $val"
+${DEBUG:-false} && set +x

@@ -279,7 +279,6 @@
 #
 # Starting SWARM now
 #
-	echo $SWARM_THEME
 	swarm.init.theme $SWARM_THEME
 	swarm.update.geometry
 #

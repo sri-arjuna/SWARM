@@ -202,7 +202,7 @@
 			local CAPS #=false
 			local mode #="yes"
 			local out=""
-			echo " ---------- $@ ----------- "
+			#echo " ---------- $@ ----------- "
 		#
 		# Catching Arguments
 		#
@@ -360,28 +360,30 @@
 		# Catch arguments
 		#
 			for opt in "${@}"
-			do 	[[ "-" == "${opt:0:1}" ]] && \
-				case "${opt/-}" in
-				"1" | "2" | "3")
-					ROWS="${opt/-}"
-					shift
-					;;
-				"0")	as_menu=true
-					shift
-					;;
-				"a")	MODE=alpha
-					SEP=") "
-					shift
-					;;
-				"r")	MODE=roman
-					SEP=". "
-					shift
-					;;
-				"n")	MODE=num
-					SEP=") "
-					shift
-					;;
-				esac
+			do 	# Only parse for Arguments
+				# if variable:'opt' starts with '-'
+				[[ "-" == "${opt:0:1}" ]] && \
+					case "${opt/-}" in
+					"1" | "2" | "3")
+						ROWS="${opt/-}"
+						shift
+						;;
+					"0")	as_menu=true
+						shift
+						;;
+					"a")	MODE=alpha
+						SEP=") "
+						shift
+						;;
+					"r")	MODE=roman
+						SEP=". "
+						shift
+						;;
+					"n")	MODE=num
+						SEP=") "
+						shift
+						;;
+					esac
 			done
 			[ -z "$1" ] && \
 				while IFS= read -r ARG
@@ -493,6 +495,7 @@
 			local pick_len=${#pick_count}
 			# Special handling
 			local invalid=true
+			local todo=false
 			local NUM=""
 			local POS="$(swarm.print.goto $(( $identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
 			$as_menu && \
@@ -506,8 +509,6 @@
 		# Print the input line:
 			swarm.print.border >&2
 			$PRINTF "$POS      $POS " >&2
-		# Reset 'enter' check
-			todo=true
 		# Read the input
 			builtin read -n $pick_len NUM
 		# Catch invalid inputs
@@ -529,7 +530,9 @@
 
 		# Output
 		$ECHO ${ARGS[$NUM]} >&1
-		$todo && $PRINTF "${POS_END}\n" >&2
+		#set -x
+		[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&2
+		#set +x
 		unset opt
 	}
 	press() { # [-c -l -r] [STR]

@@ -4,8 +4,8 @@
 # Author:	Simon Arjuna Erat (sea)	     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.04.27	 	     #
-# Build:	25			     #
+# Changed:	2020.04.28	 	     #
+# Build:	27			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -62,7 +62,7 @@
 		export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=25
+	SWARM[BUILD]=27
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -284,7 +284,7 @@
 #
 # Initiate Interface : Runtime Executed
 #
-	if [[ "./runtime" = "${0##/}" ]] || [[ "runtime" = "${0##/}" ]]
+	if [[ "runtime" = "${0##*/}" ]]
 	then	# First time caller or arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
@@ -337,7 +337,7 @@
 #
 # Develeoper testings
 #
-	if true && [[ "bash" = "${0/-}" ]]; then
+	if false && [[ "bash" = "${0/-}" ]]; then
 		#$ECHO " ----------- TEST AREA START -----------"
 		#printe "Now it will work"
 		ask "something blab?"

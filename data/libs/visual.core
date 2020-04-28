@@ -169,7 +169,7 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		$PRINTF "\033[4m${1}\033[0m"
 	}
-	swarm.print.border() { # MODE
+	swarm.print.border() { # [-h -t]
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
@@ -178,9 +178,9 @@
 
 		local MODE="" #name=""
 		case "${1/-}" in
-		e|p)	MODE="basic"	;;
 		h)	MODE="header"	;;
 		t)	MODE="title"	;;
+		*)	MODE="basic"	;;
 		esac
 
 		# Make sure values are udpated
@@ -225,7 +225,7 @@
 		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
 		$PRINTF "${posEND}"
 	}
-	swarm.print.text() { # MODE [ LEFT ] [ CENTER ] [ RIGHT]
+	swarm.print.text() { # [-h -t] [ LEFT ] [ CENTER ] [ RIGHT]
 	# This simply puts the text
 	# according to MODE
 		#swarm.protect "$FUNCNAME" "${@}" && exit 1
@@ -235,16 +235,19 @@
 		local title_pre=""
 		local title_end=""
 
-		case ${1/-} in
-		t)	MODE=title
-			fix_title=16
-			title_pre=""
-			title_end=""	;;
-		h)	MODE=header
-			fix_header_r=4	;;
-		*)	MODE=basic	;;
-		esac
-		shift
+		[[ "-" = "${1:0:1}" ]] && \
+			case ${1/-} in
+			t)	MODE=title
+				fix_title=16
+				title_pre=""
+				title_end=""
+				shift	;;
+			h)	MODE=header
+				fix_header_r=4
+				shift	;;
+			*)	MODE=basic	;;
+			esac
+
 
 		# Check if it is too short, if so, print fallback mode and return
 		[[ ${COLUMNS} -lt 25 ]] && \

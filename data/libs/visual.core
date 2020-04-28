@@ -64,7 +64,7 @@
 		$isRoot && \
 			local this_theme="${1:-default-red}" || \
 			local this_theme="${1:-default-blue}"
-
+		export SWARM_THEME="$this_theme"
 		# Always use the user themes first
 		# in case someone wants to pseudo-overwrite the default themes
 		for there in "$SWARM_USER_CONFIG/themes" "$SWARM_DIR_THEMES"
@@ -82,8 +82,8 @@
 		if [[ $ret != 0 ]]
 		then	# The theme could not be Found
 			# Lets fallback to default
-			source "$SWARM_DIR_THEMES/default-blue"
-			init.log.msg "$SWARM_MSG_INIT_THEME : $1"
+			source "$SWARM_DIR_THEMES/$this_theme"
+			init.log.msg "$SWARM_MSG_INIT_THEME : $1 / $this_theme"
 		fi
 		# Export the values now
 		export SWARM_THEME_DATA
@@ -110,7 +110,7 @@
 	# Initiate the theme for the first time
 	# This is only a wrapper for the initial loading.
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		swarm.theme.update ${SWARM_THEME:-default-blue}
+		swarm.theme.update ${SWARM_THEME}
 	}
 #
 # Visual outputs - core essentials

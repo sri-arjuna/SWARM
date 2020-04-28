@@ -5,7 +5,7 @@
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
 # Changed:	2020.04.28	 	     #
-# Build:	27			     #
+# Build:	28			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -62,7 +62,7 @@
 		export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.4
-	SWARM[BUILD]=27
+	SWARM[BUILD]=28
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -279,7 +279,8 @@
 #
 # Starting SWARM now
 #
-	swarm.init.theme
+	echo $SWARM_THEME
+	swarm.init.theme $SWARM_THEME
 	swarm.update.geometry
 #
 # Initiate Interface : Runtime Executed

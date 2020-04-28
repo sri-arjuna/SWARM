@@ -234,6 +234,7 @@
 		local fix_header_r=0
 		local title_pre=""
 		local title_end=""
+		local MODE=basic
 
 		[[ "-" = "${1:0:1}" ]] && \
 			case ${1/-} in
@@ -245,7 +246,7 @@
 			h)	MODE=header
 				fix_header_r=4
 				shift	;;
-			*)	MODE=basic	;;
+			'e'|'p') shift	;;
 			esac
 
 

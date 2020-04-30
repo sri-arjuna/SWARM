@@ -1,0 +1,25 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+  bool2str - Converts a bool return value in text
+
+.SH SYNOPSYS
+  \fBswarm.str.bool2str\fP [-c -C -d -t -y] $?
+
+.SH OPTIONS
+  -c		Makes first letter Capital
+  -C		Makes all letters CAPITAL
+  -d		Returns: done/fail
+  -t		Returns: true/false
+  -y		Returns: yes/no
+
+.SH EXAMPLE
+yesno "Do you like this?"
+
+answer="$(swarm.str.bool2str -y $?)"
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland

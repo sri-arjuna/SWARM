@@ -345,6 +345,19 @@
 		done
 		$PRINTF "$output"
 	}
+	swarm.str.num2ascii() { # NUM
+	# Returns the ASCII of given NUM
+	# https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html
+		[[ -z "$1" ]] && return 1
+		[[ $1 =~ ^[0-9]+$ ]] || return 1
+		printf "\\$(printf '%03o' "$1")"
+	}
+	swarm.str.ascii2num() { # "CHAR"
+	# Returns the (ASCII-)NUM of given CHAR
+	# https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html
+		[[ $# -gt 1 ]] && return 1
+		printf "%u\n" "'${1}"
+	}
 	printlist() { # [options] $LIST or ${ARRAYS[@]}
 	# Prints up to 3 'indexed'/numbered entries per row
 	# Options -12arn ; 1 or 2 rows (instead of 3=default), alpha, roman, num=default

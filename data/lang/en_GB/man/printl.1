@@ -1,0 +1,40 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBprintl \fP- Print on the same Line
+\fB
+.SH SYNOPSYS
+printl [ -1 -2 -- ] [str1 [str2 [str3]]]
+
+.SH DESCRIPTION
+This function can be used to keep changing the text of the current line.
+.RE
+A good use-example for this would be the \fBprogress\fP-function.
+.PP
+Allthough you can pipe a data stream to \fBprintl\fP it will print each output on its own line.
+
+.SH OPTIONS
+  -1		Forces to use only left output
+  -2		Forces to use left and right output only
+  --		Reads from pipe, this will use \fBprinte\fP
+
+.SH EXAMPLE
+printl "Replace me"
+.RE
+printl "Replaced previous line"
+.RE
+printl "Replaced again"
+.PP
+grep PATTERN FILE | printl -2 --
+
+
+.SH SEE ALSO
+\fBbash\fP(1),
+.SH SEE ALSO
+\fBbash\fP(1), \fBconsole_codes\fP(4), \fBgawk\fP(1), \fBgrep\fP(1), \fBprintf\fP(1), \fBprogress\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland

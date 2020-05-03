@@ -1,0 +1,32 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.print.text\fP - Prints the text for default output
+
+.SH SYNOPSYS
+swarm.print.text [ -h -t ] [str1] [str2] [str3]
+
+.SH DESCRIPTION
+This function is one of the core visuals and is supposed for internal use only.
+.PP
+It is used by the \fButil.enduser\fP file which provides \fBprinte\fP, \fBprintl\fP, \fBheader\fP, \fBtitle\fP and all other functions alike.
+
+.SH OPTIONS
+  -t		\fBTitle\fP
+  		Prints centered and bold \fBstr1\fP
+
+.SH EXAMPLE
+swarm.print.text 	[left]	[centered]	[right]
+
+swarm.print.text -h	[left] 				[right]
+
+swarm.print.text -t			\fB[centered]\fP
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBconsole_codes\fP(4), \fBgawk\fP(1), \fBgrep\fP(1), \fBprintf\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland

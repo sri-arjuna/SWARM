@@ -1,0 +1,39 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+printe - Display up to three strings per line, ending with a NL
+
+.SH SYNOPSYS
+printe [-|--] [-1 -2] [str1 [str2 [str3]]]
+
+.SH DESCRIPTION
+This is the function that should be used the most to display any data to endusers.
+.RE
+By default it accepts up to 3 strings per output line, this can be changed via options.
+.RE
+To use the center, you must provide 3 strings.
+
+.SH OPTIONS
+  --		Recieve strings from pipe
+  -1		Force left aligned text only
+  -2		Force left & right aligned text only
+
+.SH EXAMPLE
+printe "Hello World"
+.RE
+printe "left" "right"
+.RE
+printe "" "center" ""
+.PP
+grep PATTERN FILE | printe -2 --
+
+
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBprintl\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland

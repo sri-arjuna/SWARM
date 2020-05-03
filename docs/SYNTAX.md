@@ -2,7 +2,7 @@ This file is part of SWARM (Shell Wrapper And Runtime Modifier)
 and describes the best way to write the most cross-plattform
 compatible scripts using SWARM.
 
-Last Changed: 2020.03.13
+Last Changed: 2020.05.03
 
 
 
@@ -39,7 +39,7 @@ Functions definitions shall take 3 lines,
 with the first one providing the ARGS.
 The last two lines shall be a descriptive text of the function.
 
-	functionname() { # [optionals] ARG1 ARG2
+	functionname() { # [options] ARG1 ARG2 ...
 	# What it does
 	# What it returns, unless covered by "What it does"
 		echo code

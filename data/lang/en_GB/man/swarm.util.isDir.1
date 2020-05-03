@@ -1,0 +1,29 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+$isDir - Returns a bool wether a passed DIR exists or not.
+
+.SH SYNOPSYS
+swarm.util.isDir [-c] DIR
+
+.SH DESCRIPTION
+Returns true (0) if DIR exists or could be created.
+.RE
+Returns false (1) if DIR could not be created, or is a file
+
+.SH OPTIONS
+  -c		Count how many passed DIR do not exist, and use that as exit code
+
+.SH EXAMPLE
+
+swarm.util.isDir \fB-v\fP *
+
+swarm.util.isDir -c /etc /home/sea/.cache /home/sea /fail1 /fail2
+.RE
+printe "There are $? directories missing."
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland

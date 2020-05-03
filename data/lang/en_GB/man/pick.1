@@ -1,0 +1,32 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBpick\fP - select, SWARM-Style
+\fB
+.SH SYNOPSYS
+pick [ -1 -2 -a -m ] $LIST or "${ARRAY[@]}"
+
+.SH DESCRIPTION
+This is an emulator of the \fBselect\fP program. This emulator is required to keep the themed-feeling intact.
+Unlike \fBselect\fP you cannot write menu inside the select block, because \fBpick\fP will just return the string of the selected item.
+You can however pass \fB-m\fP to start it in \fImenu\fP-mode.
+
+.SH OPTIONS
+  -1|-2	Print that many rows
+  -a		Auto select if only one entry was found
+  -m		Prints '\fBBack\fP' (translated) as option \fB0\fP in the selection.
+  		If '\fBBack\fP' is selected, return code is 4, 0 otherwise.
+
+
+.SH EXAMPLE
+pick $LIST
+.RE
+var=$(pick -a $LIST)
+.RE
+var=$(pick -2 -m "${ARRAY[@]}")
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland

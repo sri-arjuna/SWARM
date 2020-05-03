@@ -40,6 +40,14 @@ Examples:
 ---------
 
 
+    yesno "Do you want to create a tempfile?"
+    if status $? "Creating tempfile: $(swarm.str.bool2str $?)"
+	then
+		tmpfile=$(mktemp)
+		status $? "Created ${tmpfile:-NONE}"
+		RET=$?
+	fi
+
 
 
 
@@ -80,8 +88,9 @@ All 'color' references are to the __default-blue__ theme!
 * title "my title" ; All white background with blue text, and blue borders
 * printe "left" "center" "right" ; blue borders, next output is on a newline
 * printl "left" "center" "right" ; blue borders, next output overwrites this
-* choose $list or "${ARRAY[@]}" ; 0 (zero) will always be 'Back' and return 1 (back)
-* ask "question?" ; the 'yn' is provided by language file and is supported in code
+* pick $list or "${ARRAY[@]}" ; 0 (zero) will always be 'Back' and return 1 (back)
+* yesno "question?" ; the 'yn' is provided by language file and is supported in code
+* ask "question?" ; all purose input questins
 * status $? "Left" "Center"
 * rnd _[max | min max ]_ ; prints a random number between 0-100; or 0-max.
 * edit "file" ; opens CLI or GUI appliaction

@@ -12,6 +12,20 @@ ___$isRO___
 If **true** you cannot write on the machines filesystem. Either becuase it is Read-Only (RC) or due to the lack of permissions.
 
 
+___$isDir___ <DIR>
+
+This variable refers to _swarm.util.isdir_ which will return 0 if passed dir is found.
+
+
+___$isROOT___
+
+Returns **true** if _UID_ or _EUID_ is 0.
+
+
+___$isGUI___
+
+Returns **true** if $XDG_SESSION_DESKTOP
+
 
 
 Variables - Core Utils
@@ -254,7 +268,10 @@ Refers to the RC conf file (default: $HOME/.swarmrc ; Fallback: ./.swarmrc)
 
 
 Functions - INIT & later
----------
+-------------------------
+
+Functions defined here are for internal use only.
+
 
 ___init.msg()___
 

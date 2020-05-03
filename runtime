@@ -2,10 +2,11 @@
 ##############################################
 # SWARM = Shell Wrapper and Runtime Modifier #
 # Author:	Simon Arjuna Erat (sea)	     #
+# License:	GPL v2			     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.04.29	 	     #
-# Build:	29			     #
+# Changed:	2020.05.03	 	     #
+# Build:	30			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -25,12 +26,12 @@
 #	To change settings, you can use eiter one of:
 #	./runtime config user
 #	swarm.userconfig.edit
-#	edit "$HOME/.swarmrc"
+#	edit "$HOME/.swarmrc" "$HOME/.config/swarm/"
 #
 ##############################################
 # Requirements:
-# * BASH 5.0+
-# * GNU Coreutils
+# * BASH 4.3+
+# * GNU Coreutils 8.25
 # *
 #
 # Speed increase:
@@ -62,7 +63,7 @@
 		export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.5
-	SWARM[BUILD]=29
+	SWARM[BUILD]=30
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="LGPL"
@@ -79,6 +80,8 @@
 #	This is just ment as failsafe if PATH is not set
 #	to get the most elementary basics on/of most systems
 	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN"
+	# Make sure TERM is set
+	TERM="${TERM:-GNU\057Linux}"
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
 	export PRINTF=${PRINTF:-\printf}
@@ -279,7 +282,7 @@
 #
 # Starting SWARM now
 #
-	swarm.init.theme $SWARM_THEME
+	swarm.init.theme "$SWARM_THEME"
 	swarm.update.geometry
 #
 # Initiate Interface : Runtime Executed
@@ -294,9 +297,10 @@
 			printe	"$SWARM_MSG_WELCOME_INFOLINE2"
 			title	"" # Separator
 			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
-			#status $? "one"
+			exit 0
 
 		else	# Has arguments, lets parse
+			$PRINTF "$(swarm.print.goto 0)"
 			case "$1" in
 			"basic")
 				shift
@@ -328,6 +332,34 @@
 					tar -acf "$HOME/swarm-${SWARM[BUILD]}-small.tar.gz" --exclude ".git" "${SWARM_DIR_ROOT##*/}"
 				)
 				;;
+			"new")
+				shift
+				case "$1" in
+				"function")
+					cat<<-EO_SCREEN
+					funcname() { # [option] ARG
+					#
+					#
+					 	swarm.protect "\$FUNCNAME" "\${@}" && exit 1
+					# Variables
+					 	local RET=1
+					# Catch arguments
+					 	for opt in \${@}
+					 	do
+					 		[[ "-" == "\${opt:0:1}" ]] && \\
+					 			case "\${opt:1}" in
+					 	 		*)
+					 				printe "TODO" "\$opt"
+					 				;;
+					 			esac
+					 	done
+					# Action & Display
+					 	return \$RET
+					}
+					EO_SCREEN
+					;;
+				esac
+				;;
 			# *)	# Exit the loop
 			#	return
 			#		;;
@@ -337,16 +369,8 @@
 #
 # Develeoper testings
 #
-	if false && [[ "bash" = "${0/-}" ]]; then
-		#$ECHO " ----------- TEST AREA START -----------"
-		#printe "Now it will work"
-		ask "something blab?"
-		#set -x
-		#pick -m one two three four five six
-		#set +x
-		#$ECHO " ----------- TEST AREA END -----------"
+	if false && [[ "bash" = "${0/-}" ]]
+	then	#while read line;do printe "$line";done <README.md
+		cat README.md | printe -1 --
 	fi
-#val=$(pick -m one two three four five six)
-#echo
-#echo "--> $val"
 ${DEBUG:-false} && set +x

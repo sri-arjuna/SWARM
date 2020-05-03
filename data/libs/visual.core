@@ -161,32 +161,30 @@
 	# Returns STR with wrapped code for BOLD
 	#
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		$PRINTF "\033[1m${1}\033[0m"
+		$PRINTF "\033[1m${@}\033[0m"
 	}
 	swarm.print.underline() { # "STR"
 	# Returns STR with wrapped code for UNDERLINE
 	#
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		$PRINTF "\033[4m${1}\033[0m"
+		$PRINTF "\033[4m${@}\033[0m"
 	}
 	swarm.print.border() { # [-h -t]
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# Makes no sense to print visuals on such short lines
-		[[ ${COLUMNS} -lt 25 ]] && return 1
-
+		[[ ${COLUMNS} -lt $SWARM_SKIP_THEME_WIDTH ]] && return 1
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+	# Get args
 		local MODE="" #name=""
 		case "${1/-}" in
 		h)	MODE="header"	;;
 		t)	MODE="title"	;;
 		*)	MODE="basic"	;;
 		esac
-
-		# Make sure values are udpated
+	# Make sure values are udpated
 		swarm.update.geometry
-
-		# Now prepare the seperate handling
+	# Now prepare the seperate handling
 		case "$MODE" in
 		"basic")
 			PRINT_LEFT_IN="$c_reset"
@@ -212,16 +210,13 @@
 			;;
 		*)	pos_cor_num=0 ;;
 		esac
-
-		# Get some numbers
+	# Get some numbers
 		local identRight=$(( $lenRight + ${#clrCL}  ))
 		local posLEFT="\33[$(( ${#BORDER_LEFT} - 2 ))G"
 		local posRIGHT="\33[$(( $numEND - $lenRight - $pos_cor_num ))G"
-
-		# Well, left aligned it works. isnt too hard
+	# Well, left aligned it works. isnt too hard
 		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" >&2
-
-		# The right side is much more challenging
+	# The right side is much more challenging
 		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
 		$PRINTF "${posEND}"
 	}
@@ -252,8 +247,8 @@
 
 		# Check if it is too short, if so, print fallback mode and return
 		[[ ${COLUMNS} -lt 25 ]] && \
-				$PRINTF "%s\n" "${@}" && \
-				return 1
+			$PRINTF "%s\n" "${@}" && \
+			return 1
 
 		# Make sure values are udpated
 		swarm.update.geometry
@@ -274,7 +269,13 @@
 			$PRINTF "${posLEFT}"
 			;;
 		1)	# Just left oriented
-			$PRINTF "${posLEFT}$1"
+			if [[ $MODE = title ]]
+			then
+				local posMIDDLE="\33[$(( $numHALF - $(( ${#1} / 2 ))  + $fix_title ))G"
+				$PRINTF "${posMIDDLE}$(swarm.print.bold "$1")"
+			else
+				$PRINTF "${posLEFT}$1"
+			fi
 			#return
 			;;
 		2)	# 2nd arg is right oriented

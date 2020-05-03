@@ -18,7 +18,7 @@
 			#local today=`$DATE_TODAY`
 			#local time=`$DATE_TIME`
 			swarm.print.text -h \
-				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro))" \
+				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro|$SED s,'"','',g))" \
 				" " \
 				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
 			#swarm.print.text -h \
@@ -39,11 +39,11 @@
 		swarm.print.border -t
 		output="$1"
 		#output=$(swarm.print.underline "$output")
-		output=$(swarm.print.bold "$output")
-		swarm.print.text -t "" "${c_front}${c_back}${c_invert}${output}${c_reset}" ""
+		#output=$(swarm.print.bold "$output")
+		swarm.print.text -t "${c_front}${c_back}${c_invert}${output}${c_reset}"
 		$PRINTF "$posEND\n"
 	}
-	printe() { # STR1 STR2 STR3
+	printe() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
@@ -63,33 +63,33 @@
 		case "$1" in
 		"--"|"-")
 			case "$MODE" in
-				"2")
-					# Read pipe, expect 2 lines
-					while read LEFT
-					do
-						read RIGHT
-						printe "$LEFT" "" "$RIGHT"
-					done
-					return
-					;;
-				"1")
-					# Read pipe, expect 1 lines
-					while read LEFT
-					do
-						printe "$LEFT"
-					done
-					return
-					;;
-				*)
-					# Read pipe, expect 3 lines (default)
-					while read LEFT
-					do
-						read CENTER; read RIGHT
-						printe "$LEFT" "$CENTER" "$RIGHT"
-					done
-					return
-					;;
-				esac
+			"2")
+				# Read pipe, expect 2 lines
+				while read LEFT
+				do
+					read RIGHT
+					printe "$LEFT" "" "$RIGHT"
+				done
+				return
+				;;
+			"1")
+				# Read pipe, expect 1 lines
+				while read LEFT
+				do
+					printe "$LEFT"
+				done
+				return
+				;;
+			*)
+				# Read pipe, expect 3 lines (default)
+				while read LEFT
+				do
+					read CENTER; read RIGHT
+					printe "$LEFT" "$CENTER" "$RIGHT"
+				done
+				return
+				;;
+			esac
 			;;
 		esac
 		#set +x
@@ -117,16 +117,90 @@
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		case "$1" in
-		"--"|"-")
-				# Read pipe, expect 3 lines
-				read LEFT; read CENTER; read RIGHT
-				printe "$LEFT" "$CENTER" "$RIGHT"
-				return
+	# Variables
+		local MODE="none"
+		local ROW=3
+		local doPipe=false
+	# Get args
+		for opt in "${@}"
+		do
+			case "${opt/-}" in
+			"-1"|"-2")
+				ROW="${1/-}"
+				shift
+				;;
+			"-"|"")
+				MODE="pipe"
+				;;
+			*)
+				MODE="normal"
+				;;
+			esac
+		done
+	# Action
+		case "$MODE" in
+			"pipe")
+				case "$ROW" in
+				"2")
+					# Read pipe, expect 2 lines
+					while read LEFT
+					do
+						read RIGHT
+						printe "$LEFT" "" "$RIGHT"
+					done
+					return
+					;;
+				"1")
+					# Read pipe, expect 1 lines
+					while read LEFT
+					do
+						printe "$LEFT"
+					done
+					return
+					;;
+				*)
+					# Read pipe, expect 3 lines (default)
+					while read LEFT
+					do
+						read CENTER; read RIGHT
+						printe "$LEFT" "$CENTER" "$RIGHT"
+					done
+					return
+					;;
+				esac
+				;;
+			"normal")
+				# Check if it makes sense to print the border
+				[[ $COLUMNS -lt $SWARM_SKIP_THEME_WIDTH ]]
+				swarm.print.border -e
+				case "$ROW" in
+					"0")
+
+						swarm.print.text -e "" "" ""
+						;;
+					"1")
+						swarm.print.border -e
+						swarm.print.text -e "$1" "" ""
+						;;
+					"2")
+						swarm.print.border -e
+						swarm.print.text -e "$1" "" "$2"
+						;;
+					"3")
+						swarm.print.border -e
+						swarm.print.text -e "$1" "$2" "$3"
+						;;
+				esac
+				;;
+			"2")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" "$2"
+				;;
+			"3")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		swarm.print.border -p
-		swarm.print.text -p "$1" "$2" "$3"
 	}
 #
 # Visual outputs - 'End user' stuff - Core Convenience

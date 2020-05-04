@@ -234,7 +234,7 @@
 		[[ "-" = "${1:0:1}" ]] && \
 			case ${1/-} in
 			t)	MODE=title
-				fix_title=16
+				fix_title=12
 				title_pre=""
 				title_end=""
 				shift	;;

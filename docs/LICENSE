@@ -2,3 +2,19 @@ See file: ./GPLv2
 
 Or the online versoin:
 https://www.gnu.org/licenses/old-licenses/gpl-2.0
+
+
+You can still customize SWARM without breaking the GPLv2 license!
+
+Just as a reminder, SWARM is a framework to build/write your scripts upon,
+so writing a script project while using SWARM and distribunting them together for free is allowed.
+
+First and foremost, keep in mind that if you use SWARM, you probably will use 'swarm' for your project.
+The function 'swarm' does provide a way to add your own libraries to your project collected in your projects root directory.
+This is the recomended method for fine-tuning.
+
+If you should have a very special approach, you can write your own scripts using the internal function names and save them under:
+$SWARM_USER_DIR_{CONF,LIBS} (default: ~/.config/swarm/{conf,libs}
+
+This way, you do not touch the original source code, but still change/overwrite existing code.
+If you do this to bugfix, please send me a pull request on github!

@@ -171,7 +171,7 @@ Refers to wget
 
 ___$CURLWGET___
 
-Refers to the first available installed command
+Refers to the first available installed command (default if both avilable: curl)
 
 
 ___$DD___
@@ -196,7 +196,7 @@ Refers to less
 
 ___$MORELESS___
 
-Refers to more or less, user settings
+Refers to more or less, user settings (default if both available: more)
 
 
 ___$FIND___
@@ -210,7 +210,7 @@ Variables - Paths
 
 ___$SWARM_DIR_ROOT___
 
-Refers to the path where the RC file of SWARM is located
+Refers to the path where the runtime file of SWARM is located
 
 
 ___$SWARM_DIR_DOCS___
@@ -248,17 +248,38 @@ ___$TMP_DIR___
 This is the base dir for all tempfiles
 
 
+___$SWARM\_USER\_DIR\_CONF___
+
+This contains all the configuration files that are not part of the core
+
+
+___$SWARM\_USER\_DIR\_LIBS___
+
+This contains all functions that are not part of the core
+
+
+
 Variables - Files
 -----------------
 
 ___$LOG___
 
-Refers to the log file
+Refers to the log file, to be used in your scripts
 
 
 ___$TMP___
 
-Refers to the default tmp file
+Refers to the default tmp file, to be used in your scripts
+
+
+___$SWARM\_LOG___
+
+Refers to the log file, for internal use
+
+
+___$SWARM\_TMP___
+
+Refers to the default tmp file, for internal use
 
 
 ___$SWARMRC___
@@ -290,8 +311,8 @@ Prints message to the user during init and saves log file
 
 ___log.check___
 
-Checks if **$LOG** can be written. If so, write **$DATE_CUR** to **$LOG**.
-If it cant write, it sets **$isRO=true**
+Checks if **$LOG** can be written. If so, write **$DATE_CUR** to **$LOG** and sets **$isRO=false**
+If it can not write the logfile, it sets **$isRO=true**
 
 _This is done during init, no need to call it again!_
 

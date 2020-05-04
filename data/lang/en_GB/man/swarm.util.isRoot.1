@@ -1,29 +1,20 @@
 .TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
-\fBbol-root \fP- Returns true if you are root
-\fB
+\fBswarm.util.isRoot \fP- Returns true if user is root
+
 .SH SYNOPSYS
-bol-root [\fB-h\fP|\fB--help\fP] [\fB--version\fP] [\fB-v\fP]
-.RE
-.PP
+$isRoot
 
-.SH OPTIONS
-.TP
-.B
-\fB-h\fP|\fB--help\fP
-Shows help and exit with 99
-.TP
-.B
-\fB--version\fP
-Shows version info and exit with 0
-.TP
-.B
-\fB-v\fP
-Be Verbose
 .SH EXAMPLE
+  $isRoot && \\
+.RE
+		$GREP $USER /etc/passwd || \\
+.RE
+		status 1 "No Access"
 
-bol-root && grep $USER /etc/passwd || status 1 "No Access"
+.SH SEE ALSO
+\fBbash\fP(1)
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP

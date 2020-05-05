@@ -1,0 +1,45 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBask \fP- Ask a question.
+
+.SH SYNOPSYS
+ask [\fB-options\fP] ["Question:"]
+
+.SH DESCRIPTION
+desc
+
+.SH OPTIONS
+.TP
+.B
+\fB-h\fP|\fB--help\fP
+Shows help and exit with 99
+.TP
+.B
+\fB--version\fP
+Shows version infoand exit with 0
+.TP
+.B
+\fB-n\fP
+does not accept empty strings
+.TP
+.B
+\fB-p\fP
+does not show chars on input
+
+.SH EXAMPLE
+color=$(ask "What is your favorite color?")
+.RE
+ask "What is your favorite text editor?" >> "$TMP"
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBcat\fP(1), \fBgawk\fP(1), \fBgrep\fP(1), \fBsed\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

@@ -1,0 +1,43 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fByesno\fP - Ask a simple yes or no question
+
+.SH SYNOPSYS
+yesno "Continue?"
+
+.SH DESCRIPTION
+If SWARM was translated to the language installed by the user, it will provide the according abrevihations and handle them accordingly. If a language uses the same character for both words, yes and no, it will fallback to +/-.
+
+.SH EXAMPLE
+1)
+ 	yesno "Decide now:"
+ 	if status $? "Your decision was: $(swarm.str.bool2str $?)"
+ 	then
+ 	    echo "do yes"
+ 	else
+ 	    echo "do no"
+ 	fi
+
+2)
+ 	if yesno "Do you want to do this?"
+ 	then
+ 	    echo "yes"
+ 	else
+ 	    echo "no"
+ 	fi
+3)
+ 	
+.SH SEE ALSO
+\fBbash\fP(1), \fBprintl\fP(1), \fBstatus\fP(1)
+
+
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

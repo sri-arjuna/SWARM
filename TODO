@@ -1,0 +1,22 @@
+Grosse Functionen
+-----------------
+1) bar
+2) cfg.edit
+3) swarm
+
+
+Kleine Functionen
+-----------------
+* edit
+* filemgr
+* web
+* download
+* swarm.os.install
+* swarm.util.cp @ $CP
+* swarm.util.mv @ $MV
+* asRoot
+*
+
+Additions?
+----------
+* cfg.set -a(ppend)?

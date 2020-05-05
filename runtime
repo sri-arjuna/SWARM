@@ -6,7 +6,7 @@
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
 # Changed:	2020.05.04	 	     #
-# Build:	34			     #
+# Build:	35			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -61,12 +61,13 @@
 	[[ -n "$COLUMNS" ]] && \
 		export hasCOLUMNS=true || \
 		export hasCOLUMNS=false
+	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.5
-	SWARM[BUILD]=34
+	SWARM[BUILD]=35
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
-	SWARM[LICENSE]="LGPL"
+	SWARM[LICENSE]="GPLv2"
 	# This is default 'highlighted' MACHINE or ROOT display
 	# Non-root users (if existing) have very hardcoded 'default-blue' (fallback) theme
 	SWARM[THEME]="default-red"

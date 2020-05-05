@@ -1,17 +1,19 @@
 .TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
-\fBprintl \fP- Print on the same Line
+\fBprintl \fP- Display up to three strings on the current line and do not print NL.
 \fB
 .SH SYNOPSYS
 printl [ -1 -2 -- ] [str1 [str2 [str3]]]
 
 .SH DESCRIPTION
-This function can be used to keep changing the text of the current line.
+This function can be used to keep changing the text of the current line. A good use-example for this would be the \fBprogress\fP-function. Allthough you can pipe a data stream to \fBprintl\fP it will print each output on its own line - using \fBprinte\fP.
 .RE
-A good use-example for this would be the \fBprogress\fP-function.
-.PP
-Allthough you can pipe a data stream to \fBprintl\fP it will print each output on its own line.
+* Prints one string on the left
+.RE
+* Prints two strings, left and right
+.RE
+* Prints three strings: left, centered and right
 
 .SH OPTIONS
   -1		Forces to use only left output

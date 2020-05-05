@@ -7,11 +7,13 @@ printe - Display up to three strings per line, ending with a NL
 printe [-|--] [-1 -2] [str1 [str2 [str3]]]
 
 .SH DESCRIPTION
-This is the function that should be used the most to display any data to endusers.
+This is the function that should be used the most to display any data to endusers. By default it accepts up to 3 strings per output line, this can be changed via options. To use the center, you must provide 3 strings.
 .RE
-By default it accepts up to 3 strings per output line, this can be changed via options.
+* Prints one string on the left
 .RE
-To use the center, you must provide 3 strings.
+* Prints two strings left and right
+.RE
+* Prints three strings left, centered and right
 
 .SH OPTIONS
   --		Recieve strings from pipe

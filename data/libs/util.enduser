@@ -630,7 +630,7 @@
 		# Catch arguments
 		for opt in "${@}"
 		do	if [[ "-" == "${opt:0:1}" ]]
-			then	case "${opt/-}" in
+			then	case "${opt:1}" in
 				"c")	mode="center"
 					shift
 					;;

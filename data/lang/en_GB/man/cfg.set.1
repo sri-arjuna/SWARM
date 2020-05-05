@@ -1,0 +1,42 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+  cfg.set - Set a value of a variable within a config file
+
+.SH SYNOPSYS
+  cfg.set [-i -c -s -V] "FILE" "VARNAME" "VALUE"
+
+.SH DESCRIPTION
+  This function is used to change a variable within an existing file. You can also use it to created unified VARNAMES from MiXeD SoUrCeS.
+
+
+.SH OPTIONS
+  -i		Internal search pattern is no longer case sensitive
+  -c		Writes the VALUE, and stores VALUENAME in capital chars
+  -s		Writes the VALUE, and stores VALUENAME in lower chars
+  -V		Prints a status message whether or not the value could be saved
+
+.SH EXAMPLE
+  value=$(ask "A Question:")
+.RE
+  cfg.set -V  FILE VARNAME "$value"
+.PP
+  cfg.set     /etc/default/grub GRUB_TIMEOUT 15	| Saves VALUENAME as passed (VALUENAME)
+.RE
+  cfg.set -ic /etc/default/grub grub_timeout 15	| Saves valuename as VALUENAME
+.RE
+  cfg.set -i  /etc/default/grub theme DEFAULT	| Saves valuename as passed (valuename)
+.RE
+  cfg.set -is /etc/default/grub GRUB_TIMEOUT 15	| Saves VALUENAME as valuename
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBcat\fP(1), \fBgawk\fP(1), \fBgrep\fP(1), \fBsed\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

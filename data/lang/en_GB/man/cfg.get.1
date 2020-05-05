@@ -1,0 +1,33 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBcfg.get \fP- Gets a value from a configuration file
+\fB
+.SH SYNOPSYS
+cfg.get [ [\fB-options\fP] [\fB-option\fP arg]
+
+
+.SH OPTIONS
+  -i		Is no longer case sensitive
+  -s		Use more secure retrieval, but slightly slower
+
+
+.SH EXAMPLE
+
+cfg.get \fB-l\fP /etc/tui/commands.conf
+.PP
+value=$(cfg.get /etc/tui/commands.conf PAGER)
+.RE
+.PP
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBcat\fP(1), \fBgawk\fP(1), \fBgrep\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

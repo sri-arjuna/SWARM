@@ -665,12 +665,41 @@
 	# Reads a user's input
 	# Returns the buffer
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
+	# Variables
+		hideText=""
+		notEmpty=false
+	# Catch options
+		for opt in "${@}"
+		do
+			case "$opt" in
+			"-n")
+				notEmpty=true
+				shift
+				;;
+			"-p")
+				hideText="-s"
+				shift
+				;;
+			esac
+		done
+	# Define the proper string to display
 		[[ -z "$1" ]] && \
 			local STR="$(swarm.print.goto $(( $identRight + 1 ))) ${SWARM_THEME_DATA[read]}" || \
 			local STR="$(swarm.print.goto $(( $identRight + 1 ))) $1 ${SWARM_THEME_DATA[read]}"
-
-		swarm.print.border >&2
-		$PRINTF "$STR " >&2
-		builtin read buffer
+	# Does it need a loop?
+		if $notEmpty
+		then
+			while [[ -z "$buffer" ]]
+			do
+				swarm.print.border >&2
+				$PRINTF "$STR " >&2
+				builtin read $hideText buffer
+			done
+		else
+			swarm.print.border >&2
+			$PRINTF "$STR " >&2
+			builtin read $hideText buffer
+		fi
+	# Output
 		$ECHO "$buffer" >&1
 	}

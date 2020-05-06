@@ -723,15 +723,21 @@
 	# Prepare : first use or is variable set?
 		if [[ -z "$EDITOR_GUI" ]]
 		then
-			title "SWARM_MSG_EDITOR_GUI"
-			EDITOR_GUI=$(pick $(<${SWARM_DIR_LIST}/editor_gui))
+			title "$SWARM_MSG_EDITOR_GUI"
+			list_raw="$(<${SWARM_DIR_LIST}/editor_gui)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			EDITOR_GUI=$(pick -a $list)
 			cfg.set "$SWARMRC" "EDITOR_GUI" "$EDITOR_GUI"
 			status $? "$SWARMRC" "EDITOR_GUI=$EDITOR_GUI"
 		fi
 		if [[ -z "$EDITOR_CLI" ]]
 		then
-			title "SWARM_MSG_EDITOR_CLI"
-			EDITOR_CLI=$(pick $(<${SWARM_DIR_LIST}/editor_cli))
+			title "$SWARM_MSG_EDITOR_CLI"
+			list_raw="$(<${SWARM_DIR_LIST}/editor_cli)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			EDITOR_CLI=$(pick -a $list)
 			cfg.set "$SWARMRC" "EDITOR_CLI" "$EDITOR_CLI"
 			status $? "$SWARMRC" "EDITOR_CLI=$EDITOR_CLI"
 		fi
@@ -767,32 +773,91 @@
 			esac
 		done
 	# Prepare : first use or is variable set?
-		if [[ -z "$EDITOR_GUI" ]]
+		if [[ -z "$FILEMGR_GUI" ]]
 		then
-			title "SWARM_MSG_FILEMGR_GUI"
-			FILEMGR_GUI=$(pick $(<${SWARM_DIR_LIST}/filemgr_gui))
-			cfg.set "$SWARMRC" "FILEMGR_GUI" "$EDITOR_GUI"
-			status $? "$SWARMRC" "FILEMGR_GUI=$EDITOR_GUI"
+			title "$SWARM_MSG_FILEMGR_GUI"
+			list_raw="$(<${SWARM_DIR_LIST}/filemgr_gui)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			FILEMGR_GUI=$(pick -a $list)
+			cfg.set "$SWARMRC" "FILEMGR_GUI" "$FILEMGR_GUI"
+			status $? "$SWARMRC" "FILEMGR_GUI=$FILEMGR_GUI"
 		fi
-		if [[ -z "$EDITOR_CLI" ]]
+		if [[ -z "$FILEMGR_CLI" ]]
 		then
-			title "SWARM_MSG_FILEMGR_CLI"
-			FILEMGR_CLI=$(pick $(<${SWARM_DIR_LIST}/filemgr_cli))
-			cfg.set "$SWARMRC" "FILEMGR_CLI" "$EDITOR_CLI"
-			status $? "$SWARMRC" "FILEMGRCLI=$EDITOR_CLI"
+			title "$SWARM_MSG_FILEMGR_CLI"
+			list_raw="$(<${SWARM_DIR_LIST}/filemgr_cli)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			FILEMGR_CLI=$(pick -a $list)
+			cfg.set "$SWARMRC" "FILEMGR_CLI" "$FILEMGR_CLI"
+			status $? "$SWARMRC" "FILEMGR_CLI=$FILEMGR_CLI"
 		fi
 
 	# Prepare : Get the proper editor
 		if ! $isGUI || $cli_forced
 		then	# Its console, or forced
-			[[ -n "$EDITOR_CLI" ]] && FILEMGR="$EDITOR_CLI"
+			[[ -n "$FILEMGR_CLI" ]] && FILEMGR="$FILEMGR_CLI"
 		else	# it is GUI
-			[[ -n "$EDITOR_GUI" ]] && FILEMGR="$EDITOR_GUI"
+			[[ -n "$FILEMGR_GUI" ]] && FILEMGR="$FILEMGR_GUI"
 		fi
 	# Action
 		# Sadly not all GUI filemanagers support tabs
 		for F in "${@}"
 		do
 			$FILEMGR "$F"
+		done
+	}
+	web() { # [ -c ] FILE1 FILE2 FILE3 ...
+	#
+	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+	# Variables
+		local cli_forced=false
+		local FILEMGR=""
+	# Get options
+		for opt in "${@}"
+		do
+			case "${opt}" in
+			"-c")
+				cli_forced=true
+				shift
+				;;
+			esac
+		done
+	# Prepare : first use or is variable set?
+		if [[ -z "$WEB_GUI" ]]
+		then
+			title "$SWARM_MSG_WEB_GUI"
+			list_raw="$(<${SWARM_DIR_LIST}/web_gui)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			WEB_GUI=$(pick -a $list)
+			cfg.set "$SWARMRC" "WEB_GUI" "$WEB_GUI"
+			status $? "$SWARMRC" "WEB_GUI=$WEB_GUI"
+		fi
+		if [[ -z "$WEB_CLI" ]]
+		then
+			title "$SWARM_MSG_WEB_CLI"
+			list_raw="$(<${SWARM_DIR_LIST}/web_cli)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			WEB_CLI=$(pick -a $list)
+			cfg.set "$SWARMRC" "WEB_CLI" "$WEB_CLI"
+			status $? "$SWARMRC" "WEB_CLI=$WEB_CLI"
+		fi
+
+	# Prepare : Get the proper editor
+		if ! $isGUI || $cli_forced
+		then	# Its console, or forced
+			[[ -n "$WEB_CLI" ]] && WEB="$WEB_CLI"
+		else	# it is GUI
+			[[ -n "$WEB_GUI" ]] && WEB="$WEB_GUI"
+		fi
+	# Action
+		# Sadly not all GUI filemanagers support tabs
+		for F in "${@}"
+		do
+			$WEB "$F"
 		done
 	}

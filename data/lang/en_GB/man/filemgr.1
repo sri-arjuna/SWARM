@@ -1,0 +1,25 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBfilemgr\fP - Opens passed directories in the favorite filemanager (gui/cli)
+
+.SH SYNOPSYS
+filemgr [ -c ] [/path/to/]DIR [../]DIR2 \.\.\.
+
+.SH DESCRIPTION
+Does only work in GUI, unless the end user (you) has a cli-filebrowser installed. Opens provided directories in the preferred file manager according to environment. In multi-user or emergency stage it will open "browser" and in graphical stage it will open "nautilus"
+
+.SH OPTIONS
+  -c		Force CLI application
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBprinte\fP(1), \fBpick\fP(1), \fBcfg.set\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

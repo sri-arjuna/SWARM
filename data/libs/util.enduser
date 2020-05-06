@@ -703,3 +703,49 @@
 	# Output
 		$ECHO "$buffer" >&1
 	}
+	edit() { # [ -c ] FILE1 FILE2 FILE3 ...
+	#
+	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+	# Variables
+		local cli_forced=false
+		local EDITOR=""
+	# Get options
+		for opt in "${@}"
+		do
+			case "${opt}" in
+			"-c")
+				cli_forced=true
+				shift
+				;;
+			esac
+		done
+	# Prepare : first use or is variable set?
+		if [[ -z "$EDITOR_GUI" ]]
+		then
+			title "SWARM_MSG_EDITOR_GUI"
+			EDITOR_GUI=$(pick $(<${SWARM_DIR_LIST}/editor_gui))
+			cfg.set "$SWARMRC" "EDITOR_GUI" "$EDITOR_GUI"
+			status $? "$SWARMRC" "EDITOR_GUI=$EDITOR_GUI"
+		fi
+		if [[ -z "$EDITOR_CLI" ]]
+		then
+			title "SWARM_MSG_EDITOR_CLI"
+			EDITOR_CLI=$(pick $(<${SWARM_DIR_LIST}/editor_cli))
+			cfg.set "$SWARMRC" "EDITOR_CLI" "$EDITOR_CLI"
+			status $? "$SWARMRC" "EDITOR_CLI=$EDITOR_CLI"
+		fi
+
+	# Prepare : Get the proper editor
+		if ! $isGUI || $cli_forced
+		then	# Its console, or forced
+			[[ -n "$EDITOR_CLI" ]] && EDITOR="$EDITOR_CLI"
+		else	# it is GUI
+			[[ -n "$EDITOR_GUI" ]] && EDITOR="$EDITOR_GUI"
+		fi
+	# Action
+		for F in "${@}"
+		do
+			$EDITOR "$F"
+		done
+	}

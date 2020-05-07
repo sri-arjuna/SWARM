@@ -269,7 +269,7 @@
 			$PRINTF "${posLEFT}"
 			;;
 		1)	# Just left oriented
-			if [[ $MODE = title ]]
+			if [[ "$MODE" == "title" ]]
 			then
 				local posMIDDLE="\33[$(( $numHALF - $(( ${#1} / 2 ))  + $fix_title ))G"
 				$PRINTF "${posMIDDLE}$(swarm.print.bold "$1")"

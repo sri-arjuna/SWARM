@@ -904,12 +904,13 @@
 			;;
 		esac
 	# Functions
+		#set -x
 		myRND() { #
 		#
 		#
-			VAR=$[[ $RANDOM % $MAX ]]
+			VAR=$[ $RANDOM % $MAX ]
 			while  [[ $VAR -lt $MIN ]] || [[ $VAR -gt $MAX ]]
-			do	VAR=$[[ $RANDOM % $MAX ]]
+			do	VAR=$[ $RANDOM % $MAX ]
 				# This is required, otherwise one never gets the 'max' value.
 				VAR=$(( $VAR + 1 ))
 			done
@@ -949,4 +950,5 @@
 			unset P
 		else	myRND
 		fi
+		#set +x
 	}

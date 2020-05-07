@@ -1,20 +1,21 @@
 .TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
-\fBrnd \fP- Prints a random number within range
+\fBrnd \fP- Prints a random number within range (default: 0-100)
 
 .SH SYNOPSYS
-rnd [ -p|--perm COUNT -l COUNT ] [MAXVAL] | [MINVAL MAXVAL]
+rnd [ -p COUNT VALUE ] [ -l COUNT ] [MAXVAL] | [MINVAL MAXVAL]
 
 .SH OPTIONS
-
+  -p COUNT VALUE 	Prints COUNT permutations of VALUE
+  -l COUNT		Prints COUNT random numbers
 
 .SH EXAMPLE
 rnd
 .RE
 rnd -p 4 150
 .RE
-rnd 300 320
+rnd -l 5 300 600
 
 .SH SEE ALSO
 \fBbash\fP(1)

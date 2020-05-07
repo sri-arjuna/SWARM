@@ -861,3 +861,92 @@
 			$WEB "$F"
 		done
 	}
+	rnd() { #
+	#
+	#
+		doPerm=false
+		doList=false
+		PERM_NUM=""
+		LIST_NUM=""
+		MIN=""
+		MAX=""
+		c=0
+	# Catch Arguments
+		case "$1" in
+		"-p"|"--perm")
+			doPerm=true
+			PERM_NUM="$2"
+			shift 2
+			# Permutation requires some calulations
+			case $# in
+			1|2)	# If 2, too many arguments, ignoring...
+				MIN=$(( $1 ))
+				MAX=$(( $1 + $PERM_NUM ))
+				;;
+			esac
+			#shift $#
+			;;
+		"-l"|"--list")
+			doList=true
+			LIST_NUM="$2"
+			shift 2
+			;;
+		esac
+		case $# in
+		0)	MIN=${MIN:-1}
+			MAX=${MAX:-100}
+			;;
+		1)	MIN=${MIN:-1}
+			MAX=${MAX:-$1}
+			;;
+		2)	MIN=${MIN:-$1}
+			MAX=${MAX:-$2}
+			;;
+		esac
+	# Functions
+		myRND() { #
+		#
+		#
+			VAR=$[[ $RANDOM % $MAX ]]
+			while  [[ $VAR -lt $MIN ]] || [[ $VAR -gt $MAX ]]
+			do	VAR=$[[ $RANDOM % $MAX ]]
+				# This is required, otherwise one never gets the 'max' value.
+				VAR=$(( $VAR + 1 ))
+			done
+			builtin echo "$VAR"
+		}
+	#
+	#	Display & Action
+	#
+	#
+		if $doList
+		then	declare -A L
+			while [[ $c -lt $LIST_NUM ]]
+			do
+				n=$(myRND)
+				while echo "${L[@]}" | $GREP -q $n
+				do	n=$(myRND)
+				done
+				L[$c]=$n
+				((c++))
+			done
+			echo "${L[@]}"
+			unset L
+		elif $doPerm
+		then 	# This part (permutation) is originaly from RupertPumpkin
+			# http://forums.fedoraforum.org/showpost.php?p=1748816&postcount=6
+			# but has been modified by sea to match this command functionality
+			declare -A P
+			R=$RANDOM
+			for x in $(eval builtin echo {${MIN}..${MAX}})
+			do
+				while 	[[ -n "${P[$R]}" ]]
+				do	R=$RANDOM
+				done
+				P[$R]="$x"
+			done
+			echo "${P[@]}"
+			unset P
+		else	myRND
+		fi
+	}

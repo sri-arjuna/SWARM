@@ -1136,11 +1136,36 @@
 			TAR="tar." || TAR=""
 		if [ "$ext" = "$1" ]
 		then	builtin echo ""
-	else 	builtin echo "$TAR$ext"
+		else 	builtin echo "$TAR$ext"
 		fi
 	}
-	swarm.str.genfilename() { # FILENAME
+	swarm.str.genfilename() { # FILENAME.EXT [NEXT_EXT]
+	# Prints the filename with an increased index before [NEW_]EXT
 	#
+		local this="$1"	# File without EXT?
+		local EXT=$(swarm.str.extension "$this")	# OLD
+		local ext="${2:-$EXT}"	# Fill 'ext' with old EXT if its empty
+		this="${this%%$EXT}"
 	#
-		d
+	#	Action & Display
+	#
+		# Set the initial name check according to presets:
+		# Currently only known special case: tar
+		local NAME_INIT="${this/\.tar/}.$ext"
+		NAME_INIT="${NAME_INIT/\.\./\.}"
+		if [ -f "${NAME_INIT}" ]
+		then	C=0		# Counter
+			local NAME_CHECK="${this/\.tar}.$C.$ext"
+			NAME_CHECK="${NAME_CHECK/\.\./\.}"
+			while [ -f "${NAME_CHECK}" ]
+			do	C=$(( $C + 1 ))
+				NAME_CHECK="${this/\.tar}.$C.$ext"
+				NAME_CHECK="${NAME_CHECK/\.\./\.}"
+			done
+
+			# Finally a file that does not exist yet
+			builtin echo "$NAME_CHECK" >&1
+		else	# File does not exist, and can be used
+			builtin echo "$NAME_INIT"  >&1
+		fi
 	}

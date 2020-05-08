@@ -1,0 +1,30 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.str.genfilename\fP - Generate a filename, rexplace extension if provided
+
+.SH SYNOPSYS
+swarm.str.genfilename [/path/to/]BASENAME.EXT [NEW_EXTENSION]
+
+.SH DESCRIPTION
+If a NEW_EXTENSION is provided, it will be replacing EXT (if exists).
+If BASENAME with either the existing EXT or the NEW_EXTENSION already exists, a number will be inserted before the file its new/old EXT.
+If BASENAME has neither an old EXT nor a NEW_EXTENSION, the number will become its extension.
+The number will be increased until the generated file name does not exist yet.
+
+.SH EXAMPLE
+swarm.str.genfilename tempfile.tmp
+.PP
+swarm.str.genfilename ../tempfile.tmp cache
+
+.SH SEE ALSO
+\fBbash\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

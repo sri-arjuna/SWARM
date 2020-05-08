@@ -1,0 +1,50 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBtui-status \fP- Status Messages
+\fB
+.SH SYNOPSYS
+tui-status [ -r ] RET ["Message to user" ["Center string"]]
+
+.SH DESCRIPTION
+desc
+
+.SH OPTIONS
+  -r		Return on line, do not do a newline.
+
+.SH CODES
+Interpreted exit codes are:
+
+   0 | $RET_DONE      =      [  ✓   ]  =	$(swarm.str.status $RET_DONE)
+   1 | $RET_FAIL      =      [  ✗   ]  =	$(swarm.str.status $RET_FAIL)
+   2 | $RET_WORK      =      [  ∞   ]  =	$(swarm.str.status $RET_WORK)
+   3 | $RET_TODO      =      [  ≣   ]  = 	$(swarm.str.status $RET_TODO)
+   4 | $RET_SKIP      =      [  »   ]  =	$(swarm.str.status $RET_SKIP)
+   5 | $RET_NEXT      =      [  ⇒   ]  =	$(swarm.str.status $RET_NEXT)
+   6 | $RET_BACK      =      [  ⇐   ]  =	$(swarm.str.status $RET_BACK)
+   7 | $RET_CANC      =      [  ✗   ]  =	$(swarm.str.status $RET_CANC)
+  10 | $RET_ON        =      [  ◆   ]  =	$(swarm.str.status $RET_ON)
+  11 | $RET_OFF       =      [  ◇   ]  =	$(swarm.str.status $RET_OFF)
+  99 | $RET_HELP      =      [ HELP ]  =	$(swarm.str.status $RET_HELP)
+ 111 | $RET_INFO      =      [  ⅈⅈ  ]  =	$(swarm.str.status $RET_INFO)
+ 127 | $RET_NFOUND    =      [  ✗   ]  =	$(swarm.str.status $RET_NFOUND)
+ 130 | $RET_CANC      =      [  ✗   ]  =	$(swarm.str.status $RET_CANC)
+.SS
+
+.SH EXAMPLE
+
+status 0 "Your account exists:" "$USER"
+.PP
+status \fB-r\fP 2 "Loading data\.\.\." ; sleep 1 ; status $? "Loaded data."
+
+.SH SEE ALSO
+\fBbash\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

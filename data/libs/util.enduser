@@ -235,7 +235,19 @@
 	#
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		unset RET TXT1 TXT2
-		# Check for minimal arguments
+		local doReturn=false
+	# Check for options
+		for opt in "${@}"
+		do
+			case word in
+			"-r")
+				doReturn=true
+				shift
+				;;
+
+			esac
+		done
+	# Check for minimal arguments
 		[[ -z "$1" ]] && \
 			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
 			return 99
@@ -253,7 +265,9 @@
 		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		$PRINTF "$value" >&1
 
-		$PRINTF "$posEND\n"
+		$doReturn && \
+			$PRINTF "$(swarm.print.goto 0)" || \
+			$PRINTF "$posEND\n"
 		return $RET
 	}
 	swarm.str.bool2str() { # [options] $?

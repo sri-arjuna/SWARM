@@ -719,8 +719,8 @@
 			list=""
 			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
 			EDITOR_GUI=$(pick -a $list)
-			cfg.set "$SWARMRC" "EDITOR_GUI" "$EDITOR_GUI"
-			status $? "$SWARMRC" "EDITOR_GUI=$EDITOR_GUI"
+			cfg.set "$SWARMRC" "EDITOR_GUI" "${EDITOR_GUI##*/}"
+			status $? "$SWARMRC" "EDITOR_GUI=${EDITOR_GUI##*/}"
 		fi
 		if [[ -z "$EDITOR_CLI" ]]
 		then
@@ -729,8 +729,8 @@
 			list=""
 			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
 			EDITOR_CLI=$(pick -a $list)
-			cfg.set "$SWARMRC" "EDITOR_CLI" "$EDITOR_CLI"
-			status $? "$SWARMRC" "EDITOR_CLI=$EDITOR_CLI"
+			cfg.set "$SWARMRC" "EDITOR_CLI" "${EDITOR_CLI##*/}"
+			status $? "$SWARMRC" "EDITOR_CLI=${EDITOR_CLI##*/}"
 		fi
 
 	# Prepare : Get the proper editor
@@ -771,8 +771,8 @@
 			list=""
 			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
 			FILEMGR_GUI=$(pick -a $list)
-			cfg.set "$SWARMRC" "FILEMGR_GUI" "$FILEMGR_GUI"
-			status $? "$SWARMRC" "FILEMGR_GUI=$FILEMGR_GUI"
+			cfg.set "$SWARMRC" "FILEMGR_GUI" "${FILEMGR_GUI##*/}"
+			status $? "$SWARMRC" "FILEMGR_GUI=${FILEMGR_GUI##*/}"
 		fi
 		if [[ -z "$FILEMGR_CLI" ]]
 		then
@@ -781,16 +781,16 @@
 			list=""
 			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
 			FILEMGR_CLI=$(pick -a $list)
-			cfg.set "$SWARMRC" "FILEMGR_CLI" "$FILEMGR_CLI"
-			status $? "$SWARMRC" "FILEMGR_CLI=$FILEMGR_CLI"
+			cfg.set "$SWARMRC" "FILEMGR_CLI" "${FILEMGR_CLI##*/}"
+			status $? "$SWARMRC" "FILEMGR_CLI=${FILEMGR_CLI##*/}"
 		fi
 
 	# Prepare : Get the proper editor
 		if ! $isGUI || $cli_forced
 		then	# Its console, or forced
-			[[ -n "$FILEMGR_CLI" ]] && FILEMGR="$FILEMGR_CLI"
+			[[ -n "$FILEMGR_CLI" ]] && FILEMGR="$FILEMGR_CLI##*/}"
 		else	# it is GUI
-			[[ -n "$FILEMGR_GUI" ]] && FILEMGR="$FILEMGR_GUI"
+			[[ -n "$FILEMGR_GUI" ]] && FILEMGR="$FILEMGR_GUI##*/}"
 		fi
 	# Action
 		# Sadly not all GUI filemanagers support tabs
@@ -824,8 +824,8 @@
 			list=""
 			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
 			WEB_GUI=$(pick -a $list)
-			cfg.set "$SWARMRC" "WEB_GUI" "$WEB_GUI"
-			status $? "$SWARMRC" "WEB_GUI=$WEB_GUI"
+			cfg.set "$SWARMRC" "WEB_GUI" "${WEB_GUI##*/}"
+			status $? "$SWARMRC" "WEB_GUI=${WEB_GUI##*/}"
 		fi
 		if [[ -z "$WEB_CLI" ]]
 		then
@@ -834,16 +834,16 @@
 			list=""
 			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
 			WEB_CLI=$(pick -a $list)
-			cfg.set "$SWARMRC" "WEB_CLI" "$WEB_CLI"
-			status $? "$SWARMRC" "WEB_CLI=$WEB_CLI"
+			cfg.set "$SWARMRC" "WEB_CLI" "${WEB_CLI##*/}"
+			status $? "$SWARMRC" "WEB_CLI=${WEB_CLI##*/}"
 		fi
 
 	# Prepare : Get the proper editor
 		if ! $isGUI || $cli_forced
 		then	# Its console, or forced
-			[[ -n "$WEB_CLI" ]] && WEB="$WEB_CLI"
+			[[ -n "$WEB_CLI" ]] && WEB="${WEB_CLI}"
 		else	# it is GUI
-			[[ -n "$WEB_GUI" ]] && WEB="$WEB_GUI"
+			[[ -n "$WEB_GUI" ]] && WEB="${WEB_GUI}"
 		fi
 	# Action
 		# Sadly not all GUI filemanagers support tabs
@@ -851,6 +851,67 @@
 		do
 			$WEB "$F"
 		done
+	}
+	terminals() {  ## # [ -c ] FILE1 FILE2 FILE3 ...
+	#
+	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+	# Variables
+		local cli_forced=false
+		local FILEMGR=""
+	# Get options
+		for opt in "${@}"
+		do
+			case "${opt}" in
+			"-c")
+				cli_forced=true
+				shift
+				;;
+			esac
+		done
+	# Prepare : first use or is variable set?
+		if [[ -z "$TERMINAL_GUI" ]]
+		then
+			title "$SWARM_MSG_TERMINAL_GUI"
+			list_raw="$(<${SWARM_DIR_LIST}/terminal_gui)"
+			list=""
+			list=$(for l in $list_raw;do $WHICH $l 2>/dev/null ; done)
+			TERMINAL_GUI=$(pick -a $list)
+			cfg.set "$SWARMRC" "TERMINAL_GUI" "${TERMINAL_GUI##*/}"
+			status $? "$SWARMRC" "TERMINAL_GUI=${TERMINAL_GUI##*/}"
+		fi
+
+	# Prepare : Get the proper editor
+		if ! $isGUI || $cli_forced
+		then	# Its console, or forced
+			[[ -n "$FILEMGR_CLI" ]] && FILEMGR="$FILEMGR_CLI"
+		else	# it is GUI
+			[[ -n "$FILEMGR_GUI" ]] && FILEMGR="$FILEMGR_GUI"
+		fi
+	# Action	# Handle 'known' terminal emulators
+		set -x
+		case "${TERMINAL_GUI:-$TERMINAL}" in
+		gnome-terminal|lxterminal|vte|[eipx]term)
+			[ -z "$1" ] && opt="" || opt="-e "	;;
+		termit)
+			[ -z "$1" ] && opt="" || opt="-c "	;;
+		*)	# Handle 'unknown' terminal emulators, assuming defaults
+			[ -z "$1" ] && opt="" || opt="-e "
+			# Fill the fallback, to avoid empty calls
+			TERMINAL="${TERMINAL:-xterm}"
+			tui-print -E  "$(eval_gettext '$TERMINAL: Using default option \"$opt\", please report your terminal ($TERMINAL) and its command execution option.')" >&2
+			;;
+		esac
+		# Sadly not all GUI filemanagers support tabs
+		if [[ -f "$1" ]]
+		then	# handle file
+			$TERMINAL_GUI $opt "$@"
+		else	# handle command
+			#builtin echo "$F" > "$TMP"
+			$TERMINAL_GUI $opt "$@"
+		fi
+
+		set +x
 	}
 	rnd() { #
 	#

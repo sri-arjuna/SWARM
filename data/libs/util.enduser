@@ -903,7 +903,7 @@
 			[[ -n "$FILEMGR_GUI" ]] && FILEMGR="$FILEMGR_GUI"
 		fi
 	# Action	# Handle 'known' terminal emulators
-		set -x
+		#set -x
 		case "${TERMINAL_GUI:-$TERMINAL}" in
 		gnome-terminal|lxterminal|vte|[eipx]term)
 			[ -z "$1" ] && opt="" || opt="-e "	;;
@@ -925,7 +925,7 @@
 			$TERMINAL_GUI $opt "$@"
 		fi
 
-		set +x
+		#set +x
 	}
 	rnd() { #
 	#
@@ -1263,5 +1263,5 @@
 		else	targetUsb="$(pick -a $list)"
 		fi
 		tDev="$(readlink -f $devDisk/$targetUsb)"
-		echo "$tDev" >&1
+		builtin echo "$tDev" >&1
 	}

@@ -1183,3 +1183,85 @@
 			builtin echo "$NAME_INIT"  >&1
 		fi
 	}
+	swarm.str.usb() { #
+	#
+	#
+		getspace() { # NUM
+		# Returns string of NUM space chars
+		#
+			local C=0
+			local out=""
+			while [ "$C" -lt "$1" ];do out+=" ";let C++;done
+			printf "$out"
+		}
+		getlist() { #
+		# Lists the contend of $devDisk, limits the output to usb items and removes partition entries
+		# If there is something to ignore, that one will be hidden too
+			if [ -z "$usbIgnore" ]
+			then	"$LS" "$devDisk" | "$GREP" usb | "$GREP" -v part
+			else	"$LS" "$devDisk" | "$GREP" usb | "$GREP" -v part | "$GREP" -v "$usbIgnore"
+			fi
+		}
+	# Variables
+		# Make sure there is something available
+		local msg="$SWARM_MSG_USB_CONNECT"
+		local left="$BORDER_LEFT $msg"
+		local list=""
+		local sleeper=0.0001
+		local targetusb=""
+		local devDisk=/dev/disk/by-id
+		local tDev=""
+		local AUTO=false
+	# Catch options
+		for opt in "${@}"
+		do
+			case "${opt}" in
+			"-a")
+				AUTO=true
+				;;
+			esac
+		done
+	# Loop while waiting for --item-list-without-the-ignored-ones--
+		while [ -z "$list" ] ; do
+			bar "$msg" >&2
+			list="$(getlist)" 2>/dev/null
+			list="${list/$usbIgnore}"
+			sleep $sleeper
+			[ "$sleeper" = "0.0001" ] && sleeper=1.2
+		done
+	#
+	#	Check for user settings for default behaviour.
+	#	This is required so internal card readers do not get in the way,
+	#	or so you can select to (not) use it automatically
+	#
+		#echo "if [ "$(echo $list|wc -l)" -eq 1 ] && [ -z "$usbAsk" ] "
+		if [ "$(builtin echo $list|wc -w)" -eq 1 ] && [ -z "$usbAsk" ]
+		then	# There is no setting yet, first time usage
+			printe  "$SWARM_MSG_USB_ONLY_AVAIL : ${list}" >&2
+			if yesno "$SWARM_MSG_USB_CARD_LISTED" >&2
+			then	if yesno "$SWARM_MSG_USB_CARD_IGNORE" >&2
+				then	# Save the card reader
+					cfg.set -v "$TUI_FILE_USER_SETTINGS" usbIgnore "\"$list\""
+					RET=1
+				else	printe  "$SWARM_MSG_USB_ASK_AGAIN" >&2
+					yesno "$SWARM_MSG_USB_ASK_DESC" >&2
+					RET=$?
+				fi
+			else	RET=1
+			fi
+			cfg.set -v "$TUI_FILE_USER_SETTINGS" usbAsk "$(swarm.str.bool2str -t $RET)"  >&2
+			source "$TUI_FILE_USER_SETTINGS"
+			[ -z "$usbIgnore" ] || return 1
+		fi
+	#
+	#	Ask now or not?
+	#
+		if ${usbAsk:-true}
+		then	"$AUTO" && \
+				targetUsb="$(pickt -a $list)" || \
+				targetUsb="$(pick $list)"
+		else	targetUsb="$(pick -a $list)"
+		fi
+		tDev="$(readlink -f $devDisk/$targetUsb)"
+		echo "$tDev" >&1
+	}

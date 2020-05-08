@@ -1,0 +1,31 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBtar\fP - tar, SWARM-Style
+
+.SH SYNOPSYS
+tar  [ -b -x ] [/path/to/]directory
+
+.SH DESCRIPTION
+It is designed to pass directory names to compress, it will store the tarball in current path, named like the last folder.
+
+.SH OPTIONS
+  -b		Show progress bar
+  -x		Extract tarball
+
+.SH EXAMPLE
+tar -b ../thisdir.tar.gz .
+.PP
+tar -x tarball.tar.gz
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBtar\fP(1), \fBbar\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

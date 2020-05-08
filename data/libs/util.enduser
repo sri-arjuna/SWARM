@@ -239,7 +239,7 @@
 	# Check for options
 		for opt in "${@}"
 		do
-			case word in
+			case "${opt}" in
 			"-r")
 				doReturn=true
 				shift

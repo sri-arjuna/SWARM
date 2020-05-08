@@ -7,9 +7,6 @@ Grosse Functionen
 
 Kleine Functionen
 -----------------
-* edit
-* filemgr
-* web
 * download
 * swarm.os.install
 * swarm.util.cp @ $CP
@@ -20,3 +17,4 @@ Kleine Functionen
 Additions?
 ----------
 * cfg.set -a(ppend)?
+* swarm.str.usb -> BSD ???

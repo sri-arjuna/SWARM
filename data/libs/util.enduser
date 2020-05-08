@@ -1125,3 +1125,22 @@
 		$PRINTF "\n"
 		return 0
 	}
+	swarm.str.extension() { # FILENAME
+	# Returns the file extension of a given FILENAME
+	# REturns empty if no extension was found
+		local ext="${1##*.}"
+		# Tar is the only (known to me) file extension with 2 strings
+		local TAR=""
+		# Workaround for tarballs...
+		builtin echo "$1" | $GREP -q ".tar" && \
+			TAR="tar." || TAR=""
+		if [ "$ext" = "$1" ]
+		then	builtin echo ""
+	else 	builtin echo "$TAR$ext"
+		fi
+	}
+	swarm.str.genfilename() { # FILENAME
+	#
+	#
+		d
+	}

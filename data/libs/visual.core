@@ -67,13 +67,13 @@
 		#export SWARM_THEME="$this_theme"
 		# Always use the user themes first
 		# in case someone wants to pseudo-overwrite the default themes
-		for there in "$SWARM_USER_CONFIG/themes" "$SWARM_DIR_THEMES"
+		for there in "$SWARM_DIR_THEMES" "$SWARM_USER_DIR_BASE/themes"
 		do
 			# check in each dir
 			if [[ -d "$there" ]]
 			then	if [[ -f "$there/$this_theme" ]]
-				then	source "$there/$this_theme"
-						ret=$?
+				then	source "$there/$this_theme" || init.log "$there/$this_theme : $SWARM_MSG_PHRASE_FILENOTFOUND"
+					ret=$?
 				fi
 			fi
 		done
@@ -92,10 +92,10 @@
 	}
 	swarm.theme.list() {
 	# Lists all themes available
-	# Includes SWARM_USER_CONFIG/themes and SWARM_DIR_THEMES alike
+	# Includes SWARM_USER_DIR_BASE/themes and SWARM_DIR_THEMES alike
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local d f
-		for d in "$SWARM_USER_CONFIG/themes/" "$SWARM_DIR_THEMES/"
+		for d in "$SWARM_USER_DIR_BASE/themes/" "$SWARM_DIR_THEMES/"
 		do
 			# Check if path exists and handle each file for its own
 			[[ -d "$d" ]] && \

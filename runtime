@@ -6,7 +6,7 @@
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
 # Changed:	2020.05.08	 	     #
-# Build:	38			     #
+# Build:	39			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -64,7 +64,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.6
-	SWARM[BUILD]=38
+	SWARM[BUILD]=39
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -80,7 +80,10 @@
 #
 #	This is just ment as failsafe if PATH is not set
 #	to get the most elementary basics on/of most systems
-	PATH="${PATH:-/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN}:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$BINDIR:$SBINDIR:$OS_DIR_BIN:$OS_DIR_SBIN"
+	posix_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+	configure_PATH="$BINDIR:$SBINDIR"
+	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
+	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
 	TERM="${TERM:-GNU\057Linux}"
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
@@ -109,6 +112,7 @@
 	export RMDIR=${RMDIR:-\rmdir}
 	export FIND=${FIND:-\find}
 	export TR=${TR:-\tr}
+	export WC=${WC:-\wc}
 #
 # Some other things
 #
@@ -192,7 +196,7 @@
 			tmp_len=0 \
 			tmp_empty=""
 
-	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env #{utils,sanity}
+	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env
 	do
 		# shellcheck disable=SC1090
 		source "$thisCFG"
@@ -279,7 +283,14 @@
 		for uf in "${SWARM_USER_DIR_CONF}/"* "${SWARM_USER_DIR_LIBS}/"*
 		do
 			# shellcheck disable=SC1090
-			[[ ! -d "$uf" ]] && [[ -f "$uf" ]] && source "$uf" && $PRINTF "."
+			if [[ ! -d "$uf" ]] && [[ -f "$uf" ]]
+			then
+				source "$uf" && \
+					$PRINTF "." || \
+					init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
+			else
+				init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
+			fi
 		done
 	fi
 #
@@ -298,8 +309,9 @@
 			title	"$SWARM_MSG_WELCOME_TITLE"
 			printe	"$SWARM_MSG_WELCOME_INFOLINE1"
 			printe	"$SWARM_MSG_WELCOME_INFOLINE2"
-			title	"" # Separator
-			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
+			builtin echo "$SWARM_MSG_WELCOME_INFOLINE3" | printe -2 --
+			title	"$SWARM_MSG_WORD_ARGUMENTS"
+			builtin echo "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
 			exit 0
 
 		else	# Has arguments, lets parse
@@ -363,17 +375,10 @@
 					;;
 				esac
 				;;
-			# *)	# Exit the loop
-			#	return
-			#		;;
 			esac
 		fi
 	fi
 #
-# Develeoper testings
+# Exit script or beginn user scripts
 #
-	if false && [[ "bash" = "${0/-}" ]]
-	then	#while read line;do printe "$line";done <README.md
-		cat README.md | printe -1 --
-	fi
 ${DEBUG:-false} && set +x

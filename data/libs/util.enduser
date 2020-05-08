@@ -15,16 +15,10 @@
 		case "$1" in
 		"--default")
 			shift
-			#local today=`$DATE_TODAY`
-			#local time=`$DATE_TIME`
 			swarm.print.text -h \
 				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro|$SED s,'"','',g))" \
 				" " \
 				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
-			#swarm.print.text -h \
-			#	"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}}" \
-			#	" " \
-			#	"$($PRINTF '%s ' ${@}) | ${today} / ${time}${c_reset}"
 			;;
 		*)
 			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
@@ -37,10 +31,7 @@
 	# It has blue borders and fills the inner line with white (Default-{front,back})
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.print.border -t
-		output="$1"
-		#output=$(swarm.print.underline "$output")
-		#output=$(swarm.print.bold "$output")
-		swarm.print.text -t "${c_front}${c_back}${c_invert}${output}${c_reset}"
+		swarm.print.text -t "${c_front}${c_back}${c_invert}${1}${c_reset}"
 		$PRINTF "$posEND\n"
 	}
 	printe() { # [-|--] STR1 STR2 STR3
@@ -207,28 +198,34 @@
 			return 99
 			;;
 		esac
-		[[ -z "${SWARM_MSG_YESNO_YES}${SWARM_MSG_YESNO_NO}" ]] && \
-			SWARM_MSG_YESNO_YES="+" && \
-			SWARM_MSG_YESNO_NO="-"
+		[[ -z "${SWARM_MSG_WORD_YES}${SWARM_MSG_WORD_NO}" ]] && \
+			SWARM_MSG_WORD_YES="+" && \
+			SWARM_MSG_WORD_NO="-"
 
 		swarm.print.border -e
 		# Print the text
-		$PRINTF "$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_YESNO_YES:0:1}${SWARM_MSG_YESNO_NO:0:1})"
+		local str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_YESNO_YES:0:1}${SWARM_MSG_YESNO_NO:0:1})"
 		# Move the cursor
-		$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
-		read -n1 answer
-		$PRINTF "$posEND\n"
+		local str2="$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
+		local RET=""
+		while [[ -z "$RET" ]]
+		do
+			$PRINTF "$str1"
+			$PRINTF "$str2"
+			read -n1 answer
 
-		case "$answer" in
-		"+"|"${SWARM_MSG_YESNO_YES:0:1}")
-				return 0
+			case "$answer" in
+			"+"|"${SWARM_MSG_WORD_YES:0:1}")
+				RET=0
 				;;
-		"-"|"${SWARM_MSG_YESNO_NO:0:1}")
-				return 1
+			"-"|"${SWARM_MSG_WORD_NO:0:1}")
+				RET=1
 				;;
-		*)		return 1
-				;;
-		esac
+			esac
+		done
+		# Leave line
+		$PRINTF "$posEND\n"
+		return $RET
 	}
 	status() { # $? ["Text Left"] ["Text Center"]
 	# Prints text and exit with passed return code
@@ -312,23 +309,23 @@
 		#
 			case "${mode}" in
 			"done")	case "$1" in
-				0)	out="$SWARM_MSG_BOOL2STR_DONE"	;;
-				1)	out="$SWARM_MSG_BOOL2STR_FAIL"	;;
+				0)	out="$SWARM_MSG_WORD_DONE"	;;
+				1)	out="$SWARM_MSG_WORD_FAIL"	;;
 				esac
 				;;
 			"true")	case "$1" in
-				0)	out="$SWARM_MSG_BOOL2STR_TRUE"	;;
-				1)	out="$SWARM_MSG_BOOL2STR_FALSE"	;;
+				0)	out="$SWARM_MSG_WORD_TRUE"	;;
+				1)	out="$SWARM_MSG_WORD_FALSE"	;;
 				esac
 				;;
 			"on")	case "$1" in
-				0)	out="$SWARM_MSG_BOOL2STR_ON"	;;
-				1)	out="$SWARM_MSG_BOOL2STR_OFF"	;;
+				0)	out="$SWARM_MSG_WORD_ON"	;;
+				1)	out="$SWARM_MSG_WORD_OFF"	;;
 				esac
 				;;
 			"yes"|*)	case "$1" in
-				0)	out="$SWARM_MSG_BOOL2STR_YES"	;;
-				1)	out="$SWARM_MSG_BOOL2STR_NO"	;;
+				0)	out="$SWARM_MSG_WORD_YES"	;;
+				1)	out="$SWARM_MSG_WORD_NO"	;;
 				esac
 				;;
 			esac
@@ -429,13 +426,13 @@
 	# https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html
 		[[ -z "$1" ]] && return 1
 		[[ $1 =~ ^[0-9]+$ ]] || return 1
-		printf "\\$(printf '%03o' "$1")"
+		$PRINTF "\\$($PRINTF '%03o' "$1")"
 	}
 	swarm.str.ascii2num() { # "CHAR"
 	# Returns the (ASCII-)NUM of given CHAR
 	# https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html
 		[[ $# -gt 1 ]] && return 1
-		printf "%u\n" "'${1}"
+		$PRINTF "%u\n" "'${1}"
 	}
 	printlist() { # [options] $LIST or ${ARRAYS[@]}
 	# Prints up to 3 'indexed'/numbered entries per row
@@ -569,7 +566,7 @@
 			# Can not be set earlier because of possible options
 			# Which state wether it is 'as menu' or default
 			$as_menu && \
-				local ARGS=( "${SWARM_MSG_PICK_BACK}" "${@}" ) || \
+				local ARGS=( "${SWARM_MSG_WORD_BACK}" "${@}" ) || \
 				local ARGS=("${@}")
 		# Handle auto-pick (only 1 option)
 			"$AUTO" && \
@@ -902,8 +899,8 @@
 		else	# it is GUI
 			[[ -n "$FILEMGR_GUI" ]] && FILEMGR="$FILEMGR_GUI"
 		fi
-	# Action	# Handle 'known' terminal emulators
-		#set -x
+	# Action
+		# Handle 'known' terminal emulators
 		case "${TERMINAL_GUI:-$TERMINAL}" in
 		gnome-terminal|lxterminal|vte|[eipx]term)
 			[ -z "$1" ] && opt="" || opt="-e "	;;
@@ -921,11 +918,8 @@
 		then	# handle file
 			$TERMINAL_GUI $opt "$@"
 		else	# handle command
-			#builtin echo "$F" > "$TMP"
 			$TERMINAL_GUI $opt "$@"
 		fi
-
-		#set +x
 	}
 	rnd() { #
 	#
@@ -942,7 +936,6 @@
 		"-p"|"--perm")
 			doPerm=true
 			PERM_NUM="$2"
-			shift 2
 			# Permutation requires some calulations
 			case $# in
 			1|2)	# If 2, too many arguments, ignoring...
@@ -950,7 +943,7 @@
 				MAX=$(( $1 + $PERM_NUM ))
 				;;
 			esac
-			#shift $#
+			shift 2
 			;;
 		"-l"|"--list")
 			doList=true
@@ -970,7 +963,6 @@
 			;;
 		esac
 	# Functions
-		#set -x
 		myRND() { #
 		#
 		#

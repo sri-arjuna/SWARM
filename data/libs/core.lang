@@ -12,8 +12,8 @@
 	#
 		local lang_list=$(swarm.lang.list)
 		local tmp_counter=($lang_list)
-		local lang_count=$( $ECHO ${#tmp_counter[@]} )
-		$ECHO $lang_count
+		local lang_count=$( builtin echo ${#tmp_counter[@]} )
+		builtin echo $lang_count
 	}
 	swarm.update.lang() { # en_GB
 	# Updates the current language with passed lang_code
@@ -42,8 +42,6 @@
 						# Load the selected language files
 						source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf"
 						source "$SWARM_DIR_LANG/${SWARM[LANG]}/usage.conf"
-						#source "$SWARM_DIR_LANG/${SWARM[LANG]}/help.conf"
-						#source "$SWARM_DIR_LANG/${SWARM[LANG]}/manpages.conf"
 				fi
 		fi
 		# Export all messages
@@ -58,46 +56,46 @@
 			# RET_VALUE's are in coherence with status,
 			# so you can always use them to pass them to it.
 			#RET_DONE=0
-			 STATUS_TEXT[$RET_DONE]="${SWARM_MSG_STATUS_DONE}"
+			STATUS_TEXT[$RET_DONE]="${SWARM_MSG_STATUS_DONE}"
 
 			#RET_FAIL=1
-			 STATUS_TEXT[$RET_FAIL]="${SWARM_MSG_STATUS_FAIL}"
+			STATUS_TEXT[$RET_FAIL]="${SWARM_MSG_STATUS_FAIL}"
 
 			#RET_WORK=2
-			 STATUS_TEXT[$RET_WORK]="${SWARM_MSG_STATUS_WORK}"
+			STATUS_TEXT[$RET_WORK]="${SWARM_MSG_STATUS_WORK}"
 
 			#RET_TODO=3
-			 STATUS_TEXT[$RET_TODO]="${SWARM_MSG_STATUS_TODO}"
+			STATUS_TEXT[$RET_TODO]="${SWARM_MSG_STATUS_TODO}"
 
 			#RET_SKIP=4
-			 STATUS_TEXT[$RET_SKIP]="${SWARM_MSG_STATUS_SKIP}"
+			STATUS_TEXT[$RET_SKIP]="${SWARM_MSG_STATUS_SKIP}"
 
 			#RET_NEXT=5
-			 STATUS_TEXT[$RET_NEXT]="${SWARM_MSG_STATUS_NEXT}"
+			STATUS_TEXT[$RET_NEXT]="${SWARM_MSG_STATUS_NEXT}"
 
 			#RET_BACK=6
-			 STATUS_TEXT[$RET_BACK]="${SWARM_MSG_STATUS_BACK}"
+			STATUS_TEXT[$RET_BACK]="${SWARM_MSG_STATUS_BACK}"
 
 			#RET_CANC=7
-			 STATUS_TEXT[$RET_CANC]="${SWARM_MSG_STATUS_ERROR}"
+			STATUS_TEXT[$RET_CANC]="${SWARM_MSG_STATUS_ERROR}"
 
 			#RET_ON=10
-			 STATUS_TEXT[$RET_ON]="${SWARM_MSG_STATUS_ON}"
+			STATUS_TEXT[$RET_ON]="${SWARM_MSG_STATUS_ON}"
 
 			#RET_OFF=11
-			 STATUS_TEXT[$RET_OFF]="${SWARM_MSG_STATUS_OFF}"
+			STATUS_TEXT[$RET_OFF]="${SWARM_MSG_STATUS_OFF}"
 
 			#RET_HELP=99
-			 STATUS_TEXT[$RET_HELP]="${SWARM_MSG_STATUS_HELP}"
+			STATUS_TEXT[$RET_HELP]="${SWARM_MSG_STATUS_HELP}"
 
 			#RET_INFO=111
-			 STATUS_TEXT[$RET_INFO]="${SWARM_MSG_STATUS_INFO}"
+			STATUS_TEXT[$RET_INFO]="${SWARM_MSG_STATUS_INFO}"
 
 			#RET_NFOUND=127
-			 STATUS_TEXT[$RET_NFOUND]="${SWARM_MSG_STATUS_NFOUND}"
+			STATUS_TEXT[$RET_NFOUND]="${SWARM_MSG_STATUS_NFOUND}"
 
 			#RET_CANC=130
-			 STATUS_TEXT[$RET_CANC]="${SWARM_MSG_STATUS_CANC}"
+			STATUS_TEXT[$RET_CANC]="${SWARM_MSG_STATUS_CANC}"
 
 			export ${STATUS_TEXT[@]}
 	}

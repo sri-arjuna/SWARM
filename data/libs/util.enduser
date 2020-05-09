@@ -629,6 +629,7 @@
 	# c=center ,l=left , r=right
 		# Vars
 		local mode=""
+		local doReturn=false
 		# Catch arguments
 		for opt in "${@}"
 		do	if [[ "-" == "${opt:0:1}" ]]
@@ -642,6 +643,9 @@
 				"r")	mode="right"
 					shift
 					;;
+				#"R")	doReturn=true
+				#	shift
+				#	;;
 				esac
 			fi
 		done
@@ -661,7 +665,10 @@
 			;;
 		esac
 	# Action :p
-		builtin read
+		#$doReturn && \
+		#	$PRINTF "$(swarm.print.goto 0)" && \
+		#	(var=$(builtin read -u buffer n0 2>/dev/null)) & || \
+			builtin read
 	}
 	ask() { # "A question?"
 	# Reads a user's input
@@ -1086,11 +1093,20 @@
 
 		TIME="${1/[a-zA-Z]}"
 		UNIT="$(builtin echo ${1}|$TR -d [:digit:])"
-		[ -z "$UNIT" ] && UNIT=s
-		( [ -z "$TIME" ] || builtin echo "${UNIT:-s}"|${GREP:-grep} -v ^[smh]$ ) && \
-			printf "$help_text" && exit 1
+		if [[ -z "$UNIT" ]]
+		then	if [[ -z "$TIME" ]]
+			then
+				printf "$SWARM_MSG_WAIT_USAGE"
+				return 1
+			fi
+			if ! builtin echo "${UNIT:-s}"|${GREP:-grep} -v ^[smh]
+			then
+				builtin echo "$SWARM_MSG_WAIT_FAIL"
+				return 1
+			fi
+		fi
 
-		[ -z "$2" ] && \
+		[[ -z "$2" ]] && \
 			MSG="$SWARM_MSG_WAIT_TIME_LEFT" || \
 			MSG="$2"
 		case ${UNIT,,} in
@@ -1098,6 +1114,8 @@
 		m)	minutes="$TIME"	;;
 		h)	hours="$TIME"	;;
 		*)	status 1 "$SWARM_MSG_WAIT_USAGE"
+			return $?
+			;;
 		esac
 
 		case "${UNIT,,}" in

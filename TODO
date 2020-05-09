@@ -18,3 +18,8 @@ Additions?
 ----------
 * cfg.set -a(ppend)?
 * swarm.str.usb -> BSD ???
+
+
+KNOWN ISSUES
+------------
+print{e,l}, header,title:	String splitting

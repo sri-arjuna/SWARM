@@ -388,6 +388,43 @@
 						title
 				done
 				;;
+			"stats")
+			#
+			#	Vars
+			#
+				LINER="########################################"
+				COMMENTS=0
+				LINES=0
+				BLANKS=0
+			#
+			#	Action
+			#
+				$ECHO "$LINER"
+				$ECHO -e "\tProject stats for \"${PWD##*/}\""
+			# Size
+				$ECHO "$LINER"
+				for DIR in * ; do [ -d "$DIR" ] && LIST+=" $DIR" ; done
+				#press "$LIST"
+				du -d 0 $LIST  | $AWK '{print $1" kb\tin "$2;SUM=SUM+$1} END {print NR" folders with a total of "SUM" kbytes"}'
+			# Files
+				$ECHO "$LINER"
+				FILES=$($FIND|$GREP -ve ".git" -ve ".jpg"| wc -l)
+				$ECHO "Spread across $FILES files, there are:"
+			# Lines
+				for F in $($FIND|$GREP -ve ".git" -ve ".jpg")
+				do	if [[ -f "$F" ]]
+					then
+						val_num=$(\cat "$F"|wc -l)
+						COMMENTS=$(( $COMMENTS + $($GREP ^"#" "$F" | wc -l) ))
+						LINES=$(( $LINES + $val_num ))
+						BLANKS=$(( $BLANKS + $($GREP ^[[:space:]]$ "$F" | wc -l) ))
+					fi
+				done
+				$ECHO -e "Lines Total: \t\t $LINES"
+				$ECHO -e "Comment lines: \t\t $COMMENTS"
+				$ECHO -e "Blank lines: \t\t $BLANKS"
+				$ECHO -e "Avrg lines p. file: \t $(( $LINES / $FILES ))"
+			;;
 			esac
 		fi
 	fi

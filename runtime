@@ -375,6 +375,19 @@
 					;;
 				esac
 				;;
+			"words")
+				title "$SWARM_MSG_WORD_WORDS"
+				swarm_wordlist="$($builtin echo ${!SWARM_MSG_WORD_*})"
+				declare C=0
+				for this_word in $swarm_wordlist
+				do
+					printe "$this_word" "${!this_word}"
+					C=$(( $C + 1 ))
+					[[ $C -eq 10 ]] && \
+						C=0 && \
+						title
+				done
+				;;
 			esac
 		fi
 	fi

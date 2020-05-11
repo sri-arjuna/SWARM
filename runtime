@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.05.08	 	     #
-# Build:	40			     #
+# Changed:	2020.05.11	 	     #
+# Build:	41			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -64,7 +64,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.6
-	SWARM[BUILD]=40
+	SWARM[BUILD]=41
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -83,6 +83,7 @@
 	posix_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 	configure_PATH="$BINDIR:$SBINDIR"
 	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
+	export PATH_OLD="$PATH"
 	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
 	TERM="${TERM:-GNU\057Linux}"
@@ -405,7 +406,7 @@
 				$ECHO "$LINER"
 				for DIR in * ; do [ -d "$DIR" ] && LIST+=" $DIR" ; done
 				#press "$LIST"
-				du -d 0 $LIST  | $AWK '{print $1" kb\tin "$2;SUM=SUM+$1} END {print NR" folders with a total of "SUM" kbytes"}'
+				$DU -d 0 $LIST  | $AWK '{print $1" kb\tin "$2;SUM=SUM+$1} END {print NR" folders with a total of "SUM" kbytes"}'
 			# Files
 				$ECHO "$LINER"
 				FILES=$($FIND|$GREP -ve ".git" -ve ".jpg"| wc -l)

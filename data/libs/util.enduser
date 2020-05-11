@@ -292,10 +292,10 @@
 				${LS:-\ls} -l "$1"| $AWK -v Text="$SWARM_MSG_WORD_BYTES" '{print $5 " " Text  }'
 				;;
 			"kilo")
-				${LS:-\ls} -l "$1" | $AWK -v Text="$SWARM_MSG_WORD_KILOBYTES"  '{sum=sum+$5} END {print sum/1024 " " Text  }'
+				${LS:-\ls} -l "$1" | $AWK -v Text="$SWARM_MSG_WORD_KILOBYTES"  '{print sum/1024 " " Text  }'
 				;;
 			"mega")
-				${LS:-\ls} -l "$1" | $AWK -v Text="${SWARM_MSG_WORD_MEGABYTES}"  'END {print $5/1024/1024 " " Text}'
+				${LS:-\ls} -l "$1" | $AWK -v Text="${SWARM_MSG_WORD_MEGABYTES}"  '{print $5/1024/1024 " " Text}'
 				;;
 			esac
 		fi

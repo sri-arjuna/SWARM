@@ -400,31 +400,35 @@
 			#
 			#	Action
 			#
+				cd "$SWARM_DIR_ROOT"
 				$ECHO "$LINER"
-				$ECHO -e "\tProject stats for \"${PWD##*/}\""
+				$ECHO -e "\t$SWARM_MSG_STATS_TITLE \"${PWD##*/}\""
 			# Size
 				$ECHO "$LINER"
-				for DIR in * ; do [ -d "$DIR" ] && LIST+=" $DIR" ; done
-				#press "$LIST"
-				$DU -d 0 $LIST  | $AWK '{print $1" kb\tin "$2;SUM=SUM+$1} END {print NR" folders with a total of "SUM" kbytes"}'
+				swarm.str.dirlist . | swarm.str.dirsize -- | \
+					$AWK \
+						-v FOLDER="$SWARM_MSG_STATS_FOLDERS" \
+						-v KB="$SWARM_MSG_WORD_KB" \
+						'{print $0;SUM=SUM+$1} END {print NR" "FOLDER" "SUM/1024" "KB}' | $SED s,"${SWARM_DIR_ROOT}\/",'',g
 			# Files
 				$ECHO "$LINER"
-				FILES=$($FIND|$GREP -ve ".git" -ve ".jpg"| wc -l)
-				$ECHO "Spread across $FILES files, there are:"
+				FILES=$($FIND|$GREP -ve ".git" | $WC -l)
+				eval $ECHO "$SWARM_MSG_STATS_FILES"
 			# Lines
 				for F in $($FIND|$GREP -ve ".git" -ve ".jpg")
 				do	if [[ -f "$F" ]]
 					then
-						val_num=$(\cat "$F"|wc -l)
-						COMMENTS=$(( $COMMENTS + $($GREP ^"#" "$F" | wc -l) ))
+						val_num=$(\cat "$F"|$WC -l)
+						COMMENTS=$(( $COMMENTS + $($GREP ^"#" "$F" | $WC -l) ))
 						LINES=$(( $LINES + $val_num ))
-						BLANKS=$(( $BLANKS + $($GREP ^[[:space:]]$ "$F" | wc -l) ))
+						BLANKS=$(( $BLANKS + $($GREP ^[[:space:]]$ "$F" | $WC -l) ))
 					fi
 				done
-				$ECHO -e "Lines Total: \t\t $LINES"
-				$ECHO -e "Comment lines: \t\t $COMMENTS"
-				$ECHO -e "Blank lines: \t\t $BLANKS"
-				$ECHO -e "Avrg lines p. file: \t $(( $LINES / $FILES ))"
+				$ECHO -e "$SWARM_MSG_STATS_LINES: \t\t $LINES"
+				$ECHO -e "$SWARM_MSG_STATS_COMMENTS: \t $COMMENTS"
+				$ECHO -e "$SWARM_MSG_STATS_BLANK: \t\t $BLANKS"
+				$ECHO -e "$SWARM_MSG_STATS_AVERAGE: \t $(( $LINES / $FILES ))"
+				cd "$OLDPWD"
 			;;
 			esac
 		fi

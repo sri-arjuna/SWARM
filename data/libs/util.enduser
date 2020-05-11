@@ -267,6 +267,39 @@
 			$PRINTF "$posEND\n"
 		return $RET
 	}
+	swarm.str.filesize() { # [ -k -m ] FILE
+	# Returns the filesize in bytes
+	#
+		local MODE="bytes"
+		local VAR=""
+		for opt in "${@}"
+		do
+			case "$opt" in
+			"-k")	MODE="kilo" ; VAR="$opt" ; shift	;;
+			"-m")	MODE="mega" ; VAR="$opt" ; shift	;;
+			esac
+		done
+	# Action
+		if [[ "$1" == "--" ]]
+		then
+			while read line
+			do
+				$FUNCNAME $VAR "$line"
+			done
+		else
+			case "$MODE" in
+			"bytes")
+				${LS:-\ls} -l "$1"| $AWK -v Text="$SWARM_MSG_WORD_BYTES" '{print $5 " " Text  }'
+				;;
+			"kilo")
+				${LS:-\ls} -l "$1" | $AWK -v Text="$SWARM_MSG_WORD_KILOBYTES"  '{sum=sum+$5} END {print sum/1024 " " Text  }'
+				;;
+			"mega")
+				${LS:-\ls} -l "$1" | $AWK -v Text="${SWARM_MSG_WORD_MEGABYTES}"  'END {print $5/1024/1024 " " Text}'
+				;;
+			esac
+		fi
+	}
 	swarm.str.dirlist() { # PATH
 	# Print a list of a ll subdirs
 	# Ignores .git
@@ -290,7 +323,7 @@
 	# Action
 		if [[ "$1" == "--" ]]
 		then
-			while read line ##tAcc tNum tU tG tSize
+			while read line
 			do
 				$FUNCNAME $VAR "$line"
 			done

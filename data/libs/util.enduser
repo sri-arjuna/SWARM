@@ -1094,22 +1094,22 @@
 	swarm.str.seconds2TIME() { # --> NEW ONE
 	# Returns the TIME as string
 	# as much as applicable: hh:mm:ss
-		tmp_input="${1:-0}"
-		tmp_work="$tmp_input"
+		local tmp_input="${1:-0}"
+		local tmp_work="$tmp_input"
 
-		M=60
-		H=3600
+		local M=60
+		local H=3600
 		# display
-		hours=0
-		minutes=0
-		seconds=0
+		local hours=0
+		local minutes=0
+		local seconds=0
 		# subtraction
-		sub_hrs=0
-		sub_min=0
+		local sub_hrs=0
+		local sub_min=0
 
 
 		# Get hours
-		while [ $tmp_work -ge $H ]
+		while [[ $tmp_work -ge $H ]]
 		do
 			((hours++))
 			tmp_work=$(( $tmp_work - $H ))
@@ -1124,28 +1124,28 @@
 
 
 		# Format strings - hrs
-		[ $hours -eq 0 ] && \
+		[[ $hours -eq 0 ]] && \
 			hours="0" || hours+=":"
 
 		# Format strings - mins
-		if [ ${hours/:} -eq 0 ] && [ ${minutes/:} -eq 0 ]
+		if [[ ${hours/:} -eq 0 ]] && [ ${minutes/:} -eq 0 ]
 		then	minutes="0"
-		elif [ ${hours/:} -gt 0 ]
-		then	[ ${#minutes} -lt 2 ] && \
+		elif [[ ${hours/:} -gt 0 ]]
+		then	[[ ${#minutes} -lt 2 ]] && \
 				minutes="0${minutes}:" || \
 				minutes+=":"
 		else	minutes+=":"
 		fi
 
 		# Format strings - secs
-		if [ ${hours/:} -gt 0 ] || [ ${minutes/:} -gt 0 ]
-		then	[ ${#seconds} -lt 2 ] && \
+		if [[ ${hours/:} -gt 0 ]] || [[ ${minutes/:} -gt 0 ]]
+		then	[[ ${#seconds} -lt 2 ]] && \
 				seconds="0${seconds}"
 		fi
 
 		# Remove the single '0', as they were only required to be 'math compatible'
-		[ "$hours" = "0" ] && hours=""
-		[ "$minutes" = "0" ] && minutes=""
+		[[ "$hours" = "0" ]] && hours=""
+		[[ "$minutes" = "0" ]] && minutes=""
 
 
 		builtin echo "${hours}${minutes}$seconds"
@@ -1167,10 +1167,20 @@
 
 		TIME="${1/[a-zA-Z]}"
 		UNIT="$(builtin echo ${1}|$TR -d [:digit:])"
+		[[ -z "$UNIT" ]] && UNIT="s"
+
+		#set -x
+		if [[ "$1" == "$TIME$UNIT" ]]
+		then	# all Good
+			builtin echo >/dev/null
+		else
+			builtin echo "$SWARM_MSG_WAIT_USAGE"
+			return 1
+		fi
 		if [[ -z "$UNIT" ]]
 		then	if [[ -z "$TIME" ]]
 			then
-				printf "$SWARM_MSG_WAIT_USAGE"
+				builtin echo "$SWARM_MSG_WAIT_USAGE"
 				return 1
 			fi
 			if ! builtin echo "${UNIT:-s}"|${GREP:-grep} -v ^[smh]
@@ -1179,6 +1189,7 @@
 				return 1
 			fi
 		fi
+		#set +x
 
 		[[ -z "$2" ]] && \
 			MSG="$SWARM_MSG_WAIT_TIME_LEFT" || \

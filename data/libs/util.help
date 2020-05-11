@@ -66,6 +66,9 @@
 		"BASED" | "swarm.os.based")
 			out="$SWARM_MSG_BASED_USAGE"
 			;;
+		"swarm.util.tar" | "TAR")
+			out="$SWARM_MSG_TAR_USAGE"
+			;;
 		"swarm.cleanup")
 			out="$SWARM_MSG_CLEANUP_USAGE"
 			;;
@@ -79,7 +82,7 @@
 			out="$SWARM_MSG_COLOR_LIST_USAGE"
 			;;
 		"swarm.help.usage")
-			out="$SWARM_MSG_USAGE_USAGE"
+			out="$SWARM_MSG_HELP_USAGE"
 			;;
 		"swarm.help.manpage")
 			out="$SWARM_MSG_MANPAGE_USAGE"
@@ -120,11 +123,38 @@
 		"swarm.util.which")
 			out="$"
 			;;
-		"")
-			out="$"
+		"filemgr")
+			out="$SWARM_MSG_FILEMGR_USAGE"
 			;;
-		"")
-			out=""
+		"edit")
+			out="$SWARM_MSG_EDIT_USAGE"
+			;;
+		"web")
+			out="$SWARM_MSG_WEB_USAGE"
+			;;
+		"rnd")
+			out="$SWARM_MSG_RND_USAGE"
+			;;
+		"wait")
+			out="$SWARM_MSG_WAIT_USAGE"
+			;;
+		"swarm.str.genfilename")
+			out="$SWARM_MSG_STR_GENFILENAME_USAGE"
+			;;
+		"swarm.str.dirlist")
+			out="$SWARM_MSG_STR_DIRLIST_USAGE"
+			;;
+		"swarm.str.dirsize")
+			out="$SWARM_MSG_STR_DIRSIZE_USAGE"
+			;;
+		"swarm.str.filesize")
+			out="$SWARM_MSG_STR_FILESIZE_USAGE"
+			;;
+		"swarm.str.num2ascii")
+			out="$SWARM_MSG_STR_NUM2ASCII_USAGE"
+			;;
+		"swarm.str.ascii2num")
+			out="$SWARM_MSG_STR_ASCII2NUM_USAGE"
 			;;
 		"")
 			out="$"

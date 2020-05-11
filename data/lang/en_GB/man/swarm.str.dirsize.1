@@ -1,0 +1,33 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.str.dirsize\fP - Prints the size of all files of passed directory
+
+.SH SYNOPSYS
+swarm.str.dirsize  [ -k -m ] [/path/to/]directory
+
+.SH DESCRIPTION
+Returns the size of all files of the passed directory as TYPE (default: Bytes).
+
+.SH OPTIONS
+  -k		Returns SIZE as TYPE Kilobytes
+  -m		Returns SIZE as TYPE Megabytes
+
+.SH EXAMPLE
+swarm.str.dirsize .
+.RE
+swarm.str.dirsize -m ~/Screenshots
+.RE
+swarm.str.dirlist . | swarm.str.dirsize -k --
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBfind\fP(1), \fBswarm.str.dirlist\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

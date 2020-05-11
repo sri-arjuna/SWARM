@@ -267,6 +267,47 @@
 			$PRINTF "$posEND\n"
 		return $RET
 	}
+	swarm.str.dirlist() { # PATH
+	# Print a list of a ll subdirs
+	# Ignores .git
+		local tmp=""
+		cd "$1"
+		$FIND -type d -print | while read line;do tmp="$PWD/$line" ; $ECHO "${tmp/\/\.\//\/}" ;done 2>/dev/null| $GREP -v '.git'
+		cd "$OLDPWD"
+	}
+	swarm.str.dirsize() { # [ -k -m ] DIR
+	# Prints "SIZE TYPE in DIR"
+	# -k for kilobytes ; -m for megabytes
+		local MODE=bytes
+		local VAR=""
+		for opt in "${@}"
+		do
+			case "$opt" in
+			"-k")	MODE=kilo ; VAR="$opt" ; shift	;;
+			"-m")	MODE=mega ; VAR="$opt" ; shift	;;
+			esac
+		done
+	# Action
+		if [[ "$1" == "--" ]]
+		then
+			while read line ##tAcc tNum tU tG tSize
+			do
+				$FUNCNAME $VAR "$line"
+			done
+		else
+			case "$MODE" in
+			"bytes")
+				${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="$SWARM_MSG_DIR_SIZE_IN_BYTES" '{sum=sum+$5} END {print sum " " Text " \t" DIR }'
+				;;
+			"kilo")
+				${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="$SWARM_MSG_DIR_SIZE_IN_KB"  '{sum=sum+$5} END {print sum/1024 " " Text " \t" DIR }'
+				;;
+			"mega")
+				${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="${SWARM_MSG_DIR_SIZE_IN_MB}"  '{sum=sum+$5} END {print sum/1024/1024 " " Text " \t" DIR }'
+				;;
+			esac
+		fi
+	}
 	swarm.str.bool2str() { # [options] $?
 	# Returns a string from a BOOL input
 	#

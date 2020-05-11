@@ -1,0 +1,31 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.str.dirlist\fP - Prints a list of all subdirectories
+
+.SH SYNOPSYS
+swarm.str.dirlist  [ -k -m ] [/path/to/]directory
+
+.SH DESCRIPTION
+It is designed to pass directory names to compress, it will store the tarball in current path, named like the last folder.
+
+.SH OPTIONS
+  -k		Returns SIZE as TYPE Kilobytes
+  -m		Returns SIZE as TYPE Megabytes
+
+.SH EXAMPLE
+swarm.str.dirlist .
+.PP
+swarm.str.dirlist /
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBfind\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

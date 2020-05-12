@@ -118,10 +118,10 @@
 			out="$SWARM_MSG_STR_STATUS_USAGE"
 			;;
 		"swarm.util.echo")
-			out="$"
+			out="$SWARM_MSG_ECHO_USAGE"
 			;;
 		"swarm.util.which")
-			out="$"
+			out="$SWARM_MSG_WHICH_USAGE"
 			;;
 		"filemgr")
 			out="$SWARM_MSG_FILEMGR_USAGE"
@@ -155,6 +155,36 @@
 			;;
 		"swarm.str.ascii2num")
 			out="$SWARM_MSG_STR_ASCII2NUM_USAGE"
+			;;
+		"swarm.util.cp")
+			out="$SWARM_MSG_CP_USAGE"
+			;;
+		"swarm.util.mv")
+			out="$SWARM_MSG_MV_USAGE"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
+			;;
+		"")
+			out="$"
 			;;
 		"")
 			out="$"

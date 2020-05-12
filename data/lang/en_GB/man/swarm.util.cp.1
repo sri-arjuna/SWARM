@@ -1,0 +1,32 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.util.cp\fP - Copy, TUI-Style
+
+.SH SYNOPSYS
+swarm.util.cp [-d -f -l -q] SOURCE1 [..] TARGET
+
+.SH OPTIONS
+In addition to the default options of "cp"
+  --dash		Switch to (animated) dash-mode
+  --line		Print all items on one line.
+  --long		Show long names (full passed target path)
+
+.SH EXAMPLE
+swarm.util.cp * /path/to/destination[/file]
+.RE
+swarm.util.cp \fB--long\fP * /path/to/destination[/file]
+.RE
+swarm.util.cp \fB--dash\fP \fB--line\fP * /path/to/destination[/file]
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBcp\fP(1), \fBbar\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

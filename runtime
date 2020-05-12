@@ -172,6 +172,9 @@
 # SWARM_DIR_* for proper re-use
 # source this file and type: SWARM_DIR_<hit tabulator>
 #
+	# Some might wonder why I did not use BASH_SOURCE[0]
+	# -> Because if it was sourced with a relative reference,
+	# I would not get an abslute path
 	export SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
 	export SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
 	export SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
@@ -395,7 +398,7 @@
 			#
 				LINER="########################################"
 				COMMENTS=0
-				LINES=0
+				lines=0
 				BLANKS=0
 			#
 			#	Action
@@ -415,19 +418,20 @@
 				FILES=$($FIND|$GREP -ve ".git" | $WC -l)
 				eval $ECHO "$SWARM_MSG_STATS_FILES"
 			# Lines
-				for F in $($FIND|$GREP -ve ".git" -ve ".jpg")
+				for F in $($FIND|$GREP -ve ".git" -ve ".jpg" -ve ".png" -ve ".gif")
 				do	if [[ -f "$F" ]]
 					then
 						val_num=$(\cat "$F"|$WC -l)
 						COMMENTS=$(( $COMMENTS + $($GREP ^"#" "$F" | $WC -l) ))
-						LINES=$(( $LINES + $val_num ))
+						lines=$(( $lines + $val_num ))
 						BLANKS=$(( $BLANKS + $($GREP ^[[:space:]]$ "$F" | $WC -l) ))
 					fi
 				done
-				$ECHO -e "$SWARM_MSG_STATS_LINES: \t\t $LINES"
+				$ECHO -e "$SWARM_MSG_STATS_LINES: \t\t $lines"
 				$ECHO -e "$SWARM_MSG_STATS_COMMENTS: \t $COMMENTS"
 				$ECHO -e "$SWARM_MSG_STATS_BLANK: \t\t $BLANKS"
-				$ECHO -e "$SWARM_MSG_STATS_AVERAGE: \t $(( $LINES / $FILES ))"
+				$ECHO -e "$SWARM_MSG_STATS_AVERAGE: \t $(( $lines / $FILES ))"
+
 				cd "$OLDPWD"
 			;;
 			esac

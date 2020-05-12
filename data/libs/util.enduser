@@ -1281,7 +1281,7 @@
 	swarm.str.usb() { #
 	#
 	#
-		getspace() { # NUM
+		swarm.str.usb.getspace() { # NUM
 		# Returns string of NUM space chars
 		#
 			local C=0
@@ -1289,7 +1289,7 @@
 			while [ "$C" -lt "$1" ];do out+=" ";let C++;done
 			printf "$out"
 		}
-		getlist() { #
+		swarm.str.usb.getlist() { #
 		# Lists the contend of $devDisk, limits the output to usb items and removes partition entries
 		# If there is something to ignore, that one will be hidden too
 			if [ -z "$usbIgnore" ]
@@ -1360,3 +1360,85 @@
 		tDev="$(readlink -f $devDisk/$targetUsb)"
 		builtin echo "$tDev" >&1
 	}
+	swarm.fs.get_waiting() { # KILOBYTES
+	# Returns the amount of seconds to wait
+	#
+		[ -z "$1" ] && builtin echo 0.3 && return
+		if [ $1 -lt 1000100 ]
+		then	# Its less than 1 mb
+			waiting=0.1
+		elif [ $1 -lt 100100100 ]
+		then	# Its less than 100 mb
+			waiting=0.3
+		elif [ $1 -lt 1000100100 ]
+		then	# Its less than 1 gb
+			waiting=0.4
+		elif [ $1 -lt 10100100100 ]
+		then	# Its less than 10 gb
+			waiting=0.5
+		else	# for everything higher
+			waiting=0.9
+		fi
+		builtin echo $waiting
+	}
+	swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
+	# Copies SOURCE to TARGET
+	# Returns 1 if TARGET-dir does not exist
+		#local force_Overwrite=false
+		local show_Longnames=false
+		local cp_target=""
+		local beVerbose=true
+		local optargs=""
+	# Catch arguments
+		for opt in "${@}"
+		do	case "${opt}" in
+			"-f") 	#force_Overwrite=true
+				optargs="-f"
+				shift
+				;;
+			"-l")	show_Longnames=true ; shift	;;
+			"-t")	cp_target="$2" ; shift 2	;;
+			"-q")	beVerbose=false ; shift		;;
+			"--")	# Do Pipe
+				[[ -z "$cp_target" ]] && \
+					swarm.help.manpage $FUNCNAME && \
+					return 1
+				while read line
+				do
+					\cp $optargs "$line" "$cp_target"
+				done
+				return 0
+				;;
+			*)	[[ "-" = "${opt:0:1}" ]] && \
+					optargs+=" $opt" ; shift	;;
+			esac
+		done
+	# Make sure target is set
+		local ARGS=("${@}")
+		# If TARGET was not passed as option,
+		# take last argument for it
+		if [[ -z "$cp_target" ]]
+		then
+			local tID=$(( ${#ARGS} +1 ))
+			cp_target="${ARGS[$tID]}"
+			unset ARGS[$tID]
+		fi
+	# Preparations
+		local MAX="${#ARGS[@]}"
+		local COUNT=0
+		#[[ -d "$cp_target" ]] || [[ -f "$cp_target" ]]
+
+	# Action
+		if $beVerbose
+		then	# Default handling
+			for src in "${ARGS[@]}"
+			do
+				#bar -m $MAX  -c $COUNT
+				echo \cp $optargs "$src" "$cp_target"
+			done
+		else	# Show all in one line;
+			echo \cp $optargs "${ARGS[@]}" "$cp_target"
+		fi
+	}
+	#cp -q -f $(ls) /tmp ; ls /tmp
+	#exit 18

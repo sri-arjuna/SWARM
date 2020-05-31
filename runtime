@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.05.14	 	     #
-# Build:	44			     #
+# Changed:	2020.05.31	 	     #
+# Build:	45			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -24,7 +24,7 @@
 #	./runtime docs
 #
 #	To change settings, you can use eiter one of:
-#	./runtime config user
+#	./runtime config
 #	swarm.userconfig.edit
 #	edit "$HOME/.swarmrc" "$HOME/.config/swarm/"
 #
@@ -41,7 +41,7 @@
 # RAMDISK
 # As root you can force the use of a RAMDISK
 # for configuration, log- and possible tempfiles.
-# If you should enounter a RO-system, logs and
+# If you should enounter a R(ead)O(nly)-system, logs and
 # config files will be disabled, unless you:
 # * Preset SWARM_RAMDISK=true
 # * Optionaly, you may pass SWARM_RAMDISK_DIR=/path/to/mountpoint
@@ -64,7 +64,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.7
-	SWARM[BUILD]=44
+	SWARM[BUILD]=45
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -311,7 +311,8 @@
 		then	# First Time // No arguments
 			header 	--default
 			title	"$SWARM_MSG_WELCOME_TITLE"
-			printe	"$SWARM_MSG_WELCOME_INFOLINE1" "$SWARM_MSG_WELCOME_INFOLINE2"
+			status 1 "$SWARM_MSG_WELCOME_INFOLINE1"
+			status 111 "$SWARM_MSG_WELCOME_INFOLINE2"
 			#printe
 			builtin echo "$SWARM_MSG_WELCOME_INFOLINE3" | printe -2 --
 			title	"$SWARM_MSG_WORD_ARGUMENTS"

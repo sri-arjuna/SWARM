@@ -1234,6 +1234,11 @@
 		$PRINTF "\n"
 		return 0
 	}
+	bar()  { #
+	#
+	#
+		d
+	}
 	swarm.str.extension() { # FILENAME
 	# Returns the file extension of a given FILENAME
 	# REturns empty if no extension was found
@@ -1286,13 +1291,13 @@
 		#
 			local C=0
 			local out=""
-			while [ "$C" -lt "$1" ];do out+=" ";let C++;done
+			while [[ "$C" -lt "$1" ]];do out+=" ";let C++;done
 			printf "$out"
 		}
 		swarm.str.usb.getlist() { #
 		# Lists the contend of $devDisk, limits the output to usb items and removes partition entries
 		# If there is something to ignore, that one will be hidden too
-			if [ -z "$usbIgnore" ]
+			if [[ -z "$usbIgnore" ]]
 			then	"$LS" "$devDisk" | "$GREP" usb | "$GREP" -v part
 			else	"$LS" "$devDisk" | "$GREP" usb | "$GREP" -v part | "$GREP" -v "$usbIgnore"
 			fi
@@ -1317,12 +1322,12 @@
 			esac
 		done
 	# Loop while waiting for --item-list-without-the-ignored-ones--
-		while [ -z "$list" ] ; do
+		while [[ -z "$list" ]] ; do
 			bar "$msg" >&2
 			list="$(getlist)" 2>/dev/null
 			list="${list/$usbIgnore}"
 			sleep $sleeper
-			[ "$sleeper" = "0.0001" ] && sleeper=1.2
+			[[ "$sleeper" = "0.0001" ]] && sleeper=1.2
 		done
 	#
 	#	Check for user settings for default behaviour.
@@ -1330,7 +1335,7 @@
 	#	or so you can select to (not) use it automatically
 	#
 		#echo "if [ "$(echo $list|wc -l)" -eq 1 ] && [ -z "$usbAsk" ] "
-		if [ "$(builtin echo $list|wc -w)" -eq 1 ] && [ -z "$usbAsk" ]
+		if [[ "$(builtin echo $list|$WC -w)" -eq 1 ]] && [[ -z "$usbAsk" ]]
 		then	# There is no setting yet, first time usage
 			printe  "$SWARM_MSG_USB_ONLY_AVAIL : ${list}" >&2
 			if yesno "$SWARM_MSG_USB_CARD_LISTED" >&2
@@ -1363,17 +1368,17 @@
 	swarm.fs.get_waiting() { # KILOBYTES
 	# Returns the amount of seconds to wait
 	#
-		[ -z "$1" ] && builtin echo 0.3 && return
-		if [ $1 -lt 1000100 ]
+		[[ -z "$1" ]] && builtin echo 0.3 && return
+		if [[ $1 -lt 1000100 ]]
 		then	# Its less than 1 mb
 			waiting=0.1
-		elif [ $1 -lt 100100100 ]
+		elif [[ $1 -lt 100100100 ]]
 		then	# Its less than 100 mb
 			waiting=0.3
-		elif [ $1 -lt 1000100100 ]
+		elif [[ $1 -lt 1000100100 ]]
 		then	# Its less than 1 gb
 			waiting=0.4
-		elif [ $1 -lt 10100100100 ]
+		elif [[ $1 -lt 10100100100 ]]
 		then	# Its less than 10 gb
 			waiting=0.5
 		else	# for everything higher

@@ -1445,8 +1445,9 @@
 				COUNT=$(( $COUNT + 1 ))
 			done
 		else	# Show all in one line;
-			bar
+			bar "$SWARM_MSG_WORD_COPYING $SWARM_MSG_WORD_FILES"
 			\cp $optargs "${ARGS[@]}" "$cp_target"
+			status $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILES"
 		fi
 	}
 	#cp -q -f $(ls) /tmp ; ls /tmp

@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2020		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.05.13	 	     #
-# Build:	43			     #
+# Changed:	2020.05.14	 	     #
+# Build:	44			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -64,7 +64,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.7
-	SWARM[BUILD]=43
+	SWARM[BUILD]=44
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -102,9 +102,9 @@
 	export TOUCH=${TOUCH:-\touch}
 	export PWD_EXEC=${PWD_EXEC:-\pwd}
 	export TPUT="${TPUT:-tput}"
-
-	export SU=${SU:-\su}
-	export SUDO=${SUDO:-\sudo}
+	# SU and SUDO must be empty if the command was not found
+	export SU=${SU}
+	export SUDO=${SUDO}
 	export ID=${ID:-\id}
 	export WHOAMI=${WHOAMI:-\whoami}
 	export SORT=${SORT:-\sort}		# NOT a GNU coreutil
@@ -242,8 +242,8 @@
 				 ${doLogExt:-false} &&  \
 					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this"
 			fi
-		else
-			$PRINTF '%s\n' "$SWARM_MSG_INIT_FILE_MISSING $this"
+		#else
+		#	[[ "*" == "$this" ]] || $PRINTF '%s\n' "$SWARM_MSG_INIT_FILE_MISSING $this"
 		fi
 	done
 	unset tmp_swarm_loading \
@@ -311,8 +311,8 @@
 		then	# First Time // No arguments
 			header 	--default
 			title	"$SWARM_MSG_WELCOME_TITLE"
-			printe	"$SWARM_MSG_WELCOME_INFOLINE1"
-			printe	"$SWARM_MSG_WELCOME_INFOLINE2"
+			printe	"$SWARM_MSG_WELCOME_INFOLINE1" "$SWARM_MSG_WELCOME_INFOLINE2"
+			#printe
 			builtin echo "$SWARM_MSG_WELCOME_INFOLINE3" | printe -2 --
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
 			builtin echo "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."

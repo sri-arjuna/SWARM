@@ -1435,14 +1435,18 @@
 
 	# Action
 		if $beVerbose
-		then	# Default handling
+		then	# Show each file on its own line
 			for src in "${ARGS[@]}"
 			do
-				#bar -m $MAX  -c $COUNT
-				echo \cp $optargs "$src" "$cp_target"
+				$show_Longnames && src_show="$src" || src_show="${src##*/}"
+				bar -m $MAX  -c $COUNT "$SWARM_MSG_WORD_COPYING : $src"
+				\cp $optargs "$src" "$cp_target"
+				status $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: $src"
+				COUNT=$(( $COUNT + 1 ))
 			done
 		else	# Show all in one line;
-			echo \cp $optargs "${ARGS[@]}" "$cp_target"
+			bar
+			\cp $optargs "${ARGS[@]}" "$cp_target"
 		fi
 	}
 	#cp -q -f $(ls) /tmp ; ls /tmp

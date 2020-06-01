@@ -318,7 +318,6 @@
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
 			builtin echo "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
 			exit 0
-
 		else	# Has arguments, lets parse
 			$PRINTF "$(swarm.print.goto 0)"
 			case "$1" in
@@ -330,6 +329,10 @@
 			"config")
 				shift
 				swarm.eu.show.config
+				exit $?
+				;;
+			"demo")
+				swarm.eu.demo
 				exit $?
 				;;
 			"help" | "--help" | "-h")
@@ -441,4 +444,4 @@
 #
 # Exit script or beginn user scripts
 #
-${DEBUG:-false} && set +x
+! ${DEBUG:-false} || set +x

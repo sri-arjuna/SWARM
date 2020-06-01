@@ -98,12 +98,17 @@
 		for d in "$SWARM_USER_DIR_BASE/themes/" "$SWARM_DIR_THEMES/"
 		do
 			# Check if path exists and handle each file for its own
-			[[ -d "$d" ]] && \
-				for f in $($LS "$d")
+			if [[ -d "$d" ]]
+			then	# It exists, lets parse it
+				for f in "$d"/* #$($LS "$d")
 				do
 					# Output only if it really is a file
 					[[ -f "$f" ]] && $PRINTF '%s\n' "${f##*/}"
 				done
+			else	# It does not exist yet
+				# Lets prepare for custom themes
+				$MKDIR "$d"
+			fi
 		done
 	}
 	swarm.init.theme () { #

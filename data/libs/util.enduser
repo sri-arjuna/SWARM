@@ -191,6 +191,8 @@
 	# Ask a yes/no question, returns 0/true for yes and 1/false for no
 	# y/n are taken from language file and are used in code
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		local Y="${SWARM_MSG_WORD_YES:0:1}"
+		local N="${SWARM_MSG_WORD_NO:0:1}"
 		# Check if 'yesno' is empty, if so, fill with fallback values
 		case "$1" in
 		"--help"|"-h")
@@ -204,7 +206,8 @@
 
 		swarm.print.border -e
 		# Print the text
-		local str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${SWARM_MSG_YESNO_YES:0:1}${SWARM_MSG_YESNO_NO:0:1})"
+		local yn="${SWARM_MSG_WORD_YES:0:1}${SWARM_MSG_WORD_NO:0:1}"
+		local str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${yn,,})"
 		# Move the cursor
 		local str2="$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
 		local RET=""
@@ -212,13 +215,13 @@
 		do
 			$PRINTF "$str1"
 			$PRINTF "$str2"
-			read -n1 answer
+			builtin read -n 1 answer
 
 			case "$answer" in
-			"+"|"${SWARM_MSG_WORD_YES:0:1}")
+			"+"|"${Y,,}")
 				RET=0
 				;;
-			"-"|"${SWARM_MSG_WORD_NO:0:1}")
+			"-"|"${N,,}")
 				RET=1
 				;;
 			esac
@@ -991,7 +994,7 @@
 			[ -z "$1" ] && opt="" || opt="-e "
 			# Fill the fallback, to avoid empty calls
 			TERMINAL="${TERMINAL:-xterm}"
-			tui-print -E  "$(eval_gettext '$TERMINAL: Using default option \"$opt\", please report your terminal ($TERMINAL) and its command execution option.')" >&2
+			printe -E  "$(eval_gettext '$TERMINAL: Using default option \"$opt\", please report your terminal ($TERMINAL) and its command execution option.')" >&2
 			;;
 		esac
 		# Sadly not all GUI filemanagers support tabs
@@ -1276,8 +1279,8 @@
 		# Resets the counter according to passed ID
 		# Needs to be one, otherwise last item is too low
 			if "$hasID"
-			then	cfg.set "$TMPFILE" "$ID" 1
-			else	echo 1 > "$TMPFILE"
+			then	cfg.set "${TMPFILE}.id" "$ID" 1
+			else	builtin echo 1 > "$TMPFILE"
 			fi
 			#echo was here
 		}
@@ -1286,17 +1289,17 @@
 		#
 			[ -z "$1" ] && return 1
 			if "$hasID"
-			then	cfg.set "$TMPFILE" "$ID" "$1"
-			else	echo "$1" > "$TMPFILE"
+			then	cfg.set "${TMPFILE}.id" "$ID" "$1"
+			else	builtin echo "$1" > "$TMPFILE"
 			fi
 		}
 		function read_tmp() {
 		# Reads VAL in the temp file according to passed id
 		# Returns VAL
 			if "$hasID"
-			then	cfg.get "$TMPFILE" "$ID"
+			then	cfg.get "${TMPFILE}.id" "$ID"
 				return "$?"
-			else	cat "$TMPFILE"
+			else	$CAT "$TMPFILE"
 				return "$?"
 			fi
 		}
@@ -1344,18 +1347,19 @@
 	#
 		MESSAGE="$1"
 		TYPE=$(simple_status)
-		TUI_DIR_TEMP="${TUI_DIR_TEMP:-/tmp}"
+		SWARM_TMP_DIR="${SWARM_TMP_DIR:-/tmp}"
 		if "$hasID"
-		then	TMPFILE="$TUI_DIR_TEMP/tui-progress_ids.tmp"
-		else	TMPFILE="$TUI_DIR_TEMP/tui-progress_default.tmp"
+		then	TMPFILE="$SWARM_TMP_DIR/tui-progress_ids.tmp"
+		else	TMPFILE="$SWARM_TMP_DIR/tui-progress_default.tmp"
 		fi
-		trap "rm $TMPFILE ; traps_restore" INT ABRT 2>/dev/null
+		#trap "rm $TMPFILE ; traps_restore" INT ABRT 2>/dev/null
 	#
 	#	Something quick?
 	#
 		$doReset && \
 			reset_tmp #&& \
 			#exit 0
+
 	#
 	#	Prepare required tasks from options
 	#
@@ -1363,7 +1367,7 @@
 		DASH|NUM)
 			# Create initial temp file if none exists
 			if [ ! -f "$TMPFILE" ]
-			then	if tui-bol-dir "$TUI_DIR_TEMP"
+			then	if tui-bol-dir "$SWARM_TMP_DIR"
 				then	touch "$TMPFILE"
 				fi
 				reset_tmp #|| exit 1
@@ -1387,6 +1391,7 @@
 	#
 	#	Generate output string, and save values
 	#
+		#swarm.update.geometry
 		POS=""
 		case "${TYPE}" in
 		DASH)	# Regular animated dash
@@ -1397,9 +1402,9 @@
 			case $VAL in
 			0|1|2)	STATUS="${POS}[  ${INDI[$VAL]}   ]"	;;
 			# Below is a failback setting (injection protection)
-			3)	source "$TUI_DIR_THEMES/${TUI_THEME:-default}"
+			3)	#source "$SWARM_DIR_THEMES/${SWARM_THEME:-default-blue}"
 				#STATUS="${POS}${STATUS}"
-				STATUS=$(printf "${POS}[  \174   ]")
+				STATUS=$($PRINTF "${POS}[  \174   ]")
 					;;
 			esac
 			;;
@@ -1413,7 +1418,7 @@
 			fixer_fix=0
 			if "$longBar"
 			then	# Show also procent ($STATUS)
-				procent="$( echo $MAX $VAL | $AWK '{print (100/$1*$2) }' )"
+				procent="$( builtin echo $MAX $VAL | $AWK '{print (100/$1*$2) }' )"
 				[ -z "$MESSAGE" ] && fixer_fix=0 || fixer_fix=5	# Does this depend on $WIDTH?
 
 				# How many procent?
@@ -1421,7 +1426,7 @@
 				[ "$pro" -gt 100 ] && \
 					pro=100
 				[ "$pro" -ne 100 ] && \
-					cent="$( while IFS='.' read P C;do [ -z "$C" ] && echo 00 || echo $C;done<<<$procent)" && \
+					cent="$( while IFS='.' read P C;do [ -z "$C" ] && builtin echo 00 || builtin echo $C;done<<<$procent)" && \
 					cent="${cent:0:2}" || \
 					cent=00
 				case ${#pro} in
@@ -1431,8 +1436,8 @@
 				esac
 				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - ${fixer} - $fixer_fix  ))
 				#STATUS="[ ${pro}.${cent}%% ]"		# Nope
-				STATUS="[ ${pro}.${cent}%% ] ]\]"	# Ok, what?
-				len=$( echo $length $procent | $AWK '{print ($1/100*$2) }' )
+				STATUS="[ ${pro}.${cent}%% ]"	# Ok, what?
+				len=$( builtin echo $length $procent | $AWK '{print ($1/100*$2) }' )
 			else	STATUS=""
 				[ -z "$MESSAGE" ] && fixer_fix=7	# Does this depend on $WIDTH?
 				# The length that is available to print bars
@@ -1442,34 +1447,35 @@
 				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
 				len=$( echo $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
 			fi
-			bars=$(printf '%*s' ${len/.*})
-			bars=$(echo "$bars"|$SED s," ","\\$BAR",g)
+			bars=$($PRINTF '%*s' ${len/.*})
+			bars=$(builtin echo "$bars"|$SED s," ","\\$BAR",g)
 
-			bar_total="$(printf '%*s' ${length/.*})"
+			bar_total="$($PRINTF '%*s' ${length/.*})"
 			bar_total="[${bars}${bar_total:${#bars}}]"
 			PROGRESS="$bar_total"
 			;;
 		#	*)	tui-status 1 "Error, type ($TYPE) is unhandled"	;;
 		esac
-		#[ -z "$PROGRESS" ] && tui-print -S 1 "Something went terrible wrong..." && exit 1
+		#[ -z "$PROGRESS" ] && printe -S 1 "Something went terrible wrong..." && exit 1
 	#
 	#	Display & Action
 	#
-		$CLEARLINE && printf "\e[2K" &
+		$CLEARLINE && $PRINTF "\e[2K" &
+		swarm.print.border
 		case "${TYPE}" in
 		DASH|NUM)
-			tui-print "$MESSAGE" "$STATUS"
+			swarm.print.text "$MESSAGE" "$STATUS"
 			$doSave && \
 				num_save=$(( $VAL + 1 )) && \
 				save_tmp $num_save
 			;;
 		BAR)	if $longBar
 			then	[ -z "$MESSAGE" ] && \
-					tui-print "${PROGRESS}" "$STATUS" || \
-					tui-print "$MESSAGE" "${PROGRESS}${STATUS}"
+					swarm.print.text "${PROGRESS}" " " "$STATUS" || \
+					swarm.print.text "$MESSAGE" " " "${PROGRESS}${STATUS}"
 			else	[ -z "$MESSAGE" ] && \
-					tui-print "${PROGRESS}" || \
-					tui-print "$MESSAGE" "${PROGRESS}"
+					swarm.print.text "${PROGRESS}" "" ""|| \
+					swarm.print.text "$MESSAGE" " " "${PROGRESS}"
 			fi
 			;;
 		esac

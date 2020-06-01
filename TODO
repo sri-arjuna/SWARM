@@ -25,3 +25,13 @@ KNOWN ISSUES
 print{e,l}, header,title:	String splitting
 swarm.str.usb
 wait
+yesno ??
+
+
+ROADMAP:
+--------
+0.8 bar
+-- small functions
+0.9 cfg.edit
+-- additions & fixes
+1.0 swarm

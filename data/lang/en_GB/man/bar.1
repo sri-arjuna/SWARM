@@ -1,0 +1,45 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBbar\fP - Shows a progress in different ways
+
+.SH SYNOPSYS
+bar  [ options ]  [ MESSAGE ]
+
+.SH DESCRIPTION
+Finaly an as-simple-as-posisble way to show different kind of progress.
+.PP
+If passed without options - not even a message, it will only show
+.B 
+status $RET_WORK "$SWARM_MSG_WORD_WORKING..."
+as a fallback method.
+The \fB-i VALUE\fP option should be used whenever you intend to show multiple lines of progress using the \fB-B dash\fP option, to keep each line it's dash independant from the others.
+
+
+.SH OPTIONS
+  -b			Show progress bar
+  -B dash|num	Uses either a rotation dash, or uses cur/max numbers from passed options
+  -c VALUE	Sets the current value to VALUE
+  -m VALUE	Sets the maximum value to VALUE
+  
+  -C			Clears the line?
+  -i VALUE	Sets this invocation of bar to index:VALUE
+  -l			Uses long bar
+  -r			Reset
+
+.SH EXAMPLE
+  bar -B dash -i  "Working..."
+.RE
+  bar -b -m 100 -c 50 "Got the half of it!"
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBprintl\fP(1), \fBstatus\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

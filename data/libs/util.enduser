@@ -1234,10 +1234,245 @@
 		$PRINTF "\n"
 		return 0
 	}
-	bar()  { #
+	bar()  { # [options] [MESSAGE]
+	# Prints a progress bar
 	#
+		# internals
+		local TYPE=""		# Start with no display mode
+		local INDI=(  '/' '-' '\' '|' )	# Dont use tui-indi, for asynchronus display
+		local TOTAL=$[ ${#INDI[@]} -1 ]
+		#WIDTH=${COLUMNS:-$(tput cols)}
+		# id file?
+		local ID_CUR=$$	# -i ID storage id
+		local ID=""		# -i ID storage id
+		# bols
+		local CLEARLINE=false	# Clear line between display calls?
+		local hadOpts=false	# Shift only if it had opts
+		local doReset=false	# Reset the ID file?
+		local doBar=false
+		local longBar=false	# Show (& calc) the STATUS (procent)
+		local hasID=false
+		# opts
+		local MAX=""
+		local VAL=""
+		local CURRENT=""
+		local BAR='='
+		# Display
+		local PROGRESS=""
+		local STATUS=""
+		local MESSAGE=""
 	#
-		d
+	#	Functions
+	#
+		function simple_status() {
+		# Generates a single string to represent the actual task/case
+		#
+			tmp=""
+			[ ! -z "$MAX" ] && tmp="NUM"
+			$doBar && [ ! -z "$MAX" ] && tmp="BAR"
+			builtin echo "${tmp:-DASH}"
+		}
+		function reset_tmp() { # ID
+		# Resets the counter according to passed ID
+		# Needs to be one, otherwise last item is too low
+			if "$hasID"
+			then	cfg.set "$TMPFILE" "$ID" 1
+			else	echo 1 > "$TMPFILE"
+			fi
+			#echo was here
+		}
+		function save_tmp() { # VAL
+		# Saves VAL in the temp file according to passed id
+		#
+			[ -z "$1" ] && return 1
+			if "$hasID"
+			then	cfg.set "$TMPFILE" "$ID" "$1"
+			else	echo "$1" > "$TMPFILE"
+			fi
+		}
+		function read_tmp() {
+		# Reads VAL in the temp file according to passed id
+		# Returns VAL
+			if "$hasID"
+			then	cfg.get "$TMPFILE" "$ID"
+				return "$?"
+			else	cat "$TMPFILE"
+				return "$?"
+			fi
+		}
+	#
+	#	Catching Arguments
+	#
+		while : #for opt in "${@}" #while getopts "c:CB:bi:lm:rh" name
+		do 	case $1 in
+			-B)	BAR="$2"
+				hadOpts=true		;;
+			-b)	doBar=true
+				#hadOpts=true
+						;;
+			-c)	VAL="$2"
+				hadOpts=true		;;
+			-C)	CLEARLINE=true
+				#hadOpts=true
+						;;
+			-i)	ID="$2"
+				hasID=true
+				hadOpts=true		;;
+			-l)	longBar=true
+				#hadOpts=true
+						;;
+			-m)	MAX="$2"
+				hadOpts=true		;;
+			-h|--help|-\?)
+				swarm.help.usage $FUNCNAME
+				return "${RET_HELP:-111}"
+						;;
+			-r)	doReset=true
+				#hadOpts=true
+						;;
+			--) 	shift ; break ;;
+			*)	break ;;
+			esac
+			$hadOpts && \
+				shift 2 || \
+				shift 1 #$(($OPTIND - 1))
+			hadOpts=false
+		done
+
+	#
+	#	Check for all required options
+	#
+		MESSAGE="$1"
+		TYPE=$(simple_status)
+		TUI_DIR_TEMP="${TUI_DIR_TEMP:-/tmp}"
+		if "$hasID"
+		then	TMPFILE="$TUI_DIR_TEMP/tui-progress_ids.tmp"
+		else	TMPFILE="$TUI_DIR_TEMP/tui-progress_default.tmp"
+		fi
+		trap "rm $TMPFILE ; traps_restore" INT ABRT 2>/dev/null
+	#
+	#	Something quick?
+	#
+		$doReset && \
+			reset_tmp #&& \
+			#exit 0
+	#
+	#	Prepare required tasks from options
+	#
+		case "${TYPE}" in
+		DASH|NUM)
+			# Create initial temp file if none exists
+			if [ ! -f "$TMPFILE" ]
+			then	if tui-bol-dir "$TUI_DIR_TEMP"
+				then	touch "$TMPFILE"
+				fi
+				reset_tmp #|| exit 1
+			fi
+			[ -z "$VAL" ] && \
+				VAL="$(read_tmp)" && \
+				doSave=true || \
+				doSave=false
+			;;
+		BAR)	if [ -z "$VAL" ]
+			then	VAL="$(read_tmp)"
+				save_tmp "$(( $VAL + 1 ))"
+			fi
+			if [ -z "$MAX" ] || [ -z "$VAL" ]
+			then	# Improper handling
+				swarm.help.usage $FUNCNAME
+				#tui-status 1 "$(eval_gettext 'Usage: $ME [-r] [-m \$MAV_VALUE]  [-bc \$CUR_VALUE] [-l]]  \"msg\"')"
+				#exit 1
+			fi
+		esac
+	#
+	#	Generate output string, and save values
+	#
+		POS=""
+		case "${TYPE}" in
+		DASH)	# Regular animated dash
+			[ "$VAL" -gt 3 ] && VAL=0
+			n=$(( $WIDTH - ${#BORDER_LEFT} - 8 ))
+			POS="\033[${n}G"
+
+			case $VAL in
+			0|1|2)	STATUS="${POS}[  ${INDI[$VAL]}   ]"	;;
+			# Below is a failback setting (injection protection)
+			3)	source "$TUI_DIR_THEMES/${TUI_THEME:-default}"
+				#STATUS="${POS}${STATUS}"
+				STATUS=$(printf "${POS}[  \174   ]")
+					;;
+			esac
+			;;
+		NUM)	# Show increments number
+			[ $VAL -gt $MAX ] && \
+				swarm.help.usage $FUNCNAME
+				#echo "$(eval_gettext '$ME: Should have called \"${TUI_FONT_BOLD}$ME -r\" first!${TUI_FONT_RESET}')" >&2
+			STATUS="[ $VAL / $MAX ]"
+			;;
+		BAR)	# Show pro-cent only if wanted
+			fixer_fix=0
+			if "$longBar"
+			then	# Show also procent ($STATUS)
+				procent="$( echo $MAX $VAL | $AWK '{print (100/$1*$2) }' )"
+				[ -z "$MESSAGE" ] && fixer_fix=0 || fixer_fix=5	# Does this depend on $WIDTH?
+
+				# How many procent?
+				pro="${procent/.*/}"
+				[ "$pro" -gt 100 ] && \
+					pro=100
+				[ "$pro" -ne 100 ] && \
+					cent="$( while IFS='.' read P C;do [ -z "$C" ] && echo 00 || echo $C;done<<<$procent)" && \
+					cent="${cent:0:2}" || \
+					cent=00
+				case ${#pro} in
+				1)	fixer=13 ;;
+				2)	fixer=14 ;;
+				3)	fixer=15 ;;
+				esac
+				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - ${fixer} - $fixer_fix  ))
+				#STATUS="[ ${pro}.${cent}%% ]"		# Nope
+				STATUS="[ ${pro}.${cent}%% ] ]\]"	# Ok, what?
+				len=$( echo $length $procent | $AWK '{print ($1/100*$2) }' )
+			else	STATUS=""
+				[ -z "$MESSAGE" ] && fixer_fix=7	# Does this depend on $WIDTH?
+				# The length that is available to print bars
+				[ -z "$MESSAGE" ] && \
+					fixer=16 || \
+					fixer=14
+				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
+				len=$( echo $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
+			fi
+			bars=$(printf '%*s' ${len/.*})
+			bars=$(echo "$bars"|$SED s," ","\\$BAR",g)
+
+			bar_total="$(printf '%*s' ${length/.*})"
+			bar_total="[${bars}${bar_total:${#bars}}]"
+			PROGRESS="$bar_total"
+			;;
+		#	*)	tui-status 1 "Error, type ($TYPE) is unhandled"	;;
+		esac
+		#[ -z "$PROGRESS" ] && tui-print -S 1 "Something went terrible wrong..." && exit 1
+	#
+	#	Display & Action
+	#
+		$CLEARLINE && printf "\e[2K" &
+		case "${TYPE}" in
+		DASH|NUM)
+			tui-print "$MESSAGE" "$STATUS"
+			$doSave && \
+				num_save=$(( $VAL + 1 )) && \
+				save_tmp $num_save
+			;;
+		BAR)	if $longBar
+			then	[ -z "$MESSAGE" ] && \
+					tui-print "${PROGRESS}" "$STATUS" || \
+					tui-print "$MESSAGE" "${PROGRESS}${STATUS}"
+			else	[ -z "$MESSAGE" ] && \
+					tui-print "${PROGRESS}" || \
+					tui-print "$MESSAGE" "${PROGRESS}"
+			fi
+			;;
+		esac
 	}
 	swarm.str.extension() { # FILENAME
 	# Returns the file extension of a given FILENAME

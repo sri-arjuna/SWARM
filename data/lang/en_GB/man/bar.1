@@ -22,13 +22,13 @@ The \fB-i VALUE\fP option should be used whenever you intend to show multiple li
   -c VALUE	Sets the current value to VALUE
   -m VALUE	Sets the maximum value to VALUE
   
-  -C			Clears the line?
+  -C			Clears the line -> Removes content that was previously written on the same line.
   -i VALUE	Sets this invocation of bar to index:VALUE
-  -l			Uses long bar
+  -l			Show calculated percentage
   -r			Reset
 
 .SH EXAMPLE
-  bar -B dash -i  "Working..."
+  bar -B dash -i $$ "Working..."
 .RE
   bar -b -m 100 -c 50 "Got the half of it!"
 

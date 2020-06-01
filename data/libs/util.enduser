@@ -1246,7 +1246,7 @@
 		local TOTAL=$[ ${#INDI[@]} -1 ]
 		#WIDTH=${COLUMNS:-$(tput cols)}
 		# id file?
-		local ID_CUR=$$	# -i ID storage id
+		local ID_CUR="$$"	# -i ID storage id
 		local ID=""		# -i ID storage id
 		# bols
 		local CLEARLINE=false	# Clear line between display calls?
@@ -1257,7 +1257,7 @@
 		local hasID=false
 		# opts
 		local MAX=""
-		local VAL=""
+		local VAL="1"		# This is used as index for the dash animation
 		local CURRENT=""
 		local BAR='='
 		# Display
@@ -1267,7 +1267,7 @@
 	#
 	#	Functions
 	#
-		function simple_status() {
+		function bar.simple_status() {
 		# Generates a single string to represent the actual task/case
 		#
 			tmp=""
@@ -1275,32 +1275,31 @@
 			$doBar && [ ! -z "$MAX" ] && tmp="BAR"
 			builtin echo "${tmp:-DASH}"
 		}
-		function reset_tmp() { # ID
+		function bar.reset_tmp() { # ID
 		# Resets the counter according to passed ID
 		# Needs to be one, otherwise last item is too low
 			if "$hasID"
-			then	cfg.set "${TMPFILE}.id" "$ID" 1
-			else	builtin echo 1 > "$TMPFILE"
+			then	SWARM_PROGRESS_BAR_IDS[$ID]=1
+			else	SWARM_PROGRESS_BAR_IDS[$ID_CUR]=1
 			fi
-			#echo was here
+			export SWARM_PROGRESS_BAR_IDS
 		}
-		function save_tmp() { # VAL
+		function bar.save_tmp() { # VAL
 		# Saves VAL in the temp file according to passed id
 		#
 			[ -z "$1" ] && return 1
 			if "$hasID"
-			then	cfg.set "${TMPFILE}.id" "$ID" "$1"
-			else	builtin echo "$1" > "$TMPFILE"
+			then	SWARM_PROGRESS_BAR_IDS[$ID]="$1"
+			else	SWARM_PROGRESS_BAR_IDS[$ID_CUR]="$1"
 			fi
+			export SWARM_PROGRESS_BAR_IDS
 		}
-		function read_tmp() {
+		function bar.read_tmp() {
 		# Reads VAL in the temp file according to passed id
 		# Returns VAL
 			if "$hasID"
-			then	cfg.get "${TMPFILE}.id" "$ID"
-				return "$?"
-			else	$CAT "$TMPFILE"
-				return "$?"
+			then	builtin echo "${SWARM_PROGRESS_BAR_IDS[$ID]}"
+			else	builtin echo "${SWARM_PROGRESS_BAR_IDS[$ID_CUR]}"
 			fi
 		}
 	#
@@ -1346,41 +1345,21 @@
 	#	Check for all required options
 	#
 		MESSAGE="$1"
-		TYPE=$(simple_status)
-		SWARM_TMP_DIR="${SWARM_TMP_DIR:-/tmp}"
-		if "$hasID"
-		then	TMPFILE="$SWARM_TMP_DIR/tui-progress_ids.tmp"
-		else	TMPFILE="$SWARM_TMP_DIR/tui-progress_default.tmp"
-		fi
+		TYPE=$(bar.simple_status)
 		#trap "rm $TMPFILE ; traps_restore" INT ABRT 2>/dev/null
 	#
 	#	Something quick?
 	#
-		$doReset && \
-			reset_tmp #&& \
-			#exit 0
-
+		$doReset && bar.reset_tmp
+		[[ -z "$VAL" ]] && VAL="$(bar.read_tmp)"
 	#
 	#	Prepare required tasks from options
 	#
-		case "${TYPE}" in
+		case "${TYPE^^}" in
 		DASH|NUM)
-			# Create initial temp file if none exists
-			if [ ! -f "$TMPFILE" ]
-			then	if tui-bol-dir "$SWARM_TMP_DIR"
-				then	touch "$TMPFILE"
-				fi
-				reset_tmp #|| exit 1
-			fi
-			[ -z "$VAL" ] && \
-				VAL="$(read_tmp)" && \
-				doSave=true || \
-				doSave=false
+			bar.save_tmp "$(( $VAL + 1 ))"
 			;;
-		BAR)	if [ -z "$VAL" ]
-			then	VAL="$(read_tmp)"
-				save_tmp "$(( $VAL + 1 ))"
-			fi
+		BAR)	bar.save_tmp "$(( $VAL + 1 ))"
 			if [ -z "$MAX" ] || [ -z "$VAL" ]
 			then	# Improper handling
 				swarm.help.usage $FUNCNAME
@@ -1395,7 +1374,7 @@
 		POS=""
 		case "${TYPE}" in
 		DASH)	# Regular animated dash
-			[ "$VAL" -gt 3 ] && VAL=0
+			[[ "$VAL" -gt 3 ]] && VAL=0
 			n=$(( $WIDTH - ${#BORDER_LEFT} - 8 ))
 			POS="\033[${n}G"
 
@@ -1467,7 +1446,7 @@
 			swarm.print.text "$MESSAGE" "$STATUS"
 			$doSave && \
 				num_save=$(( $VAL + 1 )) && \
-				save_tmp $num_save
+				bar.save_tmp $num_save
 			;;
 		BAR)	if $longBar
 			then	[ -z "$MESSAGE" ] && \

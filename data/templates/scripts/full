@@ -56,4 +56,4 @@ source SWARM/runtime
  	header --default "${@}"
  	title "Something"
  	printe "information"
- 	return \$RET
+ 	exit \$RET

@@ -235,7 +235,7 @@
 		$PRINTF "$posEND\n"
 		return $RET
 	}
-	status() { # $? ["Text Left"] ["Text Center"]
+	status() { # [ -r -c] $? ["Text Left"] ["Text Center"]
 	# Prints text and exit with passed return code
 	#
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
@@ -249,7 +249,10 @@
 				doReturn=true
 				shift
 				;;
-
+			"-c")
+				$PRINTF "$(swarm.print.goto 0)\e[2K"
+				shift
+				;;
 			esac
 		done
 	# Check for minimal arguments
@@ -1622,6 +1625,7 @@
 	swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 	# Copies SOURCE to TARGET
 	# Returns 1 if TARGET-dir does not exist
+		[[ -z "${@}" ]] && swarm.help.usage "$FUNCNAME" && return 1
 		#local force_Overwrite=false
 		local show_Longnames=false
 		local cp_target=""
@@ -1648,7 +1652,7 @@
 				return 0
 				;;
 			*)	[[ "-" = "${opt:0:1}" ]] && \
-					optargs+=" $opt" ; shift	;;
+					optargs+=" $opt" && shift	;;
 			esac
 		done
 	# Make sure target is set
@@ -1657,7 +1661,7 @@
 		# take last argument for it
 		if [[ -z "$cp_target" ]]
 		then
-			local tID=$(( ${#ARGS} +1 ))
+			local tID=$(( ${#ARGS[@]} - 1 ))
 			cp_target="${ARGS[$tID]}"
 			unset ARGS[$tID]
 		fi
@@ -1672,15 +1676,17 @@
 			for src in "${ARGS[@]}"
 			do
 				$show_Longnames && src_show="$src" || src_show="${src##*/}"
-				bar -m $MAX  -c $COUNT "$SWARM_MSG_WORD_COPYING : $src"
+				bar -m $MAX -c $COUNT "$SWARM_MSG_WORD_COPYING : $src"
 				\cp $optargs "$src" "$cp_target"
-				status $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: $src"
+				#$PRINTF "$POS_END\n"
+				status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: $src"
 				COUNT=$(( $COUNT + 1 ))
 			done
 		else	# Show all in one line;
 			bar "$SWARM_MSG_WORD_COPYING $SWARM_MSG_WORD_FILES"
 			\cp $optargs "${ARGS[@]}" "$cp_target"
-			status $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILES"
+			#$PRINTF "$POS_END\n"
+			status $? "$SWARM_MSG_WORD_COPIED $MAX $SWARM_MSG_WORD_FILES"
 		fi
 	}
 	#cp -q -f $(ls) /tmp ; ls /tmp

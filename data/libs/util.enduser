@@ -108,81 +108,71 @@
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-	# Variables
+		#set -x
 		local MODE="none"
-		local ROW=3
-		local doPipe=false
-	# Get args
-		for opt in "${@}"
-		do
-			case "${opt/-}" in
-			"-1"|"-2")
-				ROW="${1/-}"
+		# Get args
+		case "$1" in
+		"-1"|"-2")	MODE="${1/-}"
 				shift
 				;;
-			"-"|"")
-				MODE="pipe"
-				;;
-			*)
-				MODE="normal"
-				;;
-			esac
-		done
-	# Action
-		case "$MODE" in
-			"pipe")
-				case "$ROW" in
-				"2")
-					# Read pipe, expect 2 lines
-					while read LEFT
-					do
-						read RIGHT
-						printe "$LEFT" "" "$RIGHT"
-					done
-					return
-					;;
-				"1")
-					# Read pipe, expect 1 lines
-					while read LEFT
-					do
-						printe "$LEFT"
-					done
-					return
-					;;
-				*)
-					# Read pipe, expect 3 lines (default)
-					while read LEFT
-					do
-						read CENTER; read RIGHT
-						printe "$LEFT" "$CENTER" "$RIGHT"
-					done
-					return
-					;;
-				esac
-				;;
-			"normal")
-				# Check if it makes sense to print the border
-				[[ $COLUMNS -lt $SWARM_SKIP_THEME_WIDTH ]] || swarm.print.border -e
-				case "$ROW" in
-					"0")
-
-						swarm.print.text -e
-						;;
-					"1")
-						swarm.print.border -e
-						swarm.print.text -e "$1"
-						;;
-					"2")
-						swarm.print.border -e
-						swarm.print.text -e "$1"  "$2"
-						;;
-					"3")
-						swarm.print.border -e
-						swarm.print.text -e "$1" "$2" "$3"
-						;;
-				esac
+		*)		MODE="normal"
 				;;
 		esac
+		# Get arg number if not forced yet
+		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
+		# Get pipe?
+		case "$1" in
+		"--"|"-")
+			case "$MODE" in
+			"2")
+				# Read pipe, expect 2 lines
+				while read LEFT
+				do
+					read RIGHT
+					printe "$LEFT" "" "$RIGHT"
+				done
+				return
+				;;
+			"1")
+				# Read pipe, expect 1 lines
+				while read LEFT
+				do
+					printe "$LEFT"
+				done
+				return
+				;;
+			*)
+				# Read pipe, expect 3 lines (default)
+				while read LEFT
+				do
+					read CENTER; read RIGHT
+					printe "$LEFT" "$CENTER" "$RIGHT"
+				done
+				return
+				;;
+			esac
+			;;
+		esac
+		#set +x
+		case "$MODE" in
+			"0")
+				swarm.print.border -e
+				swarm.print.text -e "" "" ""
+				;;
+			"1")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" ""
+				;;
+			"2")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" "$2"
+				;;
+			"3")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "$2" "$3"
+				;;
+		esac
+		#$PRINTF "$posEND\n"
 	}
 #
 # Visual outputs - 'End user' stuff - Core Convenience
@@ -1257,7 +1247,7 @@
 		local hasID=false
 		# opts
 		local MAX=""
-		local VAL="1"		# This is used as index for the dash animation
+		local VAL #="1"		# This is used as index for the dash animation
 		local CURRENT=""
 		local BAR='='
 		# Display
@@ -1346,17 +1336,18 @@
 	#
 		MESSAGE="$1"
 		TYPE=$(bar.simple_status)
+		VAL="${VAL:-$(bar.read_tmp)}"
 		#trap "rm $TMPFILE ; traps_restore" INT ABRT 2>/dev/null
 	#
 	#	Something quick?
 	#
-		$doReset && bar.reset_tmp
-		[[ -z "$VAL" ]] && VAL="$(bar.read_tmp)"
+		$doReset && bar.reset_tmp && VAL="$(bar.read_tmp)"
+		[[ -z "$VAL" ]] && VAL=1 && bar.reset_tmp
 	#
 	#	Prepare required tasks from options
 	#
 		case "${TYPE^^}" in
-		DASH|NUM)
+		DASH)
 			bar.save_tmp "$(( $VAL + 1 ))"
 			;;
 		BAR)	bar.save_tmp "$(( $VAL + 1 ))"
@@ -1377,6 +1368,7 @@
 			[[ "$VAL" -gt 3 ]] && VAL=0
 			n=$(( $WIDTH - ${#BORDER_LEFT} - 8 ))
 			POS="\033[${n}G"
+			POS=""
 
 			case $VAL in
 			0|1|2)	STATUS="${POS}[  ${INDI[$VAL]}   ]"	;;
@@ -1384,7 +1376,7 @@
 			3)	#source "$SWARM_DIR_THEMES/${SWARM_THEME:-default-blue}"
 				#STATUS="${POS}${STATUS}"
 				STATUS=$($PRINTF "${POS}[  \174   ]")
-					;;
+				;;
 			esac
 			;;
 		NUM)	# Show increments number
@@ -1439,22 +1431,28 @@
 	#
 	#	Display & Action
 	#
-		$CLEARLINE && $PRINTF "\e[2K" &
+		$CLEARLINE && $PRINTF "\e[2K"
 		swarm.print.border
-		case "${TYPE}" in
-		DASH|NUM)
-			swarm.print.text "$MESSAGE" "$STATUS"
-			$doSave && \
-				num_save=$(( $VAL + 1 )) && \
-				bar.save_tmp $num_save
+		case "${TYPE^^}" in
+		NUM)
+			swarm.print.text "$MESSAGE" "" "$STATUS"
+			;;
+		DASH)
+			swarm.print.text "$MESSAGE" "" "$STATUS"
+			VAL=$(( $VAL + 1 ))
+			if [[ "${TYPE^^}" == "DASH" ]]
+			then
+				[[ $VAL -ge 4 ]] && VAL=1
+			fi
+			bar.save_tmp $VAL
 			;;
 		BAR)	if $longBar
 			then	[ -z "$MESSAGE" ] && \
-					swarm.print.text "${PROGRESS}" " " "$STATUS" || \
-					swarm.print.text "$MESSAGE" " " "${PROGRESS}${STATUS}"
+					swarm.print.text "${PROGRESS}" "" "$STATUS" || \
+					swarm.print.text "$MESSAGE" "" "${PROGRESS}${STATUS}"
 			else	[ -z "$MESSAGE" ] && \
 					swarm.print.text "${PROGRESS}" "" ""|| \
-					swarm.print.text "$MESSAGE" " " "${PROGRESS}"
+					swarm.print.text "$MESSAGE" "" "${PROGRESS}"
 			fi
 			;;
 		esac

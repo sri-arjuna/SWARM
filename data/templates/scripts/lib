@@ -12,7 +12,7 @@
 	functionnameA() { # ARGS?
 	# Descriptional
 	# Text
-		$ECHO "Some code"
+		$ECHO "TODO : $FUNCNAME : Some code"
 	}
 #
 # SectionB
@@ -20,5 +20,5 @@
 	functionnameB() { # ARGS?
 	# Descriptional
 	# Text
-		$ECHO "Some code"
+		$ECHO "TODO : $FUNCNAME : Some code"
 	}

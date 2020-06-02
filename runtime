@@ -356,32 +356,8 @@
 				)
 				;;
 			"new")
-				shift
-				case "$1" in
-				"function")
-					cat<<-EO_SCREEN
-					funcname() { # [option] ARG
-					#
-					#
-					 	swarm.protect "\$FUNCNAME" "\${@}" && exit 1
-					# Variables
-					 	local RET=1
-					# Catch arguments
-					 	for opt in \${@}
-					 	do
-					 		[[ "-" == "\${opt:0:1}" ]] && \\
-					 			case "\${opt:1}" in
-					 	 		*)
-					 				printe "TODO" "\$opt"
-					 				;;
-					 			esac
-					 	done
-					# Action & Display
-					 	return \$RET
-					}
-					EO_SCREEN
-					;;
-				esac
+				swarm.eu.new.menu
+				exit $?
 				;;
 			"words")
 				title "$SWARM_MSG_WORD_WORDS"

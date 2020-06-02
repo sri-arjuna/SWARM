@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#--------------------------------
+# Your LICENSE information
+# Other descriptions
+#
+#--------------------------------
+# This script requires SWARM (Shell Wrapper And Runtime Modifier)
+# If this script is not displayed properly,
+# make sure that SWARM is at ./SWARM relative to this file.
+#--------------------------------
+source SWARM/runtime
+# For more information, please see: ./SWARM/runtime help
+#
+# Script Information
+#
+	script_version=0.1
+	ME=${0##*/}
+	script_name=${ME/.sh}
+	script_license="GPLv2"	# This is only a suggestion
+#
+# Variables
+#
+	# Defines an integer variable '$i'
+	define -i i
+#
+# Functions
+#
+	USAGE() {
+	# Prints basic usage string
+	# Please adjust as soon you know the options, if any.
+		builtin echo "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+	}
+#
+# Catch arguments
+#
+ 	while :; do
+ 		case \$1 in
+ 		-h|-\?|--help)
+ 			USAGE
+ 			exit 0
+ 			;;
+ 		--)
+ 			# General purpose pipe support, might need adjustment!
+ 			while read line;do
+ 				$FUNCNAME "$line"
+ 			done
+ 			exit 0
+ 			;;
+ 		*)
+ 			break
+ 			;;
+ 		esac
+ 		shift
+ 	done
+# Action & Display
+ 	header --default "${@}"
+ 	title "Something"
+ 	printe "information"
+ 	return \$RET

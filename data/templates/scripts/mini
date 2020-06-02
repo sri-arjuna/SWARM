@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# --------------------------------
-# This script uses requires SWARM!
-# When executing this file,
-# you must have either the dir: "SWARM"
-# or the file: "runtime" in your current directory
-# --------------------------------
-for d in . SWARM; do [[ -f "${d}/runtime" ]] && source ${d}/runtime && break ; done
+#--------------------------------
+script_version=0.1
+ME=${0##*/}
+script_name=${ME/.sh}
+#--------------------------------
+source SWARM/runtime
 
 header --default
 title yay

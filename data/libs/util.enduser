@@ -13,15 +13,22 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.print.border -h
 		case "$1" in
+		"--")
+			shift
+			while read line;do
+				header "" "$line" ""
+			done
+			return 0
+			;;
 		"--default")
 			shift
 			swarm.print.text -h \
-				"${c_front}${c_back}${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro|$SED s,'"','',g))" \
+				"${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro|$SED s,'"','',g))" \
 				" " \
-				"$($PRINTF '%s ' ${@}) | `$DATE_TODAY` / `$DATE_TIME`${c_reset}"
+				"$($PRINTF '%s ' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
 			;;
 		*)
-			swarm.print.text -h "${c_front}${c_back}$1" "$2" "$3${c_reset}"
+			swarm.print.text -h "$1" "$2" "$3"
 			;;
 		esac
 		$PRINTF "$posEND\n"
@@ -30,9 +37,17 @@
 	# This prints a single centered string on a line
 	# It has blue borders and fills the inner line with white (Default-{front,back})
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		swarm.print.border -t
-		swarm.print.text -t "${c_front}${c_back}${c_invert}${1}${c_reset}"
-		$PRINTF "$posEND\n"
+		if [[ "--" == "$1" ]]
+		then
+			while read line;do
+				title "$line"
+			done
+			return 0
+		else
+			swarm.print.border -t
+			swarm.print.text -t "${1}"
+			$PRINTF "$posEND\n"
+		fi
 	}
 	printe() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center

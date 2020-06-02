@@ -239,12 +239,12 @@
 		[[ "-" = "${1:0:1}" ]] && \
 			case ${1/-} in
 			t)	MODE=title
-				fix_title=12
+				fix_title=0
 				title_pre=""
 				title_end=""
 				shift	;;
 			h)	MODE=header
-				fix_header_r=4
+				fix_header_r=0
 				shift	;;
 			'e'|'p') shift	;;
 			esac
@@ -256,7 +256,9 @@
 			return 1
 
 		# Make sure values are udpated
+		#set +x
 		swarm.update.geometry
+		#set -x
 
 		# Get the actual string
 		local evalLeft=$($PRINTF "$1")
@@ -268,6 +270,27 @@
 		local lenEvalMiddle=${#evalMiddle}
 		local lenEvalRight=${#evalRight}
 
+		# Before we attempt to print anything, lets check about the length
+		local len_strings_total=$(( $lenEvalLeft + $lenEvalMiddle + $lenEvalRight ))
+
+		if [[ ${len_strings_total:-0} -gt $(( $COLUMNS - 6 )) ]]
+		then	case "$MODE" in
+			"basic")
+				swarm.str.split "$1" | printe -1 --
+				return 0
+				;;
+			"title")
+				swarm.str.split "$1" | title --
+				return 0
+				;;
+			"header")
+				#echo "$1" ; press
+				swarm.str.split "$1" | header --
+				return 0
+				;;
+			esac
+		fi
+
 		# Output
 		case ${#@} in
 		0)	# Nothing to print
@@ -276,29 +299,56 @@
 		1)	# Just left oriented
 			if [[ "$MODE" == "title" ]]
 			then
-				local posMIDDLE="\33[$(( $numHALF - $(( ${#1} / 2 ))  + $fix_title ))G"
-				$PRINTF "${posMIDDLE}$(swarm.print.bold "$1")"
+				local posMIDDLE="\33[$(( $numHALF - $(( ${#1} / 2 ))   ))G"
+				$PRINTF "${posMIDDLE}${c_front}${c_back}${c_invert}$(swarm.print.bold "$1")${c_reset}"
 			else
 				$PRINTF "${posLEFT}$1"
 			fi
 			#return
 			;;
 		2)	# 2nd arg is right oriented
-			$PRINTF "${posLEFT}$1"
-			local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 + $fix_header_r ))G"
-			$PRINTF "${posRIGHT}$2"
-			#return
+			#local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 ))G"
+			case "$MODE" in
+			"basic")
+				$PRINTF "${posLEFT}$1"
+				local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 ))G"
+				$PRINTF "${posRIGHT}$2"
+				;;
+			"header")
+				local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 - $fix_header_r ))G"
+				$PRINTF "${posLEFT}${c_front}${c_back}$1"
+				$PRINTF "${posRIGHT}$2${c_reset}"
+				;;
+			esac
 			;;
-		3)	# Default handling
-			local posMIDDLE="\33[$(( $numHALF - $(( ${#2} / 2 ))  + $fix_title ))G"
-			local posRIGHT="\33[$(( $numEND - $lenRight - ${lenEvalRight} - 1 + $fix_header_r ))G"
-			$PRINTF "${posLEFT}$1"
-			$PRINTF "${posMIDDLE}$2"
-			$PRINTF "${posRIGHT}$3"
+		3)
+			# Default handling
+			local posMIDDLE="\33[$(( $numHALF - $(( ${#2} / 2 ))  ))G"
+			case "$MODE" in
+			"basic")
+				local posRIGHT="\33[$(( $numEND - $identRight - ${lenEvalRight} - 1  ))G"
+				$PRINTF "${posLEFT}$1"
+				$PRINTF "${posMIDDLE}$2"
+				$PRINTF "${posRIGHT}$3"
+				;;
+			"header")
+				local posRIGHT="\33[$(( $numEND - $identRight - ${#3} - 1 - $fix_header_r ))G"
+				$PRINTF "${posLEFT}${c_front}${c_back}$1"
+				$PRINTF "${posMIDDLE}$2"
+				$PRINTF "${posRIGHT}$3${c_reset}"
+				;;
+			esac
 			;;
 		esac
 
 		$PRINTF "${posEND}"
+	}
+	swarm.str.split() { # "STRING"
+	# Splittes passed string in half at the nearest word
+	# and prints each part as a new line
+		[[ -z "$1" ]] && return 1
+		local tmp_count=$(( $(builtin echo "${1}" | $WC -c) / 2 + 1))
+		builtin echo "$1" | fold -sw $tmp_count
 	}
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM

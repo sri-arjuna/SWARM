@@ -356,7 +356,19 @@
 				)
 				;;
 			"new")
-				swarm.eu.new.menu
+				case "$2" in
+				"function")
+					shift 2
+					swarm.eu.new.function ${@}
+					;;
+				"script")
+					shift 2
+					swarm.eu.new.script ${@}
+					;;
+				*)
+					swarm.eu.new.menu
+					;;
+				esac
 				exit $?
 				;;
 			"words")

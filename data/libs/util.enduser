@@ -1679,7 +1679,7 @@
 				bar -m $MAX -c $COUNT "$SWARM_MSG_WORD_COPYING : $src"
 				\cp $optargs "$src" "$cp_target"
 				#$PRINTF "$POS_END\n"
-				status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: $src"
+				status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: $cp_target"
 				COUNT=$(( $COUNT + 1 ))
 			done
 		else	# Show all in one line;

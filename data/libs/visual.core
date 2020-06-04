@@ -168,6 +168,18 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		$PRINTF "\033[1m${@}\033[0m"
 	}
+	swarm.print.blink() { # "STR"
+	# Returns STR with wrapped code to blink
+	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		$PRINTF "\033[5m${@}\033[0m"
+	}
+	swarm.print.stroke() { # "STR"
+	# Returns STR with wrapped code for STROKE
+	#
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		$PRINTF "\033[9m${@}\033[0m"
+	}
 	swarm.print.underline() { # "STR"
 	# Returns STR with wrapped code for UNDERLINE
 	#

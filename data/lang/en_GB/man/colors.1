@@ -1,0 +1,150 @@
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBColors\fP - How to use
+
+.SH DESCRIPTION
+SWARM contains 2 sets of code variables, one full and one short variant. The full variant obviously starts with \fBSWARM_\fP and then either \fBFONT_\fP or \fBCOLOR_\fP before defining wether its \fBFG_\fP or \fBBG_\fP to finaly name the color.
+.br
+The short variant starts with either \fBc_\fP, \fBcf_\fP for foregrond or \fBcb_\fP for backgroundcolors.
+.br
+Likewise would the fonts in the short variant be called like: \fBfnt_\fP,
+.br
+
+.SH TERMINAL DEFAULTS
+	SWARM_RESET			"\\033[0m"
+.br
+	SWARM_COLOR_RESET		"\\033[0m"
+.br
+	SWARM_COLOR_INVERT		"\\033[7m"
+.br
+	SWARM_COLOR_CLEARLINE	"\\033[2k"
+.br
+
+.SH FONT MODES
+	SWARM_FONT_BOLD		"\\033[1m"
+.br
+	SWARM_FONT_STROKE		"\\033[9m"
+.br
+	SWARM_FONT_UNDERLINE	"\\033[4m"
+.br
+	SWARM_FONT_BLINK		"\\033[5m"
+.br
+
+.SH COLOR FOREGROUND
+	SWARM_COLOR_FG_BLACK	"\\033[30m"
+.br
+	SWARM_COLOR_FG_WHITE	"\\033[37m"
+.br
+	SWARM_COLOR_FG_GREEN	"\\033[32m"
+.br
+	SWARM_COLOR_FG_CYAN		"\\033[36m"
+.br
+	SWARM_COLOR_FG_RED		"\\033[31m"
+.br
+	SWARM_COLOR_FG_BLUE		"\\033[34m"
+.br
+	SWARM_COLOR_FG_YELLOW	"\\033[33m"
+.br
+	SWARM_COLOR_FG_PURPLE	"\\033[35m"
+.br
+	SWARM_COLOR_FG_GREY		"\\033[38m"
+.br
+
+.SH COLOR FOREGROUND
+	SWARM_COLOR_BG_BLACK	"\\033[40m"
+.br
+	SWARM_COLOR_BG_WHITE	"\\033[47m"
+.br
+	SWARM_COLOR_BG_GREEN	"\\033[42m"
+.br
+	SWARM_COLOR_BG_CYAN		"\\033[46m"
+.br
+	SWARM_COLOR_BG_RED		"\\033[41m"
+.br
+	SWARM_COLOR_BG_BLUE		"\\033[44m"
+.br
+	SWARM_COLOR_BG_YELLOW	"\\033[43m"
+.br
+	SWARM_COLOR_BG_PURPLE	"\\033[45m"
+.br
+	SWARM_COLOR_BG_GREY		"\\033[48m"
+.br
+
+
+
+.SH TERMINAL DEFAULTS (short)
+	c_invert		"$SWARM_COLOR_INVERT"
+.br
+	c_reset		"$SWARM_COLOR_RESET"
+.br
+	c_clear		"$SWARM_COLOR_CLEARLINE"
+.br
+	
+.SH FONT MODES (short)
+For the font modes, it is recomended to use the according function.
+.br
+For bold, this would be: \fBswarm.print.bold "Your message"\fP
+.br
+
+	fnt_bold		"$SWARM_FONT_BOLD"
+.br
+	fnt_stroke	"$SWARM_FONT_STROKE"
+.br
+	fnt_underline	"$SWARM_FONT_UNDERLINE"
+.br
+	fnt_blink		"$SWARM_FONT_BLINK"
+.br
+	
+.SH COLOR BACKGROUND (short)
+	cb_black		"$SWARM_COLOR_BG_BLACK"
+.br
+	cb_blue		"$SWARM_COLOR_BG_BLUE"
+.br
+	cb_cyan		"$SWARM_COLOR_BG_CYAN"
+.br
+	cb_green		"$SWARM_COLOR_BG_GREEN"
+.br
+	cb_grey		"$SWARM_COLOR_BG_GREY"
+.br
+	cb_purple		"$SWARM_COLOR_BG_PURPLE"
+.br
+	cb_red		"$SWARM_COLOR_BG_RED"
+.br
+	cb_white		"$SWARM_COLOR_BG_WHITE"
+.br
+	
+.SH COLOR FOREGROUND (short)
+	cf_black		"$SWARM_COLOR_FG_BLACK"
+.br
+	cf_blue		"$SWARM_COLOR_FG_BLUE"
+.br
+	cf_cyan		"$SWARM_COLOR_FG_CYAN"
+.br
+	cf_green		"$SWARM_COLOR_BG_GREEN"
+.br
+	cf_grey		"$SWARM_COLOR_FG_GREY"
+.br
+	cf_purple		"$SWARM_COLOR_FG_PURPLE"
+.br
+	cf_red		"$SWARM_COLOR_FG_RED"
+.br
+	cf_white		"$SWARM_COLOR_FG_WHITE"
+.br
+
+
+
+.SH EXAMPLE
+beispiel
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBswarm\fP(1), \fBconsole_codes\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

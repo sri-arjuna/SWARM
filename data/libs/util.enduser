@@ -1272,6 +1272,7 @@
 		local PROGRESS=""
 		local STATUS=""
 		local MESSAGE=""
+		local STR_COLORS_RAW
 	#
 	#	Functions
 	#
@@ -1316,31 +1317,49 @@
 		while : #for opt in "${@}" #while getopts "c:CB:bi:lm:rh" name
 		do 	case $1 in
 			-B)	BAR="$2"
-				hadOpts=true		;;
+				hadOpts=true
+				;;
 			-b)	doBar=true
-				#hadOpts=true
-						;;
+				;;
 			-c)	VAL="$2"
-				hadOpts=true		;;
+				hadOpts=true
+				;;
 			-C)	CLEARLINE=true
-				#hadOpts=true
-						;;
+				;;
+			--color)
+				STR_COLORS_RAW="$2"
+				# Vars
+				local c=0
+				local str_color str_num
+				declare -ag SWARM_BAR_COLORS
+				declare -ag SWARM_BAR_VALUE
+				# Parse values
+				while read item
+				do
+					str_color="$(builtin echo ${item} | $TR -d [:digit:])"
+					str_value="$(builtin echo ${item} | $TR -d [:alpha:])"
+					SWARM_BAR_COLORS=($str_color)
+					SWARM_BAR_VALUE=($str_value)
+					c=$(( $c + 1 ))
+				done<<<$(builtin echo "$STR_COLORS_RAW" | $SED s/','/'\n'/g )
+				hadOpts=true
+				;;
 			-i)	ID="$2"
 				hasID=true
-				hadOpts=true		;;
-			-l)	longBar=true
-				#hadOpts=true
-						;;
+				hadOpts=true
+				;;
+			-p)	longBar=true
+				;;
 			-m)	MAX="$2"
-				hadOpts=true		;;
-			-h|--help|-\?)
-				swarm.help.usage $FUNCNAME
-				return "${RET_HELP:-111}"
-						;;
+				hadOpts=true
+				;;
 			-r)	doReset=true
-				#hadOpts=true
-						;;
+				;;
 			--) 	shift ; break ;;
+			--help|-?)
+				swarm.help.usage $FUNCNAME
+				return "${RET_HELP:-99}"
+				;;
 			*)	break ;;
 			esac
 			$hadOpts && \
@@ -1355,7 +1374,6 @@
 		MESSAGE="$1"
 		TYPE=$(bar.simple_status)
 		VAL="${VAL:-$(bar.read_tmp)}"
-		#trap "rm $TMPFILE ; traps_restore" INT ABRT 2>/dev/null
 	#
 	#	Something quick?
 	#
@@ -1436,9 +1454,31 @@
 				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
 				len=$( echo $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
 			fi
-			bars=$($PRINTF '%*s' ${len/.*})
-			bars=$(builtin echo "$bars"|$SED s," ","\\$BAR",g)
-
+			# Colorize?
+			if [[ -z "$SWARM_BAR_COLORS" ]]
+			then
+				bars=$($PRINTF '%*s' ${len/.*})
+				bars=$(builtin echo "$bars"|$SED s," ","\\$BAR",g)
+			else
+				local bars_counter=$(( $numEND - ( 2 * $identRight ) ))
+				local bars_curret=0
+				local arr_count=0
+				local clr_now="${SWARM_BAR_COLORS[0]}"
+				local clr_color="$(swarm.color.fg $clr_now)"
+				local num_next="${SWARM_BAR_VALUE[0]}"
+				bars=""
+				while [[ $bars_curret -lt $bars_counter ]]
+				do
+					bars+="${clr_color}${BAR}${c_reset}"
+					bars_curret=$(( $bars_curret + 1 ))
+					[[ $num_next -lt $bars_curret ]] && \
+						arr_count=$(( $arr_count + 1 )) && \
+						clr_now="${SWARM_BAR_COLORS[$arr_count]}" && \
+						clr_color="$(swarm.color.fg $clr_now)" && \
+						num_next="${SWARM_BAR_VALUE[$arr_count]}"
+				done
+			#	set +x
+			fi
 			bar_total="$($PRINTF '%*s' ${length/.*})"
 			bar_total="[${bars}${bar_total:${#bars}}]"
 			PROGRESS="$bar_total"
@@ -1466,7 +1506,7 @@
 			;;
 		BAR)	if $longBar
 			then	[ -z "$MESSAGE" ] && \
-					swarm.print.text "${PROGRESS}" "" "$STATUS" || \
+					printf "$posLEFT${PROGRESS}" "" "$STATUS" || \
 					swarm.print.text "$MESSAGE" "" "${PROGRESS}${STATUS}"
 			else	[ -z "$MESSAGE" ] && \
 					swarm.print.text "${PROGRESS}" "" ""|| \

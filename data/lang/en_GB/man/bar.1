@@ -7,30 +7,38 @@
 bar  [ options ]  [ MESSAGE ]
 
 .SH DESCRIPTION
-Finaly an as-simple-as-posisble way to show different kind of progress.
-.PP
-If passed without options - not even a message, it will only show
-.B 
-status $RET_WORK "$SWARM_MSG_WORD_WORKING..."
-as a fallback method.
-The \fB-i VALUE\fP option should be used whenever you intend to show multiple lines of progress using the \fB-B dash\fP option, to keep each line it's dash independant from the others.
+This function is a simple way to let users know that something is beeing worked on.
+.RE
+In its simplest call, it will print a dash, that rotates upon each new call.
+.RE
+If you pass cur and max values, it will change to a \fB[ cur / max ]\fP output style, 
+unless you pass \fB-b\fP which will finaly enable the progress bar output.
 
 
 .SH OPTIONS
   -b			Show progress bar
-  -B dash|num	Uses either a rotation dash, or uses cur/max numbers from passed options
+  -B '#'	Change the 'bar-symbol' provided by the SWARM-theme
   -c VALUE	Sets the current value to VALUE
   -m VALUE	Sets the maximum value to VALUE
   
   -C			Clears the line -> Removes content that was previously written on the same line.
-  -i VALUE	Sets this invocation of bar to index:VALUE
-  -l			Show calculated percentage
+  -i VALUE	Sets this (of multiple) invocations of bar to index:VALUE, only required for \fB-B dash\fP or if \fB-B NUM\fP is not used with \fB-m NUM\fP.
+  -p			Show calculated percentage
   -r			Reset
+  --color [ green[70]orange[80] red ] Colorize the progressbar as indicated.
+.PP
+If \fB--color\fP is used without additional arguments, by default it will color everything lower than 70% in green, everything that is lower than 80 in orange and everything above in red.
+.PP
+You can use just 2 colors, or 4... up to 10!
 
 .SH EXAMPLE
-  bar -B dash -i $$ "Working..."
+  bar "Working on this task..."
 .RE
-  bar -b -m 100 -c 50 "Got the half of it!"
+  bar -b -m 100 -c 50 "Got the half of this task!"
+.RE
+  bar -b --color white50,green75,red -c 51 -m 100 "Colored bar!"
+.RE
+  
 
 .SH SEE ALSO
 \fBbash\fP(1), \fBprintl\fP(1), \fBstatus\fP(1)

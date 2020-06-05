@@ -18,6 +18,7 @@
 		BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"	# Do not export just yet
 		export clrFRONT="${SWARM_THEME_DATA[color-front]}"
 		export clrBACK="${SWARM_THEME_DATA[color-back]}"
+		export BAR="${SWARM_THEME_DATA[bar]}"
 
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \

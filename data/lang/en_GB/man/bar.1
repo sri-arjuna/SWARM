@@ -11,7 +11,7 @@ This function is a simple way to let users know that something is beeing worked 
 .RE
 In its simplest call, it will print a dash, that rotates upon each new call.
 .RE
-If you pass cur and max values, it will change to a \fB[ cur / max ]\fP output style, 
+If you pass cur and max values, it will change to a \fB[ cur / max ]\fP output style,
 unless you pass \fB-b\fP which will finaly enable the progress bar output.
 
 
@@ -20,28 +20,30 @@ unless you pass \fB-b\fP which will finaly enable the progress bar output.
   -B '#'	Change the 'bar-symbol' provided by the SWARM-theme
   -c VALUE	Sets the current value to VALUE
   -m VALUE	Sets the maximum value to VALUE
-  
+
   -C			Clears the line -> Removes content that was previously written on the same line.
   -i VALUE	Sets this (of multiple) invocations of bar to index:VALUE, only required for \fB-B dash\fP or if \fB-B NUM\fP is not used with \fB-m NUM\fP.
   -p			Show calculated percentage
   -r			Reset
-  --color [ green[70]orange[80] red ] Colorize the progressbar as indicated.
-.PP
-If \fB--color\fP is used without additional arguments, by default it will color everything lower than 70% in green, everything that is lower than 80 in orange and everything above in red.
-.PP
-You can use just 2 colors, or 4... up to 10!
+
 
 .SH EXAMPLE
   bar "Working on this task..."
 .RE
   bar -b -m 100 -c 50 "Got the half of this task!"
 .RE
+
+
+.SH PLANNED - LOW PRIO
+  --color [ green[70]orange[80] red ] Colorize the progressbar as indicated.
+.PP
+If \fB--color\fP is used without additional arguments, by default it will color everything lower than 70% in green, everything that is lower than 80 in orange and everything above in red.
+.PP
   bar -b --color white50,green75,red -c 51 -m 100 "Colored bar!"
 .RE
-  
 
 .SH SEE ALSO
-\fBbash\fP(1), \fBprintl\fP(1), \fBstatus\fP(1)
+\fBbash\fP(1), \fBprintl\fP(1), \fBdd\fP(1)
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP

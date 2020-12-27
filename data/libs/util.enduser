@@ -1273,7 +1273,8 @@
 		local STATUS=""
 		local MESSAGE=""
 		local STR_COLORS_RAW
-		swarm.update.geometry
+		# This should not be required
+		#swarm.update.geometry
 	#
 	#	Functions
 	#

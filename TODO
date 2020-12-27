@@ -1,6 +1,5 @@
 Grosse Functionen
 -----------------
-1) bar
 2) cfg.edit
 3) swarm
 
@@ -9,8 +8,7 @@ Kleine Functionen
 -----------------
 * download
 * swarm.os.install
-* swarm.util.cp @ $CP
-* swarm.util.mv @ $MV
+
 * asRoot
 *
 
@@ -24,9 +22,13 @@ KNOWN ISSUES
 ------------
 print{e,l}, header,title:	String splitting
 swarm.str.split			speed, empty line???
+bar				alignment
+swarm.util.cp @ $CP		on/e line output
+swarm.util.mv @ $MV		on/e line output
 swarm.str.usb
 wait
 yesno ??
+
 
 
 

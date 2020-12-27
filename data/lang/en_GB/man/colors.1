@@ -1,15 +1,19 @@
-.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+.TH SWARM-colors 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
 \fBColors\fP - How to use
 
 .SH DESCRIPTION
-SWARM contains 2 sets of code variables, one full and one short variant. The full variant obviously starts with \fBSWARM_\fP and then either \fBFONT_\fP or \fBCOLOR_\fP before defining wether its \fBFG_\fP or \fBBG_\fP to finaly name the color.
+SWARM contains 2 sets of code variables, one full and one short variant. The full variant obviously starts with \fBSWARM_\fP and then either \fBFONT_\fP or \fBCOLOR_\fP before defining wether its \fBFG_\fP (Fore Ground) or \fBBG_\fP (Back Ground) to finaly name the color.
 .RE
-The short variant starts with either \fBc_\fP, \fBcf_\fP for foregrond or \fBcb_\fP for backgroundcolors.
+The short variant starts with either \fBc_\fP, \fBcf_\fP for char foregrond or \fBcb_\fP for char background.
 .RE
 Likewise would the fonts in the short variant be called like: \fBfnt_\fP,
 .RE
+ 
+.RE
+After any font change, be sure to 'close' the 'tag' with either \vB\\$SWARM_COLOR_RESET\vP or \vB\\$c_reset\vP.
+
 
 .SH TERMINAL DEFAULTS
 	SWARM_RESET			"\\033[0m"

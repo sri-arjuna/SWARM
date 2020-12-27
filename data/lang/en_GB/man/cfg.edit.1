@@ -1,10 +1,10 @@
-.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+.TH SWARM-cfg.edit 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
-\fBtui-conf-editor \fP- Configuration Editor
+\fBcfg.edit \fP- Configuration Editor
 \fB
 .SH SYNOPSYS
-tui-conf-editor [\fB-h\fP|\fB--help\fP] [\fB--version\fP] [\fB-cq\fP] [\fB-T\fP|\fB--title\fP "Custom Title"] [\fB--option\fP OPTNAME [\fB--values\fP "val1 val2 \.\.\."] [\fB--default\fP val1]] FILE1 [FILE2 \.\.\.]
+cfg.edit [\fB-h\fP|\fB--help\fP] [\fB--version\fP] [\fB-cq\fP] [\fB-T\fP|\fB--title\fP "Custom Title"] [\fB--option\fP OPTNAME [\fB--values\fP "val1 val2 \.\.\."] [\fB--default\fP val1]] FILE1 [FILE2 \.\.\.]
 .RE
 .PP
 
@@ -70,9 +70,9 @@ Wait WAIT_SECONDS before clearing the screen (default 1)
 
 .SH EXAMPLE
 
-tui-conf-editor \fB-T\fP "Current GRUB config defaults" /etc/default/grub
+cfg.edit \fB-T\fP "Current GRUB config defaults" /etc/default/grub
 .PP
-tui-conf-editor \fB--option\fP var_gender \fB--default\fP male \fB--values\fP="male female" \
+cfg.edit \fB--option\fP var_gender \fB--default\fP male \fB--values\fP="male female" \
 \fB--option\fP var_name \fB--default\fP "$USER" \
 \fB--option\fP var_age \fB--default\fP 0 \fB--values\fP="1-13 14-21 22-44 44-62 63-90 90+" \
 \fB--write-no-exist\fP \

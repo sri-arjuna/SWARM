@@ -129,7 +129,7 @@
 		if [[ -z "$cb_black" ]]
 		then	# The variables are empty
 			# need to read from file
-			local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/core/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
+			local raw=$($GREP "cb_" ${SWARM_DIR_DATA}/conf/colors.conf | $SED s,"cb_","",g ) #| $SED s,"="," ",g | $AWK ' $1'
 			for r in $raw
 			do
 				$PRINTF '%s\n' "${r/=*}"

@@ -23,9 +23,11 @@ Additions?
 KNOWN ISSUES
 ------------
 print{e,l}, header,title:	String splitting
+swarm.str.split			speed, empty line???
 swarm.str.usb
 wait
 yesno ??
+
 
 
 ROADMAP:

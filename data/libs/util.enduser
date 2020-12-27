@@ -68,6 +68,7 @@
 		# Get pipe?
 		case "$1" in
 		"--"|"-")
+			shift
 			case "$MODE" in
 			"2")
 				# Read pipe, expect 2 lines
@@ -76,7 +77,7 @@
 					read RIGHT
 					printe "$LEFT" "" "$RIGHT"
 				done
-				return
+				return 0
 				;;
 			"1")
 				# Read pipe, expect 1 lines
@@ -84,7 +85,7 @@
 				do
 					printe "$LEFT"
 				done
-				return
+				return 0
 				;;
 			*)
 				# Read pipe, expect 3 lines (default)
@@ -93,7 +94,7 @@
 					read CENTER; read RIGHT
 					printe "$LEFT" "$CENTER" "$RIGHT"
 				done
-				return
+				return 0
 				;;
 			esac
 			;;
@@ -119,7 +120,7 @@
 		esac
 		$PRINTF "$posEND\n"
 	}
-	printl() { # STR1 STR2 STR3
+	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
@@ -146,7 +147,7 @@
 					read RIGHT
 					printe "$LEFT" "" "$RIGHT"
 				done
-				return
+				return 0
 				;;
 			"1")
 				# Read pipe, expect 1 lines
@@ -154,7 +155,7 @@
 				do
 					printe "$LEFT"
 				done
-				return
+				return 0
 				;;
 			*)
 				# Read pipe, expect 3 lines (default)
@@ -163,7 +164,7 @@
 					read CENTER; read RIGHT
 					printe "$LEFT" "$CENTER" "$RIGHT"
 				done
-				return
+				return 0
 				;;
 			esac
 			;;
@@ -187,7 +188,6 @@
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		#$PRINTF "$posEND\n"
 	}
 #
 # Visual outputs - 'End user' stuff - Core Convenience
@@ -1267,12 +1267,13 @@
 		local MAX=""
 		local VAL #="1"		# This is used as index for the dash animation
 		local CURRENT=""
-		local BAR='='
+		#local BAR='='
 		# Display
 		local PROGRESS=""
 		local STATUS=""
 		local MESSAGE=""
 		local STR_COLORS_RAW
+		swarm.update.geometry
 	#
 	#	Functions
 	#
@@ -1386,13 +1387,14 @@
 		DASH)
 			bar.save_tmp "$(( $VAL + 1 ))"
 			;;
-		BAR)	bar.save_tmp "$(( $VAL + 1 ))"
+		BAR)
 			if [ -z "$MAX" ] || [ -z "$VAL" ]
 			then	# Improper handling
 				swarm.help.usage $FUNCNAME
 				#tui-status 1 "$(eval_gettext 'Usage: $ME [-r] [-m \$MAV_VALUE]  [-bc \$CUR_VALUE] [-l]]  \"msg\"')"
 				#exit 1
 			fi
+			bar.save_tmp "$(( $VAL + 1 ))"
 		esac
 	#
 	#	Generate output string, and save values
@@ -1441,7 +1443,7 @@
 				2)	fixer=14 ;;
 				3)	fixer=15 ;;
 				esac
-				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - ${fixer} - $fixer_fix  ))
+				length=$(( $numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - ${fixer} - $fixer_fix  ))
 				#STATUS="[ ${pro}.${cent}%% ]"		# Nope
 				STATUS="[ ${pro}.${cent}%% ]"	# Ok, what?
 				len=$( builtin echo $length $procent | $AWK '{print ($1/100*$2) }' )
@@ -1451,9 +1453,10 @@
 				[ -z "$MESSAGE" ] && \
 					fixer=16 || \
 					fixer=14
-				length=$(( $WIDTH - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
+				length=$(( $numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
 				len=$( echo $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
 			fi
+	#		echo "len: $len // length: $length // width: $WIDTH // numEND: $numEND"
 			# Colorize?
 			if [[ -z "$SWARM_BAR_COLORS" ]]
 			then
@@ -1505,12 +1508,24 @@
 			bar.save_tmp $VAL
 			;;
 		BAR)	if $longBar
-			then	[ -z "$MESSAGE" ] && \
-					printf "$posLEFT${PROGRESS}" "" "$STATUS" || \
+			then	if [[ -z "$MESSAGE" ]]
+			 	then	# No message
+					#set -x
+				#	printf "$posLEFT${PROGRESS}"
+				#	num=$(( $posEND - $identRight - ${#STATUS} ))
+				#	printf "$(swarm.print.goto $num)$STATUS"
+					#set +x
+					swarm.print.text "$PROGRESS" "" "$STATUS"
+				else 	# With message
 					swarm.print.text "$MESSAGE" "" "${PROGRESS}${STATUS}"
-			else	[ -z "$MESSAGE" ] && \
-					swarm.print.text "${PROGRESS}" "" ""|| \
+				fi
+			else	if [[ -z "$MESSAGE" ]]
+				then 	# No message
+					printf "$posLEFT${PROGRESS}"
+					printf "\n"
+				else 	# With message
 					swarm.print.text "$MESSAGE" "" "${PROGRESS}"
+				fi
 			fi
 			;;
 		esac

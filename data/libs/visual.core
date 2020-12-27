@@ -275,6 +275,12 @@
 		#set -x
 
 		# Get the actual string
+		local ARGS=("${@}")
+		local L="${ARGS[0]}"
+		local M="${ARGS[1]}"
+		local R="${ARGS[2]}"
+		#echo " THIS  ${#ARGS[*]}   THIS --> ${ARGS[*]}"
+		#for a in "${ARGS[@]}"; do echo "N- $BASH_SOURCE - NN $a";done
 		local evalLeft=$($PRINTF "$1")
 		local evalMiddle=$($PRINTF "$2")
 		local evalRight=$($PRINTF "$3")
@@ -283,28 +289,78 @@
 		local lenEvalLeft=${#evalLeft}
 		local lenEvalMiddle=${#evalMiddle}
 		local lenEvalRight=${#evalRight}
+		local lenEvalLeft=${#L}
+		local lenEvalMiddle=${#M}
+		local lenEvalRight=${#R}
 
 		# Before we attempt to print anything, lets check about the length
 		local len_strings_total=$(( $lenEvalLeft + $lenEvalMiddle + $lenEvalRight ))
 
-		if [[ ${len_strings_total:-0} -gt $(( $COLUMNS - 6 )) ]]
-		then	case "$MODE" in
+		if [[ ${len_strings_total:-0} -ge $(( $COLUMNS - 6 )) ]]
+		then	# Needs splitting
+			case "$MODE" in
 			"basic")
-				swarm.str.split "$1" | printe -1 --
-				return 0
+				if false; then
+					local L_one="" L_two=""
+					local M_one="" M_two=""
+					local R_one="" R_two=""
+
+					[[ ${#L} -ge $(( $COLUMNS - 6 )) ]] && \
+						swarm.str.split "$L" | read L_one L_two || \
+						L_one="$L"
+
+					[[ ${#M} -ge $(( $COLUMNS - 6 )) ]] && \
+						swarm.str.split "$M" | read M_one M_two || \
+						M_one="$M"
+
+					[[ ${#R} -ge $(( $COLUMNS - 6 )) ]] && \
+						swarm.str.split "$R" | read R_one R_two || \
+						R_one="$R"
+
+					swarm.print.border
+					swarm.print.text "$L_one" "$M_one" "$R_one"
+header
+					swarm.print.border
+					swarm.print.text  "$L_two" "$M_two" "$R_two"
+
+					return 0
+				fi
+				## Geht, aber nicht schön
+				if [[ -n "$L" ]]
+				then
+					[[ ${#L} -ge $(( $COLUMNS - 6 )) ]] && \
+						swarm.str.split "$L" | printe -1 -- || \
+						printl "$L"
+				fi
+				if [[ -n "$M" ]]
+				then
+					swarm.str.split "$M" | printe -2 --
+				fi
+				if [[ -n "$R" ]]
+				then
+					[[ ${#R} -ge $(( $COLUMNS - 6 )) ]] && \
+						swarm.str.split "$R" | while read line
+									do
+										printe "" "" "$line"
+									done || \
+									printe "$R"
+				fi
+					#shift
+					#[[ -z "$1" ]] && return 0
+				#done
+				#set +x
 				;;
 			"title")
 				swarm.str.split "$1" | title --
-				return 0
 				;;
 			"header")
 				#echo "$1" ; press
 				swarm.str.split "$1" | header --
-				return 0
 				;;
 			esac
+			return 0
+		# ELSE : Normal handling
 		fi
-
 		# Output
 		case ${#@} in
 		0)	# Nothing to print
@@ -354,15 +410,14 @@
 			esac
 			;;
 		esac
-
-		$PRINTF "${posEND}"
+		#$PRINTF "${posEND}"
 	}
 	swarm.str.split() { # "STRING"
 	# Splittes passed string in half at the nearest word
 	# and prints each part as a new line
 		[[ -z "$1" ]] && return 1
-		local tmp_count=$(( $(builtin echo "${1}" | $WC -c) / 2 + 1))
-		builtin echo "$1" | fold -sw $tmp_count
+		local tmp_count=$(( ( $(builtin echo "${1}" | $WC -c)  ) / 2 ))
+		builtin echo "$1" | fold -sw $tmp_count #| printe -1 --
 	}
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM

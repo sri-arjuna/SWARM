@@ -345,14 +345,14 @@
 				(
 					# shellcheck disable=SC2164
 					cd "${SWARM_DIR_ROOT}/.."
-					tar -acf "$HOME/swarm-${SWARM[BUILD]}.tar.gz" "${SWARM_DIR_ROOT##*/}"
+					tar -acf "$HOME/swarm-${SWARM[BUILD]}-full.tar.gz" "${SWARM_DIR_ROOT##*/}"
 				)
 				;;
 			"tar")
 				(
 					# shellcheck disable=SC2164
 					cd "${SWARM_DIR_ROOT}/.."
-					tar -acf "$HOME/swarm-${SWARM[BUILD]}-small.tar.gz" --exclude ".git" "${SWARM_DIR_ROOT##*/}"
+					tar -acf "$HOME/swarm-${SWARM[BUILD]}.tar.gz" --exclude ".git" "${SWARM_DIR_ROOT##*/}"
 				)
 				;;
 			"new")

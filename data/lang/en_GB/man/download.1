@@ -4,17 +4,23 @@
 \fBdownload\fP - Download files from web
 
 .SH SYNOPSYS
-download [\fB-h\fP|\fB--help\fP] [\fB--version\fP] URL [URL2 ..]
+download [\fB-r\fP] [\fB-o [/path/to/]FILE1 \fP] URL1 [URL2 ..]
 
 .SH OPTIONS
 .TP
 .B
-\fB-h\fP|\fB--help\fP
-Shows help and exit with 99
+\fB-r\fP
+Expects manual user input - not the best idea!
 .TP
 .B
-\fB--version\fP
-Shows version info and exit with 0
+\fB-d DIRECTORY\fP
+Save all passed URLs to DIRECTORY.
+.TP
+.B
+\fB-o FILE\fP
+Saves mandatory URL1 as FILE, if you just download a single file, you can pass /path/to/file as well.
+
+Saves every further URL2..999 with swarm.str.genfilename FILE, which is the reason you should use the [\vB-d DIRECTORY[\vP option for downloading multiple files.
 
 .SH EXAMPLE
 download https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.2.1.tar.xz

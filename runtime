@@ -298,15 +298,17 @@
 		done
 	fi
 #
-# Starting SWARM now
+# Starting SWARM visuals now
 #
 	swarm.init.theme "$SWARM_THEME"
 	swarm.update.geometry
 #
 # Initiate Interface : Runtime Executed
 #
+	# Check wether the runtime is executed or sourced
+	# This is executed obviously:
 	if [[ "runtime" = "${0##*/}" ]]
-	then	# First time caller or arguments
+	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
 			header 	--default

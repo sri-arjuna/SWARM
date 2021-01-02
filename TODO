@@ -1,3 +1,11 @@
+Checklist upon adding new functions:
+1. Add english usage string in ./data/lang/en_GB/usage.conf
+2. Put english manpage in ./data/lang/en_GB/man
+3. Verify 'function - usage' uses string from file
+
+
+
+
 Grosse Functionen
 -----------------
 2) cfg.edit

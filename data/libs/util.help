@@ -162,8 +162,8 @@
 		"swarm.util.mv")
 			out="$SWARM_MSG_MV_USAGE"
 			;;
-		"")
-			out="$"
+		"download")
+			out="$SWARM_MSG_DOWNLOAD_USAGE"
 			;;
 		"")
 			out="$"

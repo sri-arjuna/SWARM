@@ -64,7 +64,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8
-	SWARM[BUILD]=49
+	SWARM[BUILD]=50
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -186,6 +186,8 @@
 	export SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 #
 # Load english strings for overall coverage for error messages.
+# This is the default language, another one will only be attempted to load,
+# if it is not starting with en_*  --> See line 260'ish
 #
 	for lang_file in "$SWARM_DIR_LANG/en_GB"/{core,usage}.conf
 	do
@@ -434,4 +436,4 @@
 #
 # Exit script or beginn user scripts
 #
-! ${DEBUG:-false} || set +x
+${DEBUG:-false} && set +x

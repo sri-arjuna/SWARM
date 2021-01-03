@@ -165,11 +165,11 @@
 		"download")
 			out="$SWARM_MSG_DOWNLOAD_USAGE"
 			;;
-		"")
-			out="$"
+		"cfg.edit")
+			out="$SWARM_MSG_CFG_EDIT_USAGE"
 			;;
-		"")
-			out="$"
+		"tar")
+			out="$SWARM_MSG_TAR_USAGE"
 			;;
 		"")
 			out="$"

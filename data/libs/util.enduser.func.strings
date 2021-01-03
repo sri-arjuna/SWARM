@@ -1,0 +1,427 @@
+#!/usr/bin/env bash
+swarm.str.seconds2TIME() { # --> NEW ONE
+# Returns the TIME as string
+# as much as applicable: hh:mm:ss
+	local tmp_input="${1:-0}"
+	local tmp_work="$tmp_input"
+
+	local M=60
+	local H=3600
+	# display
+	local hours=0
+	local minutes=0
+	local seconds=0
+	# subtraction
+	local sub_hrs=0
+	local sub_min=0
+
+
+	# Get hours
+	while [[ $tmp_work -ge $H ]]
+	do
+		((hours++))
+		tmp_work=$(( $tmp_work - $H ))
+	done
+	# Get minutes
+	while [ $tmp_work -ge $M ]
+	do
+		((minutes++))
+		tmp_work=$(( $tmp_work - $M ))
+	done
+	seconds=$tmp_work
+
+
+	# Format strings - hrs
+	[[ $hours -eq 0 ]] && \
+		hours="0" || hours+=":"
+
+	# Format strings - mins
+	if [[ ${hours/:} -eq 0 ]] && [ ${minutes/:} -eq 0 ]
+	then	minutes="0"
+	elif [[ ${hours/:} -gt 0 ]]
+	then	[[ ${#minutes} -lt 2 ]] && \
+			minutes="0${minutes}:" || \
+			minutes+=":"
+	else	minutes+=":"
+	fi
+
+	# Format strings - secs
+	if [[ ${hours/:} -gt 0 ]] || [[ ${minutes/:} -gt 0 ]]
+	then	[[ ${#seconds} -lt 2 ]] && \
+			seconds="0${seconds}"
+	fi
+
+	# Remove the single '0', as they were only required to be 'math compatible'
+	[[ "$hours" = "0" ]] && hours=""
+	[[ "$minutes" = "0" ]] && minutes=""
+
+
+	builtin echo "${hours}${minutes}$seconds"
+}
+swarm.str.filesize() { # [ -k -m ] FILE
+# Returns the filesize in bytes
+#
+	local MODE="bytes"
+	local VAR=""
+	for opt in "${@}"
+	do
+		case "$opt" in
+		"-k")	MODE="kilo" ; VAR="$opt" ; shift	;;
+		"-m")	MODE="mega" ; VAR="$opt" ; shift	;;
+		esac
+	done
+# Action
+	if [[ "$1" == "--" ]]
+	then
+		while read line
+		do
+			$FUNCNAME $VAR "$line"
+		done
+	else
+		case "$MODE" in
+		"bytes")
+			${LS:-\ls} -l "$1"| $AWK -v Text="$SWARM_MSG_WORD_BYTES" '{print $5 " " Text  }'
+			;;
+		"kilo")
+			${LS:-\ls} -l "$1" | $AWK -v Text="$SWARM_MSG_WORD_KILOBYTES"  '{print sum/1024 " " Text  }'
+			;;
+		"mega")
+			${LS:-\ls} -l "$1" | $AWK -v Text="${SWARM_MSG_WORD_MEGABYTES}"  '{print $5/1024/1024 " " Text}'
+			;;
+		esac
+	fi
+}
+swarm.str.dirlist() { # PATH
+# Print a list of a ll subdirs
+# Ignores .git
+	local tmp=""
+	cd "$1"
+	$FIND -type d -print | while read line;do tmp="$PWD/$line" ; $ECHO "${tmp/\/\.\//\/}" ;done 2>/dev/null| $GREP -v '.git'
+	cd "$OLDPWD"
+}
+swarm.str.dirsize() { # [ -k -m ] DIR
+# Prints "SIZE TYPE in DIR"
+# -k for kilobytes ; -m for megabytes
+	local MODE=bytes
+	local VAR=""
+	for opt in "${@}"
+	do
+		case "$opt" in
+		"-k")	MODE=kilo ; VAR="$opt" ; shift	;;
+		"-m")	MODE=mega ; VAR="$opt" ; shift	;;
+		esac
+	done
+# Action
+	if [[ "$1" == "--" ]]
+	then
+		while read line
+		do
+			$FUNCNAME $VAR "$line"
+		done
+	else
+		case "$MODE" in
+		"bytes")
+			${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="$SWARM_MSG_DIR_SIZE_IN_BYTES" '{sum=sum+$5} END {print sum " " Text " \t" DIR }'
+			;;
+		"kilo")
+			${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="$SWARM_MSG_DIR_SIZE_IN_KB"  '{sum=sum+$5} END {print sum/1024 " " Text " \t" DIR }'
+			;;
+		"mega")
+			${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="${SWARM_MSG_DIR_SIZE_IN_MB}"  '{sum=sum+$5} END {print sum/1024/1024 " " Text " \t" DIR }'
+			;;
+		esac
+	fi
+}
+swarm.str.bool2str() { # [options] $?
+# Returns a string from a BOOL input
+#
+	swarm.protect "$FUNCNAME" "${@}" && exit 1
+	#
+	# Defaults
+	#
+		local caps #=false
+		local CAPS #=false
+		local mode #="yes"
+		local out=""
+		#echo " ---------- $@ ----------- "
+	#
+	# Catching Arguments
+	#
+		# A ':' after a char indicates that this option requires an argument
+		# Get access to the passed value of the argument by using $OPTARG
+		while getopts "cCdoty" opt
+		do
+		 	case ${opt} in
+			"c")	caps=true
+					shift	;;
+			"C")	CAPS=true
+					shift	;;
+			"d")	mode="done"
+					shift	;;
+			"t")	mode="true"
+					shift	;;
+			"y")	mode="yes"
+					shift	;;
+			"o")	mode="on"
+					shift	;;
+		#	*)	echo opt $opt ; exit 99	;;
+			esac
+		done
+		shift $(($OPTIND - 1))
+	#
+	# Display & Action
+	# This also handles translations
+	#
+		case "${mode}" in
+		"done")	case "$1" in
+			0)	out="$SWARM_MSG_WORD_DONE"	;;
+			1)	out="$SWARM_MSG_WORD_FAIL"	;;
+			esac
+			;;
+		"true")	case "$1" in
+			0)	out="$SWARM_MSG_WORD_TRUE"	;;
+			1)	out="$SWARM_MSG_WORD_FALSE"	;;
+			esac
+			;;
+		"on")	case "$1" in
+			0)	out="$SWARM_MSG_WORD_ON"	;;
+			1)	out="$SWARM_MSG_WORD_OFF"	;;
+			esac
+			;;
+		"yes"|*)	case "$1" in
+			0)	out="$SWARM_MSG_WORD_YES"	;;
+			1)	out="$SWARM_MSG_WORD_NO"	;;
+			esac
+			;;
+		esac
+
+		# Show the output
+		if ${CAPS:-false}
+		then	$PRINTF "${out^^}"
+		elif ${caps:-false}
+		then	$PRINTF "${out^}"
+		else	$PRINTF "$out"
+		fi
+}
+swarm.str.num2char() { # NUM
+# Returns a letter string: a-z
+# Or: aa-az ba-bz, etc
+	swarm.protect "$FUNCNAME" "${@}" && exit 1
+	num="$1"
+	out=""
+	# Quoting these echo's will break the output
+	[ "$num" -gt 700 ] && \
+		list=( $(builtin echo {a..z} {a..z}{a..z} {a..z}{a..z}{a..z} ))	|| \
+		list=( $(builtin echo {a..z} {a..z}{a..z} )) 	# Be fast for letters in range..
+	out="${list[$num]}"
+	$PRINTF '%s\n' "$out"
+}
+swarm.str.num2roman() { # NUM
+# Returns NUM in roman letters
+#
+	swarm.protect "$FUNCNAME" "${@}" && exit 1
+	input="$1"	# input num
+	output=""	# Clear output string
+	len="${#input}"	# Initial length to count down
+	U="\033[4m"	# Underscore, multiplies with 1000
+	R="\033[0m"	# Resets the underscore
+	roman_val() { # NUM one five ten
+	# This sub does the basic 'roman' algorithm
+	#
+		N="$1"
+		one="$2"
+		five="$3"
+		ten="$4"
+		out=""
+		case "$N" in
+		0)	out+=""	;;
+		[123])	while [ "$N" -gt 0 ]
+			do	out+="$one"
+				N="$(($N-1))"
+			done
+			;;
+		4)	out+="$one$five"	;;
+		5)	out+="$five"	;;
+		[678])	out+="$five"
+			N="$(($N-5))"
+			while [ "$N" -gt 0 ]
+			do	out+="$one"
+				N=$(($N-1))
+			done
+			;;
+		9)	while [ "$N" -lt 10 ]
+			do	out+="$one"
+				N="$(($N+1))"
+			done
+			out+="$ten"
+			;;
+		esac
+		echo "$out"
+	}
+	while [ "$len" -gt 0  ]
+	do	# There are letters to add
+		num="${input:0:1}"
+		# Do action according position
+		case "$len" in
+		1)	output+="$(roman_val $num I V X)"	;;
+		2)	output+="$(roman_val $num X L C)"	;;
+		3)	output+="$(roman_val $num C D M)"	;;
+		4)	output+="$(roman_val $num M ${U}V${R} ${U}X${R})"	;;
+		5)	output+="$(roman_val $num ${U}X${R} ${U}L${R} ${U}C${R})"	;;
+		*)	# Count it up
+			Tone="CI\)"
+			Tfive="I\)"
+			Tten="CCI\)\)"
+			DEPTH="$(( $len - 3 ))"	# 1 = 1000 = initial template
+			while [ "$DEPTH" -gt 1 ]
+			do	Tone="C$Tone)"
+				Tfive="C$Tfive)"
+				Tten="C$Tten)"
+				DEPTH="$(($DEPTH-1))"
+			done
+			output+="$(roman_val $num $Tone $Tfive $Tten  )"
+			;;
+		esac
+		input="${input:1}" ; len="${#input}"
+	done
+	$PRINTF "$output"
+}
+swarm.str.num2ascii() { # NUM
+# Returns the ASCII of given NUM
+# https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html
+	[[ -z "$1" ]] && return 1
+	[[ $1 =~ ^[0-9]+$ ]] || return 1
+	$PRINTF "\\$($PRINTF '%03o' "$1")"
+}
+swarm.str.ascii2num() { # "CHAR"
+# Returns the (ASCII-)NUM of given CHAR
+# https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html
+	[[ $# -gt 1 ]] && return 1
+	$PRINTF "%u\n" "'${1}"
+}
+swarm.str.extension() { # FILENAME
+# Returns the file extension of a given FILENAME
+# REturns empty if no extension was found
+	local ext="${1##*.}"
+	# Tar is the only (known to me) file extension with 2 strings
+	local TAR=""
+	# Workaround for tarballs...
+	builtin echo "$1" | $GREP -q ".tar" && \
+		TAR="tar." || TAR=""
+	if [ "$ext" = "$1" ]
+	then	builtin echo ""
+	else 	builtin echo "$TAR$ext"
+	fi
+}
+swarm.str.genfilename() { # FILENAME.EXT [NEXT_EXT]
+# Prints the filename with an increased index before [NEW_]EXT
+#
+	local this="$1"	# File without EXT?
+	local EXT=$(swarm.str.extension "$this")	# OLD
+	local ext="${2:-$EXT}"	# Fill 'ext' with old EXT if its empty
+	this="${this%%$EXT}"
+#
+#	Action & Display
+#
+	# Set the initial name check according to presets:
+	# Currently only known special case: tar
+	local NAME_INIT="${this/\.tar/}.$ext"
+	NAME_INIT="${NAME_INIT/\.\./\.}"
+	if [ -f "${NAME_INIT}" ]
+	then	C=0		# Counter
+		local NAME_CHECK="${this/\.tar}.$C.$ext"
+		NAME_CHECK="${NAME_CHECK/\.\./\.}"
+		while [ -f "${NAME_CHECK}" ]
+		do	C=$(( $C + 1 ))
+			NAME_CHECK="${this/\.tar}.$C.$ext"
+			NAME_CHECK="${NAME_CHECK/\.\./\.}"
+		done
+
+		# Finally a file that does not exist yet
+		builtin echo "$NAME_CHECK" >&1
+	else	# File does not exist, and can be used
+		builtin echo "$NAME_INIT"  >&1
+	fi
+}
+swarm.str.usb() { #
+#
+#
+	swarm.str.usb.getspace() { # NUM
+	# Returns string of NUM space chars
+	#
+		local C=0
+		local out=""
+		while [[ "$C" -lt "$1" ]];do out+=" ";let C++;done
+		printf "$out"
+	}
+	swarm.str.usb.getlist() { #
+	# Lists the contend of $devDisk, limits the output to usb items and removes partition entries
+	# If there is something to ignore, that one will be hidden too
+		if [[ -z "$usbIgnore" ]]
+		then	"$LS" "$devDisk" | "$GREP" usb | "$GREP" -v part
+		else	"$LS" "$devDisk" | "$GREP" usb | "$GREP" -v part | "$GREP" -v "$usbIgnore"
+		fi
+	}
+# Variables
+	# Make sure there is something available
+	local msg="$SWARM_MSG_USB_CONNECT"
+	local left="$BORDER_LEFT $msg"
+	local list=""
+	local sleeper=0.0001
+	local targetusb=""
+	local devDisk=/dev/disk/by-id
+	local tDev=""
+	local AUTO=false
+# Catch options
+	for opt in "${@}"
+	do
+		case "${opt}" in
+		"-a")
+			AUTO=true
+			;;
+		esac
+	done
+# Loop while waiting for --item-list-without-the-ignored-ones--
+	while [[ -z "$list" ]] ; do
+		bar "$msg" >&2
+		list="$(getlist)" 2>/dev/null
+		list="${list/$usbIgnore}"
+		sleep $sleeper
+		[[ "$sleeper" = "0.0001" ]] && sleeper=1.2
+	done
+#
+#	Check for user settings for default behaviour.
+#	This is required so internal card readers do not get in the way,
+#	or so you can select to (not) use it automatically
+#
+	#echo "if [ "$(echo $list|wc -l)" -eq 1 ] && [ -z "$usbAsk" ] "
+	if [[ "$(builtin echo $list|$WC -w)" -eq 1 ]] && [[ -z "$usbAsk" ]]
+	then	# There is no setting yet, first time usage
+		printe  "$SWARM_MSG_USB_ONLY_AVAIL : ${list}" >&2
+		if yesno "$SWARM_MSG_USB_CARD_LISTED" >&2
+		then	if yesno "$SWARM_MSG_USB_CARD_IGNORE" >&2
+			then	# Save the card reader
+				cfg.set -v "$TUI_FILE_USER_SETTINGS" usbIgnore "\"$list\""
+				RET=1
+			else	printe  "$SWARM_MSG_USB_ASK_AGAIN" >&2
+				yesno "$SWARM_MSG_USB_ASK_DESC" >&2
+				RET=$?
+			fi
+		else	RET=1
+		fi
+		cfg.set -v "$TUI_FILE_USER_SETTINGS" usbAsk "$(swarm.str.bool2str -t $RET)"  >&2
+		source "$TUI_FILE_USER_SETTINGS"
+		[ -z "$usbIgnore" ] || return 1
+	fi
+#
+#	Ask now or not?
+#
+	if ${usbAsk:-true}
+	then	"$AUTO" && \
+			targetUsb="$(pickt -a $list)" || \
+			targetUsb="$(pick $list)"
+	else	targetUsb="$(pick -a $list)"
+	fi
+	tDev="$(readlink -f $devDisk/$targetUsb)"
+	builtin echo "$tDev" >&1
+}

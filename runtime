@@ -85,6 +85,7 @@
 	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
 	export PATH_OLD="$PATH"
 	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
+	export -r PRINTABLE_PIPECHAR="$(builtin echo -e \\u2502)" 2&>/dev/zero
 	# Make sure TERM is set
 	TERM="${TERM:-GNU\057Linux}"
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!

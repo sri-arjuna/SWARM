@@ -1,46 +1,98 @@
 Shell Wrapper And Runtime Modifier - SWARM
 ==========================================
 
-_SWARM is a user interface for bash scripts._
+_SWARM is a framework to write application-like BASH scripts._
 
 
-SWARM's objective is to provide scripts that work nicely in GUI, console and platform independent interfaces.
-SWARM is a wrapper for different bash builds and bindirs.
-With SWARM they will work everywhere as long there is a bash shell!
+As SWARM does not need to be installed - hence **Runtime Modifier** - 
+it is great for scripts you carry on your usb-thumbdrive, like rescue scripts.
 
-The first Text User Interface Framework that does not need to be installed.
+But the biggest bonus for portable scripts is the **Shell Wrapper** part.
+Because we all know that not all distros install the same applications.
+SWARM provides functions to automaticly open available applications to _edit_, browse the _web_, use a _filemgr_ or open a _terminal_, depending wether the user runs the script in X or TTY.
+And that is on systems it was never run before, once configured, it will open your favorite applications for each given task.
 
-SWARM tries to make coding easier for script-authors, usage more convenient for endusers and handle installed application for both of them.
-So it provides a 3-way interface between script author, enduser and the computer.
-
-
-Overview
---------
-
-Always thought that such a wide terminal window looks empty?
-Did you ever think it would be nice to have text to the left,
-to the right, and even aligned to the center??
-
-You want the end user to edit files, but dont know what applications,
-like leafpad or gedit, they might have installed?
-
-Ever wanted to have your scripted projects sorted in different directories
-but still want them to share some of the same functions / variables?
+On top of that, using SWARM will generate its output according to a configured _theme_,
+so all output the user will see is consistant to her or his preferences.
 
 
-**SWARM covers all this and more!**
 
-While it parses for default applications like "text-editors, internet browsers, file managers
-or internet commands such as wget or curl", it manages  both CLI and GUI modes.
-SWARM also lets the user configure their desired preferences to be used automaticly
-by other SWARM scripts as well.
+Whats the puprose?
+------------------
 
-It has handlers for "yesno", "select" "download" (curl/wget), "progressbar" and  more,
-so they are fully integrated into the (custom?) theme you had set for SWARM.
-You do not have to worry about the different functionalities of read and echo.
-SWARM has 'wrappers' for these as well, with the aim to give you the benefit of text orientation.
+The main goal was **swarm**, the function named like the project.
 
-And that still is not all!
+This functions main purpose is to browse directories, list and execute scripts
+from with the 'browser' but also beeing able to pass directores, scripts and their options and values directly to the script which passes the arguments down the specified script.
+
+All this while beeing highly customizeable, like showing the content of a defined textfile as a general info while browsing, or showing a specific 'help' (if passed) for folders when called from the command line.
+
+The idea for something like this was born back in 1995, but it was not until 2011,
+when I decided to 'go all GNU+Linux' that I had an actual idea how to realize (and what to use for).
+
+
+But the real goal the started all this was my "sea's scripted tools" project, 
+which aims to have scripts that serve as solutions that work on minimal 
+installations as well as rescue tool that is EASY to use - even in rescue mode.
+
+You could do fun things like:
+./sst boot grub2 theme solar
+./sst connect wifi
+./sst connect nas _\[LABEL\]_
+
+From starting that single project until realizing that I had to extract all 'visuals' and other
+'general functions' to TUI, was about a 5 year process, but required an installation.
+Now, another 5 years later, it became SWARM.
+
+
+
+Use cases:
+----------
+
+For 100% single task scripts, SWARM is best placed in something like $HOME/bin\[/SWARM\].
+For projects that contain multiple scripts, I recomend to place SWARM inside the project directory.
+
+Whatever you do, unless the script is invoked by **swarm**, the **SWARM** directory 
+must be in the same directory as the executed script.
+Only this verifies proper handling.
+
+
+
+Reason why?
+-----------
+
+1. Why BASH?
+Because BASH is pre-installed on most GNU+Linux and/or *BSD variants.
+And where it is not, it is available in the Repo.
+
+2. Why not something else?
+I did consider C, but I did not want to compile.
+Also Python was considered, but with neither the C- nor Python solution 
+"runtime" would have been an option.
+Not much else available on minimal installations.
+
+3. Why did you not want to compile?
+Just in case we get Fallout 5 in RealLife (Corona, etc) and everything falls apart,
+I wanted anyone who finds it on such a lost Vault-Tec terminal to be able to direclty
+make the changes they need.
+Yeah baby, Steam-Punk! :D
+
+
+
+What are scripts good for?
+--------------------------
+
+* Scripts are great to summarize commands that are either often repeated or hardly ever used.
+* Scripts should simplify certain tasks with the most minimal tools available.
+* Scripts should be informative and easy to use
+* 1 script should only do 1 thing
+
+But while scripts should not be applications, there is no other (faster) way to 
+give your scripts the same power for different projects, cross-distro-compatible,
+without the need to install anything to have a decent interface to present to endusers.
+
+We live in 2021, so the overhaul for bash scripts is long overdue! ;)
+
 
 
 Basic usage:
@@ -48,7 +100,7 @@ Basic usage:
 
 Or - how to get all the stuff:
 
-When actualy using in runtime, you would call it like:
+When actualy using in a script, you would call it like:
 
 
     #!/usr/bin/env bash
@@ -95,3 +147,4 @@ CREDITS & Sources:
 ------------------
 * FedoraForum.org ; Staff & Members
 * UNIX.com ; Staff & Members, special thanks to mod: Peasant for the name suggestion!
+* https://community.unix.com/t/blog-thread-creating-a-shell-wrapper-and-runtime-modifier-swarm/377390/48

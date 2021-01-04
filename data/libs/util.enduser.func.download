@@ -4,6 +4,10 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 #
 	#ME="$FUNCNAME"
 	swarm.protect "$@" && exit 1
+	# Show usage if no argument is given
+	[[ -z "$1" ]] && \
+		swarm.help.usage $FUNCNAME && \
+		return 1
 	#set -x
 #	Created: 2013.09.13
 #	Changed:2015.11.07
@@ -23,8 +27,6 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 	LIST_APPS="wget curl"
 	[ -z "$(which $CURLWGET 2>/dev/null)" ] && \
 		CURLWGET="$(echo ${LIST_APP/$CURLWGET})"
-	TERM="${TERM:-GNU\057Linux}"
-	swarm.util.isDir "$DIR_TEMP"
 	touch "$FILE_TEMP"
 #
 #	Messages
@@ -118,11 +120,11 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 		# However, the very first file might get a fixed output
 		out_string="${str_fixed_output:-${DEST:-$PWD}}/$THIS"
 		[[ -n "$str_fixed_output" ]] && str_fixed_output=""
-		# How should it be displayed to the end user?
+	# How should it be displayed to the end user?
 		$doShowFullPath && \
 			str_File="$out_string" || \
 			str_File="$THIS"
-		# Does the file exist already?
+	# Does the file exist already?
 		if [[ -f "$out_string" ]]
 		then	# Overwrite, skip or new download?
 			status 111 "$SWARM_MSG_PHRASE_FILE_EXISTS" "$out_string"
@@ -143,8 +145,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 				;;
 			esac
 		fi
-
-		# Initialize download - user output only
+	# Initialize download - user output only
 		status -r 2 "$MSG_INIT_ACT" #"$WORK"
 		>$FILE_TEMP
 		echo "LC_ALL=C $CURLWGET $OPT_C $OPT_O \"$out_string\" \"$URL\" 1>/dev/null 2>$FILE_TEMP" > "$FILE_CMD"
@@ -153,12 +154,13 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 			"$FILE_CMD" 2>/dev/zero
 		) & >/dev/zero 2>/dev/zero
 		local lPID=$!
-
+	# Add this PID to the list to force-kill when SWARM is closed
+		export SWARM_PID_USED="$SWARM_PID_USED $lPID"
+	# Prepare User output
 		str_left="$MSG_ACT_ING"
 		str_middle="$THIS ($tmp_size)"	; len=${#str_middle}
-
 		MAXVAL=$(curl_get_filesize)
-		# While lPID found, assume its till downloading...
+	# While lPID found, assume its till downloading...
 		while ps $lPID > /dev/zero #|$GREP $CURLWGET
 		do	[[ -f "$THIS" ]] && \
 				tmp_size="($($LS -hl |$GREP $THIS |$AWK '{print $5}'))"

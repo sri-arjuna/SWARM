@@ -171,8 +171,8 @@
 		"tar")
 			out="$SWARM_MSG_TAR_USAGE"
 			;;
-		"")
-			out="$"
+		"bar")
+			out="$SWARM_MSG_BAR_USAGE"
 			;;
 		"")
 			out="$"

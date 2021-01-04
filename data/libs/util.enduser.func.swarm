@@ -1,1 +1,692 @@
 #!/usr/bin/env bash
+#
+#	Author: 	Simon Arjuna Erat (sea)
+#	Contact:	erat.simon@gmail.com
+#	License:	GNU General Public License (GPL)
+#	Created:	2014.04.26
+#	Changed:	2015.11.27
+#	Description:	A script to browse a folder recursively,
+#			using its start directory as 'BASE' which it wont leave ".."
+#			Highly modifiable.
+tui() { #
+#
+#
+	script_version=0.9.1c
+#
+#	Variables
+#
+	TITLE="$(gettext 'Text User Interface')"
+	ME="${0##*/}"
+	ME_DIR="${0/${0##/*/}}"
+	help_text="$(eval_gettext '
+NAME
+  $ME ($script_version)
+
+SYNOPSIS
+  $ME [-h|--help] [--version] [-mnqS] [-p DIR_OF_MENU_ROOT]
+  	[-c /path/to/file.conf] [-s /path/to/files/to/include]
+	[-D LABEL_DIR] [-F LABEL_FILES]
+	[-L LABEL_LOCATION] [-P LABEL_POSITION]
+	[-T LABEL_TITLE] [-U LABEL_USER]
+	[-b WORD_TO_BLACKLIST] [-d PREFIX_FOR*.{info,help,cmd}]
+	[-X SHELL_OF_CONTAINED_SCRIPTS]
+	[ARG UM ENTS]
+
+  Where ARG could be a subfolder, UM a script and ENTS an argument to the
+  script, of the passed "-p /path/to/menu".
+
+DESCRIPTION
+  This is "The one script to rule them all!" :)
+
+  It is ment to give a highly customizeable tool to be used for your own "file and directory based" projects.
+  It uses its arguments to match among its root directory folders and files, and changes to a path or executes files, even with argumemts.
+
+  It lets you browse through the folders, using either a "select" based menu ( -m num ) or a text based menu ( -m text - default ).
+
+  Also, one can simply provide help test within each folder, by simply providing a file named default.info which each should contain only text, and will be read line-wise before showing either the text or numeric menu.
+
+  Furthermore it helps to ease the task of catching arguments per file, since no matter how deep the file is, it handles arguments as if it was called directly.
+
+OPTIONS
+  -b WORD	Blacklists a certain string from beeing executed ( text mode only )
+
+  -c /path/to/file.conf 	Full path to the configuration file of your project. All  variables  provided with that file, will be exported and are available by all called within the sub dirs of your root.
+
+  -D STRING	The "Directory" section will be labled as STRING ( text mode only )
+
+  -d STRING	For the path based info files, STRING will be used, rather than default (default).
+
+  -F STRING	The "File" section will be labled as STRING ( text mode only )
+
+  -L STRING	Renames Location: to STRING (2nd line upper left)
+
+  -m	When provided, enables textmode , default is numeric.
+
+  -P STRING	The "Position" section will be labled as STRING (2nd line upper right)
+
+  -p /path/to/menu/root 	Pass this if you want a specific path to be the menu-root.
+
+  -n	 Do no clear screen before the menu is shown again.
+
+  -S	Forces to show the location/position (2nd) line to be shown when executing a script directly.
+  Most likely you want to use this only when you use -P STRING or -L STRING as well.
+
+  -s /path/to/files/to/include  	Sources all files found in /path/to/files/to/include and exports  all  VARIABLES  and  FUNCTIONS
+  found within the files.
+
+  -T TITLE	This  TITLE  will  be  used in the top left as project title, and also when scripts are executed
+  before the passed arguments.
+
+  -U STRING	Changes the default userstring from $USER_NAME to STRING (top right)
+
+  -d NAME	Changes the file name string from "default" to "NAME"
+		These files will be hidden from the menu, and according to their extension be called on different purposes...
+		* default.help - Will be shown if no script named "help" is found
+		* default.info - Will be shown upon folder entry
+		* default.cmd - Will be executed upon folder entry
+
+  -q		Does not show header, title, footer
+
+  -X	SHELL	Which shell to use to execute scripts, default bash
+
+EXAMPLES
+  Open the browser with the current directory as "root".
+
+	$ME
+
+  Opens the browser using provided -p /path/to/menu path.
+
+	$ME -p "$HOME/path with spaces"
+
+  Starts the browser, using "My script manager" as title, and prints "Contains \044(ls|wc -l) entries" in the username area (top right), and shares the values of /path/to/config/file.conf among all scripts the browser will call, by exporting those variables, using /path/to/menu as base/root directory shown in the "Location bar"
+
+	$ME	-T "My script manager" \134\134
+			-p "/path/to/menu" \134\134
+			-U "Contains \044(ls\174wc -l) entries" \134\134
+			-c /path/to/config/file.conf \134\134
+			"\044{@}"
+
+NUMERIC MODE
+  The numeric mode is for easy and quick access and browse through the "BASE" (-p PATH) and all its subdirectories.
+  If one would "leave" the BASE directory to a toplevel one, $ME will exit. While browsing, only numeric inputs within range shown will be accepted, at any (sub-)level, all content of the current location will be displayed. With the exception of the "default.{cmd,info,help}" files, unless changed by -d STRING is provided, in which case it still hides all "STRING.{cmd,info,help}" files.
+  In both modes, default.{str,info} will be looked for, and if found, default.cmd will be sourced, with all variables and functions provided in the files passed with -c FILE and -s DIR/FILE, while default.info will be shown before the directory content.
+
+TEXTMODE
+  While the default numeric mode is for quick and easy access, the textmode, enabled with -m gives you a quite diffrent design or layout.
+  The main diffrence is, one doesnt select among numbers, but must enter the name of the item.
+  This said, and since one has the ability to write anyway, i also wanted to give you the possibility to block certain words. Similar to the numeric mode, at all times you have the option to go back or quit, by entering: b, B, BACK, back, Back or q, Q, quit, QUIT, Quit
+
+SEE ALSO
+  tuirc(1), tui-bol-dir(1), tui-bol-gui(1), tui-bol-root(1), tui-printfile(1),
+  tui-cp(1), tui-download(1), tui-print(1), tui-edit(1), tui-header(1),
+  tui-install(1), tui-list(1), tui-log(1), tui-mv(1), tui-new-browser(1),
+  tui-new-manpage(1), tui-new-script(1), tui-press(1), tui-printline(1),
+  tui-progress(1), tui-read(1), tui-select(1), tui-status(1), tui-tar(1),
+  tui-terminal(1), tui-title(1), tui-wait(1), tui-web(1), tui-yesno(1)
+
+BUGS
+  Report bugs to: <tui-support@nongnu.org>
+
+  TUI - Homepage: <https://savannah.nongnu.org/projects/tui>
+
+  General help using GNU software: <http://www.gnu.org/gethelp/>
+
+AUTHOR
+  Simon Arjuna Erat, <http://linux-scripter.blogspot.ch>
+')"
+#
+# 	Default Interface:
+#
+	# All
+	lbl_title="$ME ($script_version) - $TITLE"	# 0 TOP RIGHT
+	lbl_user="$USER_NAME @ $(date +'%F %T')"	# 0 TOP LEFT
+	lbl_location="Location:"			# 1 TOP RIGHT
+	lbl_position=""					# 1 TOP LEFT	-- unused yet
+	# Text mode only
+	lbl_dir="Section:"
+	lbl_file="Task:"
+#
+#	Default Bool's
+#
+	doClear=true		# Whether to clear screen or not
+	doTextmode=false	# false will show the numeric mode
+	doBlacklist=false	# Will be enabled as soon "-b WORD" is passed
+	doCustomPosition=false	# Will be enabled as soon "-P WORD" is passed
+	showLocationPos_Anyway=false	# While false, this hides the 'Location' title line when calling a script directly
+	showLocationPos_Anyway_ow=false
+	beQuiet=false		# Will be enabled by "-q"
+#
+#	Default Strings
+#
+	menu=show
+	PWD_OLD="$PWD"	# This is where the user actually entered the command
+	export PWD_OLD	# Make sure one can access this from within the scripts called by $ME
+	CURRENT="$PWD"
+
+	# Text mode only
+	default_actions="delete edit execute help info new rename quit"
+
+	# Advanced
+	BLACKLIST=""		# Default entries to ignore when entered in Text mode
+	declare -a CONFIG SOURCE # Configuration files to load (source & export)
+	SPECIAL_NAME="default"	# Default name of the files parsed before displaying any content
+	browser_shell="bash"	# This shell will be used to execute scripts, default bash
+#
+#	Internal defaults
+#
+	SPECIAL_EXT="info help cmd"	# For these 3 words there will be a handling. 'help' is only textmode!
+	BASE=""				# What is the BASE for the LOCATION_DISPLAY
+	BROWSER_LIST_LOADED_VARIABLES=""	# This will contain all the variables that had been exported, to unload them when exiting without ^C.
+#
+#	Pre-functions
+#
+	MakeCurStr() { # PATH
+	# Parses PATH and 'make it look nice'
+	# Returns the 'nice looking string'
+		[ -z "$1" ] && printf "Missing argument" && return 1
+		str="$1"
+		out=""
+
+		# If PATH is just $BASE it shows a simple /, otherwise removing leading .
+		echo "${str:0:1}" | $GREP -q '\.' && \
+			out="${str:1}" || \
+			out="$str"
+
+		# Replace the slashes with something else  (space-slash-space)
+		printf " $out"|$SED s\\"/"\\" / "\\g
+	}
+	GetStringDirs() { # ARGS[@]
+	# Parses ARGS[@] and prints a 'path-string'
+	#
+		[ -z "$BASE" ] && return 1
+		[ -z "$1" ] && return 1
+		out="$BASE/"
+		for a in "${@}";do
+			[ -d "$out/$a" ] && out+="$a/"
+		done
+		echo "$out"
+	}
+	GetStringFile() { # ARGS[@]
+	# Parses ARGS[@] and prints a 'path-string'
+	#
+		#[ -z "$BASE" ] && return 1
+		[ -z "$1" ] && return 1
+		dir="$PWD/"
+		for a in "${@}";do
+			if [ -d "$dir/$a" ]
+			then	dir+="$a/"
+				shift
+			elif [ -f "$dir/$a" ]
+			then	echo "$a"
+				return 0
+			fi
+		done
+		return 1
+	}
+	GetStringArgs() { # ARGS[@]
+	# Parses ARGS[@] and prints a 'path-string'
+	#
+		#[ -z "$BASE" ] && return 1
+		[ -z "$1" ] && return 1
+		dir="$PWD/"
+		for a in "${@}";do
+			if [ -d "$dir/$a" ]
+			then	dir+="$a/"
+				shift
+			elif [ -f "$dir/$a" ]
+			then	shift
+				echo "$@"
+				return 0
+			else	echo "$a"
+			fi
+		done
+		return 0
+	}
+#
+#	Catching Arguments
+#
+	[ "--help" = "$1" ] && printf "$help_text" && exit 99
+	showVersion() {
+	cat <<-EOF
+		TUI, Version $TUI_VERSION
+		Copyright (C) 2015 Simon Arjuna Erat
+		License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+
+		This is free software; you are free to change and redistribute it.
+		There is NO WARRANTY, to the extent permitted by law.
+	EOF
+	}
+	[ "--version" = "${1,,}" ] && showVersion && exit 0
+	while getopts "hL:T:U:P:D:F:p:ns:mb:c:d:qX:S" name
+	do 	case $name in
+		h|help)		printf "$help_text"
+				exit $RET_HELP		;;
+
+		L|location)	lbl_location="$OPTARG"	;;
+		T|title)	lbl_title="$OPTARG"	;;
+		U|user) 	lbl_user="$OPTARG"	;;
+		P|position)	lbl_position="$OPTARG"
+				doCustomPosition=true	;;
+
+		p|path) 	BASE="$OPTARG"		;;
+		n|noclear)	doClear=false		;;
+		s|source) 	SOURCE[${#SOURCE[@]}]="$OPTARG"	;;
+		m|mode)		doTextmode=true 	;;
+
+		# text mode
+		D|dir) 		lbl_dir="$OPTARG"	;;
+		F|file) 	lbl_file="$OPTARG"	;;
+
+		# Advanced
+		b|blacklist) 	BLACKLIST+=" $OPTARG"	;;
+		c|config)	CONFIG[${#CONFIG[@]}]="$OPTARG"	;;
+		d|default)	SPECIAL_NAME="$OPTARG"	;;
+		q|quiet)	beQuiet=true		;;
+		X|execute)	browser_shell="$OPTARG"	;;
+		S)		showLocationPos_Anyway_ow=true	;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	export browser_shell
+	[ -z "$BLACKLIST" ] && \
+		doBlacklist=false || \
+		doBlacklist=true
+
+	if ! which $browser_shell 1>/dev/null 2>/dev/null
+	then	tui-status 1 "Invalid shell supplied or not installed: \"$browser_shell\""
+		exit $?
+	fi
+
+	# This is required to hide these files in the both the numeric and text mode menu
+	HIDE_THIS="$SPECIAL_NAME.{$(for S in ${SPECIAL_EXT[@]};do printf '$S,';done)}"
+
+	# Go to the Base, or stay where you are when no "-p PATH" was supplied
+	[ -z "$BASE" ] && BASE="$PWD_OLD" || cd "$BASE"
+#
+#	Functions
+#
+	ShowContent() { # ABSOLUTEPATH
+	# Displays the content of a path
+	#
+		[ -z "$1" ] && printf "Missing argument" && return 1
+		if [ "" = "$(ls)" ]
+		then 	tui-status 1 "Location is empty"
+			tui-print
+		else	unset folders[@] files[@] ARRAY[@]
+			L=M=R=""
+			CD=0 ; CF=0	# Counters : dir + files
+			# Fill specific arrays
+			ARRAY=( * )
+			for e in "${ARRAY[@]}";do
+				# verify its not a 'default' file
+				num=
+				if  [ ! "${e:0:${#SPECIAL_NAME}}." = "${SPECIAL_NAME}." ] # || [ ! ${e:0:-${#SPECIAL_EXT}+1} = ".$SPECIAL_EXT" ]
+				then	# Its not, so split entries to files & folders
+					if [ -d "$e" ]
+					then	folders[$CD]="$e"
+						((CD++))
+					else	files[$CF]="$e"
+						((CF++))
+					fi
+				else	# Its a $SPECIAL_NAME (default file)
+					case "${e:${#SPECIAL_NAME}+1}" in
+					".cmd")		. "$e"
+							;;
+					info)		#echo "Show the INFO!"
+							tui-printfile "$e"
+							tui-print
+							;;
+					esac
+				fi
+			done
+			for task in folder files;do
+				unset array
+				# Counters C D E
+				C=0 ; D=1 ; E=2
+				# Show task and create specific array
+				case $task in
+				folder)	content_title="$lbl_dir"
+					array=( "${folders[@]}" )
+					;;
+				files)	content_title="$lbl_file"
+					array=( "${files[@]}" )
+					;;
+				esac
+				# Don't show title if no entries available
+				if [ ! 0 = "${#array[@]}" ]
+				then 	tui-title "${content_title}:"
+					tui-list -n "${array[@]}"
+				fi
+			done
+		fi
+	}
+#
+#	Load provided configuration and sources
+#
+	THE_MEGA_CONFIG="$TUI_DIR_TEMP/$ME_CONFIGS.cfg.tmp"
+	[ -f "$THE_MEGA_CONFIG" ] && rm -f "$THE_MEGA_CONFIG"
+	touch "$THE_MEGA_CONFIG"
+
+	#LoadFile() { # LIST OF FILES OR FOLDERS TO EXPORT
+	# This uses the variable THE_MEGA_CONFIG as a target file to store all configuration in
+	# So outside the function, it is a single source command to get all the values
+		#ARRAY="${@}"
+		#if [ ! "" = "$(echo ${ARRAY[@]})" ]
+		#then	# There are config files
+			for conf in "${CONFIG[@]}" "${SOURCE[@]}" #"${ARRAY[@]}"
+			do	# Warn the user that no configuration file was found
+				conf="$(echo $conf)"
+				if [ -d "$conf" ]
+				then	# its a dir, source and export each of the files there
+					# Supposedly the 'sources'
+					cd "$conf"
+					for f in *
+					do	CONF_LIST=""
+						# Load the values
+						if [ -f "$f" ]
+						then	printf "."
+							#f="$(echo $f)"
+							var=$(tui-conf-get -l "$f")
+							printf "\n" >> "$THE_MEGA_CONFIG"
+							cat "$f" >> "$THE_MEGA_CONFIG"
+							printf "\n" >> "$THE_MEGA_CONFIG"
+						fi
+					done
+					cd "$PWD_OLD"
+				elif [ -f "$conf" ]
+				then	# Supposedly the configs
+					printf "."
+					conf="$(echo $conf)"
+					var=$(tui-conf-get -l "$conf")
+					cat "$conf" >> "$THE_MEGA_CONFIG"
+				else	tui-print -S 111 "Warning! No file to source found (in): $conf"
+					tui-wait 3s "Continue in:"
+				fi
+			done
+		#fi
+		printf "\n" >> "$THE_MEGA_CONFIG"
+	#}
+	# Prepare the configurations
+	#[ ! "" = "$(echo ${CONFIG[@]})" ] && LoadFile "${CONFIG[@]}"
+	#[ ! "" = "$(echo ${SOURCE[@]})" ] && LoadFile "${SOURCE[@]}"
+
+	# Now load and export all the values:
+	source "$THE_MEGA_CONFIG"
+
+	# Get the variables
+	for v in $(tui-conf-set -l "$THE_MEGA_CONFIG");do
+		BROWSER_LIST_LOADED_VARIABLES+=" $v"
+	done
+
+	# Get the functions
+	oIFS="$IFS" ; IFS="{}()"
+	BROWSER_LIST_LOADED_FUNCTIONS=""
+	$GREP "()[[:space:]]{" "$THE_MEGA_CONFIG" | while read function;do
+		BROWSER_LIST_LOADED_FUNCTIONS+=" $function"
+	done
+
+	# Export variables
+	for entry in $BROWSER_LIST_LOADED_VARIABLES
+	do	cmd="export -p $entry"
+		eval $cmd
+	done
+
+	# Export functions
+	for entry in $BROWSER_LIST_LOADED_FUNCTIONS
+	do	export -f $entry
+	done
+	IFS="$oIFS"
+#
+#	Display & Action
+#
+	sleep 0.03	# This is required for arrangement (in WM cases)
+	len="${#BASE}"
+	cd "$BASE"	# Change to BASE before displaying anything
+
+	# Arguments been passed
+	if [ ! -z "$1" ]
+	then	# Change to directory
+		for d in "${@}";do
+			[ -d "$d" ] && cd "$d" && shift
+		#	if [ -f "$d" ]
+		#	then	shift
+		#		args=$(GetStringArgs "${@}")
+		#		./"$d" $args
+		#		exit $?
+		#	fi
+		done
+		CURRENT="$PWD"
+
+		# Parse arguments, execute the file or enter the folder
+	#	set -x
+		file=$(GetStringFile "${@}")
+		args=$(GetStringArgs "${@}")
+
+	#	echo
+	#	echo file: $file
+	#	echo args: $args
+	#	exit
+
+		if [ -f "$PWD/$file" ] && [ ! -z "$file" ]
+		then	$showLocationPos_Anyway_ow && \
+				showLocationPos_Anyway=$showLocationPos_Anyway_ow
+		fi
+
+		# Prepare heading string
+		if $doCustomPosition
+		then	POSITION="$lbl_position"
+		else	if [ 0 -ne $# ]
+			then	#CURRENT="$(GetStringDirs "${@}" )"
+				if [ "$BASE" = "$CURRENT" ]
+				then	CUR_STR=""
+				elif [ ! -z "$CURRENT" ]
+				then	CUR_STR=$(MakeCurStr "${CURRENT:$len}")
+				fi
+			else	CUR_STR=""
+			fi
+
+			# Beides
+			POSITION="/$CUR_STR"
+		fi
+
+		#set -x
+		if [ ! -z "$file" ] && [ -f "$CURRENT/$file" ]  #&& [ ! "$CURRENT/" = "$CURRENT/$file" ]
+		then	# Print top header
+			$beQuiet || tui-header "$lbl_title" "$lbl_user"
+
+			# The title is not required, since a script is executed
+			! $beQuiet && $showLocationPos_Anyway && tui-title "$lbl_location"  "$POSITION"
+
+			# Execute it
+			out=""
+			for a in "${@:1}";do out+=" $a";done
+
+			$browser_shell "$CURRENT/$file" $args
+			RET=$?
+			$beQuiet || tui-status $RET "${lbl_title}${out}"
+			exit $?
+		else	# There is nothing to execute
+			# Simply change dir and let the menu loop display the heading
+			cd "$CURRENT"
+		fi
+	#else 	[ -z "$CURRENT" ] && CURRENT="$PWD"
+	fi
+#			#####
+##			####
+###			###
+####	MAIN LOOP  	#
+###			###
+##			####
+#			#####
+	while [ ! $menu = "quit-browser" ];do
+	#
+	#	Set vars that must be re-read/set upon reload of current dir
+	#
+		CURRENT="$PWD"
+
+		# Prepare heading string
+		if $doCustomPosition
+		then	POSITION="$lbl_position"
+		else	# Original
+			CURRENT="$PWD"
+			if [ "${BASE//$/}" = "$CURRENT" ]
+			then	CUR_STR=""
+			else	CUR_STR=$(MakeCurStr "${CURRENT:$len}") || exit 1
+			fi
+
+			# Prepare CUR_STR for display
+			CUR_STR="$(echo $CUR_STR|sed s,'/  /','',g)"
+			[ "/" = "${CUR_STR:0:1}" ] || \
+				CUR_STR="/$CUR_STR"	# The check above is new !!!
+			POSITION="$CUR_STR"
+		fi
+	#
+	#	Display	- TOP MENU
+	#
+		$doClear && clear
+		tui-header "$lbl_title" "$lbl_user"
+		tui-title "$lbl_location"  "$POSITION"
+
+		# This must be double, since its outside the loop
+		if ! $doTextmode
+		then	for T in cmd info ;do
+				case $T in
+				cmd)	[ -f "$SPECIAL_NAME.cmd" ] && \
+						source "$SPECIAL_NAME.cmd"
+					;;
+				info)	[ -f "$SPECIAL_NAME.$T" ] && \
+						tui-printfile "$SPECIAL_NAME.$T"
+					;;
+				#help)	[ -f $SPECIAL_NAME.help ] && tui-print -E  "TODO: $(pwd) help" ;;
+				esac
+			done
+		fi
+	#
+	#	MENU :: TEXT
+	#
+		if $doTextmode ; then
+		#
+		#	DISPLAY - Show content
+		#
+			if [ -z "$CURRENT" ]
+			then	[ ! -z "$BASE" ] && \
+					CURRENT="$BASE" || \
+					CURRENT="$PWD"
+			fi
+			ShowContent "$CURRENT"
+		#
+		#	Fetch input
+		#
+			tui-print
+			#read -p "$BORDER_LEFT What is your choice: " mode item newval spare
+			action=$(tui-read "What is your choice:")
+			action_done=false
+		#
+		#	Decide action
+		#
+			str="$(echo $action|$AWK '{print $1}')"
+			if [ -d "$action" ]
+			then	cd "$action"
+				action_done=true
+			elif [ -f "$action" ]
+			then	$browser_shell "$action"
+				action_done=true
+			elif which $str 1>/dev/null 2>/dev/null
+			then	# This IS be a BASH command
+				# Check for blacklisted words$action
+				if $doBlacklist
+				then	isBlocked=false
+					for BLOCK in $BLACKLIST
+					do	if echo $str | $GREP -q -i $BLOCK
+						then	isBlocked=true
+						fi
+					done
+					if $isBlocked
+					then	tui-status 1 "Invalid argument given: $str"
+					else	$browser_shell $action
+						action_done=true
+					fi
+				else	$browser_action $action
+					action_done=true
+				fi
+			fi
+			if ! $action_done
+			then	# It has not been executed yet, do so now?
+				case $action in
+				help|HELP|h|?)
+					[ -f "$SPECIAL_NAME.help" ] && \
+						tui-print -E  && \
+						tui-title "Help" && \
+						tui-printfile "$SPECIAL_NAME.help" && \
+						tui-print -E  && \
+						tui-press || \
+						tui-wait 5s "Sorry, no help found."
+					;;
+				[bB]|[bB][aA][cC][kK])
+					[ "$CURRENT" = "$BASE" ] && \
+						menu="quit-browser" || \
+						menu="back"
+					;;
+				[qQ]|[qQ][uU][iI][tT])
+					menu="quit-browser"
+					;;
+				*)	tui-status 1 "Command ($action) not found!"
+				esac
+			fi
+		elif ! $doTextmode ; then
+		#
+		# MENU :: NUM
+		#
+			# OLD -- Working
+			#select e in $(ls|$GREP -v $SPECIAL_NAME. ) Back Quit;do
+			#	case "$e" in
+			#	Back)	menu="back"
+			#		break	;;
+			#	Quit)	menu="quit-browser"
+			#		exit 0	;;
+			#	*)	menu=up
+			#		[ -f "$e" ] &&  ./"$e"
+			#		[ -d "$e" ] && cd "$e"
+			#		break
+			#		;;
+			#	esac
+			#done
+
+			# NEW -- Experimental
+			menu="show"
+
+			while [ "$menu" = show ]
+			do
+				selected=$(tui-select $(ls|$GREP -v $SPECIAL_NAME. ) Back Quit)
+				case "$selected" in
+				Back)	menu="back"
+					break	;;
+				Quit)	menu="quit-browser"
+					exit 0	;;
+				*)	menu=nolonger
+					[ -f "$selected" ] && $browser_shell ./"$selected"
+					[ -d "$selected" ] && cd "$selected"
+					break
+					;;
+				esac
+			done
+		else	tui-status 1 "Error, MENU_MODE = $MENU_MODE"
+		fi
+	# Check for BACK
+	# Exit if 'leaving' base directory
+		if [ $menu = back ]
+		then	[ "$CURRENT" = "$BASE" ] && \
+				menu="quit-browser" || \
+				cd ..
+		fi
+	done
+	cd "$PWD_OLD"
+#
+#	Unload 'environment'
+#	Since the heartbleed, i think this is no longer required, but i keep this for security reasons
+#
+	for var in $BROWSER_LIST_LOADED_VARIABLES ; do
+		cmd="$var=\"\" ; export $var"
+		eval $cmd
+	done
+}

@@ -150,6 +150,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 		>$FILE_TEMP
 		echo "LC_ALL=C $CURLWGET $OPT_C $OPT_O \"$out_string\" \"$URL\" 1>/dev/null 2>$FILE_TEMP" > "$FILE_CMD"
 		chmod +x "$FILE_CMD"
+		# Not using 'nohup' so the download can be aborted
 		(
 			"$FILE_CMD" 2>/dev/zero
 		) & >/dev/zero 2>/dev/zero

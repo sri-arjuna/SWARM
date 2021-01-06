@@ -286,6 +286,12 @@ swarm.str.num2roman() { # NUM
 	done
 	$PRINTF "$output"
 }
+swarm.str.num2uni() { # HEX
+# Returns the Unicode character of given HEX
+# https://unicode-table.com/en/blocks
+	[[ -z "$1" ]] && return 1
+	$PRINTF "\\u$1"
+}
 swarm.str.num2ascii() { # NUM
 # Returns the ASCII of given NUM
 # https://www.unix.com/shell-programming-and-scripting/284185-problems-converting-decimal-ascii-back-decimal.html

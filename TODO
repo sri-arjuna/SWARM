@@ -5,7 +5,6 @@ Checklist upon adding new functions:
 
 
 
-
 Grosse Functionen
 -----------------
 2) cfg.edit
@@ -36,6 +35,14 @@ swarm.str.usb
 wait
 yesno ??
 
+
+
+Statement
+---------
+Framework core functions were written from scratch, again,
+wheres most functions have been migrated from its initial form TUI.
+
+Due to this, some issues are to be expected in the early public phases
 
 
 

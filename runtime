@@ -3,10 +3,10 @@
 # SWARM = Shell Wrapper and Runtime Modifier #
 # Author:	Simon Arjuna Erat (sea)	     #
 # License:	GPL v2			     #
-# Copyleft:	1995-2020		     #
+# Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2020.06.05	 	     #
-# Build:	48			     #
+# Changed:	2021.01.08	 	     #
+# Build:	52			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -47,6 +47,17 @@
 # * Optionaly, you may pass SWARM_RAMDISK_DIR=/path/to/mountpoint
 ##############################################
 #
+# Version Check
+#
+	if [[ $BASH_VERSINFO -lt 4  ]] || [[ -z $BASH_VERSINFO ]]
+	then	printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+	else	if [[ 4 -eq $BASH_VERSINFO ]]
+		then 	if [[ ${BASH_VERSION:2:1} -lt 3  ]]
+			then	printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+			fi
+		fi
+	fi
+#
 # Core Public Variables
 #
 	# SWARM
@@ -83,7 +94,7 @@
 	posix_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 	configure_PATH="$BINDIR:$SBINDIR"
 	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
-	export PATH_OLD="$PATH"
+	export PATH_OLD="${PATH_OLD:-$PATH}"
 	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	export -r PRINTABLE_PIPECHAR="$(builtin echo -e \\u2502)" 2&>/dev/zero
 	# Make sure TERM is set

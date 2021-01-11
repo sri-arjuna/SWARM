@@ -34,7 +34,7 @@ swarm.util.mv @ $MV		on/e line output
 swarm.str.usb
 wait
 yesno ??
-
+printfile			leading spaces missing
 
 
 Statement

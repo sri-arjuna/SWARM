@@ -714,8 +714,8 @@
 			swarm.print.border
 			swarm.print.text -p  "${2:-$MSG}" " " "$TIME_string"
 
-			# Wait
-			sleep 1  # 0.999
+			# Wait -- Lets give the system time to 'update' itself...
+			sleep 0.999
 
 			# Verbose / Countdown?
 			if ${beVerbose}
@@ -726,4 +726,22 @@
 		done
 		$PRINTF "\n"
 		return 0
+	}
+	printfile() { # FILE | --
+	# Prints all given files line by line, separated by "title 'filename'"
+	# -- or no arguments will use read
+		for file in "${@}"
+		do
+			if [[ -f "$file" ]]
+			then	title "$file"
+				while read line;do
+					printe "${line/\|/${PRINTABLE_PIPECHAR}}"
+				done<"$file"
+			else	title ""
+				while read line;do
+					printe "${line/\|/${PRINTABLE_PIPECHAR}}"
+				done
+			fi
+		done
+		#wait 5s
 	}

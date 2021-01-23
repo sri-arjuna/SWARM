@@ -31,10 +31,10 @@ swarm.str.split			speed, empty line???
 bar				alignment
 swarm.util.cp @ $CP		on/e line output
 swarm.util.mv @ $MV		on/e line output
-swarm.str.usb
+swarm.str.usb			linux works, BSD/arm not so sure
 wait
 yesno ??
-printfile			leading spaces missing
+printfile			leading spaces missing / possible performance ??
 
 
 Statement

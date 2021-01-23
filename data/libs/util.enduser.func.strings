@@ -288,7 +288,7 @@ swarm.str.num2roman() { # NUM
 }
 swarm.str.num2uni() { # HEX
 # Returns the Unicode character of given HEX
-# https://unicode-table.com/en/blocks
+# https://unicode-table.com/en/blocks // https://unicode-table.com/de/
 	[[ -z "$1" ]] && return 1
 	$PRINTF "\\u$1"
 }

@@ -204,7 +204,7 @@ terminals() {  ## # [ -c ] FILE1 FILE2 FILE3 ...
 		[ -z "$1" ] && opt="" || opt="-e "
 		# Fill the fallback, to avoid empty calls
 		TERMINAL="${TERMINAL:-xterm}"
-		printe -E  "$(eval_gettext '$TERMINAL: Using default option \"$opt\", please report your terminal ($TERMINAL) and its command execution option.')" >&2
+		printe "$(eval_gettext '$TERMINAL: Using default option \"$opt\", please report your terminal ($TERMINAL) and its command execution option.')" >&2
 		;;
 	esac
 	# Sadly not all GUI filemanagers support tabs

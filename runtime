@@ -94,29 +94,45 @@
 	posix_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 	configure_PATH="$BINDIR:$SBINDIR"
 	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
+	# Exporting an empty variable, but if it is, it will be filled with the current path.
 	export PATH_OLD="${PATH_OLD:-$PATH}"
+	# Use current PATH or if empty, default POSIX path, and append additional cross over paths
+	# Might result in double entries if this file is source multiple times without properly
+	# clearing the ENV by the use of swarm.cleanup
 	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
-	export -r PRINTABLE_PIPECHAR="$(builtin echo -e \\u2502)" 2&>/dev/zero
-	export -r PRINTABLE_GREATER="$(builtin echo -e \\u003e)" 2&>/dev/zero
-	export -r PRINTABLE_LESSER="$(builtin echo -e \\u003c)" 2&>/dev/zero
 	# Make sure TERM is set
 	TERM="${TERM:-GNU\057Linux}"
+	# Lets check for the most important output commands
+	# Saving results to variables
+	RESULT="$(enable | grep -e echo -e printf)"
+	NUM=$(echo "$RESULT" |wc -l)
+	# Assign variable according to result
+	if [[ 2 -eq "${NUM:-0}" ]]
+	then	# Both are found
+		ECHO="builtin echo"
+		PRINTF="builtin printf"
+	else	# Handle each on its own
+		echo "$RESULT" | grep -q echo && \
+			ECHO="builtin echo" || \
+			ECHO="swarm.util.echo"
+		echo "$RESULT" | grep -q printf && \
+			PRINTF="builtin printf" || \
+			PRINTF="\printf"
+	fi
+	unset RESULT NUM
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
-	export PRINTF=${PRINTF:-\printf}
-	export ECHO="swarm.util.echo"		# Defined in core.utils
 	export AWK=${AWK:-\gawk}
 	export GREP=${GREP:-\grep}
 	export SED=${SED:-\sed}
-	export WHICH="swarm.util.which"	# Defined in core.utils
 	export LS=${LS:-\ls}
 	export PWD_EXEC=${PWD_EXEC:-\pwd}
 	export DATE=${DATE:-\date}
-	export MKDIR="swarm.util.mkdir"	# Defined in core.utils
 	export TOUCH=${TOUCH:-\touch}
 	export PWD_EXEC=${PWD_EXEC:-\pwd}
 	export TPUT="${TPUT:-tput}"
 	# SU and SUDO must be empty if the command was not found
+	# They are assigned now however, to 'overwrite' their location
 	export SU=${SU}
 	export SUDO=${SUDO}
 	export ID=${ID:-\id}
@@ -128,6 +144,12 @@
 	export FIND=${FIND:-\find}
 	export TR=${TR:-\tr}
 	export WC=${WC:-\wc}
+	export WHICH="swarm.util.which"	# Defined in core.env
+	export MKDIR="swarm.util.mkdir"	# Defined in core.env
+	# These are required for internal functions to avoid security breaches
+	export -r PRINTABLE_PIPECHAR="$($ECHO -e \\u2502)" 2&>/dev/zero
+	export -r PRINTABLE_GREATER="$($ECHO -e \\u003e)" 2&>/dev/zero
+	export -r PRINTABLE_LESSER="$($ECHO -e \\u003c)" 2&>/dev/zero
 #
 # Some other things
 #

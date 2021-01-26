@@ -38,7 +38,7 @@ bar()  { # [options] [MESSAGE]
 		tmp=""
 		[ ! -z "$MAX" ] && tmp="NUM"
 		$doBar && [ ! -z "$MAX" ] && tmp="BAR"
-		builtin echo "${tmp:-DASH}"
+		$ECHO"${tmp:-DASH}"
 	}
 	function bar.reset_tmp() { # ID
 	# Resets the counter according to passed ID
@@ -63,8 +63,8 @@ bar()  { # [options] [MESSAGE]
 	# Reads VAL in the temp file according to passed id
 	# Returns VAL
 		if "$hasID"
-		then	builtin echo "${SWARM_PROGRESS_BAR_IDS[$ID]}"
-		else	builtin echo "${SWARM_PROGRESS_BAR_IDS[$ID_CUR]}"
+		then	$ECHO "${SWARM_PROGRESS_BAR_IDS[$ID]}"
+		else	$ECHO "${SWARM_PROGRESS_BAR_IDS[$ID_CUR]}"
 		fi
 	}
 #
@@ -92,12 +92,12 @@ bar()  { # [options] [MESSAGE]
 			# Parse values
 			while read item
 			do
-				str_color="$(builtin echo ${item} | $TR -d [:digit:])"
-				str_value="$(builtin echo ${item} | $TR -d [:alpha:])"
+				str_color="$($ECHO ${item} | $TR -d [:digit:])"
+				str_value="$($ECHO ${item} | $TR -d [:alpha:])"
 				SWARM_BAR_COLORS=($str_color)
 				SWARM_BAR_VALUE=($str_value)
 				c=$(( $c + 1 ))
-			done<<<$(builtin echo "$STR_COLORS_RAW" | $SED s/','/'\n'/g )
+			done<<<$($ECHO "$STR_COLORS_RAW" | $SED s/','/'\n'/g )
 			hadOpts=true
 			;;
 		-i)	ID="$2"
@@ -182,7 +182,7 @@ bar()  { # [options] [MESSAGE]
 		fixer_fix=0
 		if "$longBar"
 		then	# Show also procent ($STATUS)
-			procent="$( builtin echo $MAX $VAL | $AWK '{print (100/$1*$2) }' )"
+			procent="$( $ECHO $MAX $VAL | $AWK '{print (100/$1*$2) }' )"
 			[ -z "$MESSAGE" ] && fixer_fix=0 || fixer_fix=5	# Does this depend on $WIDTH?
 
 			# How many procent?
@@ -190,7 +190,7 @@ bar()  { # [options] [MESSAGE]
 			[ "$pro" -gt 100 ] && \
 				pro=100
 			[ "$pro" -ne 100 ] && \
-				cent="$( while IFS='.' read P C;do [ -z "$C" ] && builtin echo 00 || builtin echo $C;done<<<$procent)" && \
+				cent="$( while IFS='.' read P C;do [ -z "$C" ] && $ECHO 00 || $ECHO $C;done<<<$procent)" && \
 				cent="${cent:0:2}" || \
 				cent=00
 			case ${#pro} in
@@ -201,7 +201,7 @@ bar()  { # [options] [MESSAGE]
 			length=$(( $numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - ${fixer} - $fixer_fix  ))
 			#STATUS="[ ${pro}.${cent}%% ]"		# Nope
 			STATUS="[ ${pro}.${cent}%% ]"	# Ok, what?
-			len=$( builtin echo $length $procent | $AWK '{print ($1/100*$2) }' )
+			len=$( $ECHO $length $procent | $AWK '{print ($1/100*$2) }' )
 		else	STATUS=""
 			[ -z "$MESSAGE" ] && fixer_fix=7	# Does this depend on $WIDTH?
 			# The length that is available to print bars
@@ -209,14 +209,14 @@ bar()  { # [options] [MESSAGE]
 				fixer=16 || \
 				fixer=14
 			length=$(( $numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
-			len=$( echo $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
+			len=$( $ECHO $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
 		fi
 #		echo "len: $len // length: $length // width: $WIDTH // numEND: $numEND"
 		# Colorize?
 		if [[ -z "$SWARM_BAR_COLORS" ]]
 		then
 			bars=$($PRINTF '%*s' ${len/.*})
-			bars=$(builtin echo "$bars"|$SED s," ","\\$BAR",g)
+			bars=$($ECHO "$bars"|$SED s," ","\\$BAR",g)
 		else
 			local bars_counter=$(( $numEND - ( 2 * $identRight ) ))
 			local bars_curret=0
@@ -276,8 +276,8 @@ bar()  { # [options] [MESSAGE]
 			fi
 		else	if [[ -z "$MESSAGE" ]]
 			then 	# No message
-				printf "$posLEFT${PROGRESS}"
-				printf "\n"
+				$PRINTF "$posLEFT${PROGRESS}\n"
+				#printf "\n"
 			else 	# With message
 				swarm.print.text "$MESSAGE" "" "${PROGRESS}"
 			fi

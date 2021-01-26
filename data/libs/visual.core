@@ -417,7 +417,7 @@ header
 	# and prints each part as a new line
 		[[ -z "$1" ]] && return 1
 		local tmp_count=$(( ( $(builtin echo "${1}" | $WC -c)  ) / 2 ))
-		builtin echo "$1" | fold -sw $tmp_count #| printe -1 --
+		$ECHO "$1" | fold -sw $tmp_count #| printe -1 --
 	}
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM

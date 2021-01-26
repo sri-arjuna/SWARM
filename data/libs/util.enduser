@@ -220,7 +220,7 @@
 		do
 			$PRINTF "$str1"
 			$PRINTF "$str2"
-			builtin read -n 1 answer
+			read -n 1 answer
 
 			case "$answer" in
 			"+"|"${Y,,}")
@@ -512,7 +512,7 @@
 		#$doReturn && \
 		#	$PRINTF "$(swarm.print.goto 0)" && \
 		#	(var=$(builtin read -u buffer n0 2>/dev/null)) & || \
-			builtin read
+			read
 	}
 	ask() { # "A question?"
 	# Reads a user's input
@@ -546,12 +546,12 @@
 			do
 				swarm.print.border >&2
 				$PRINTF "$STR " >&2
-				builtin read $hideText buffer
+				read $hideText buffer
 			done
 		else
 			swarm.print.border >&2
 			$PRINTF "$STR " >&2
-			builtin read $hideText buffer
+			read $hideText buffer
 		fi
 	# Output
 		$ECHO "$buffer" >&1
@@ -607,7 +607,7 @@
 				# This is required, otherwise one never gets the 'max' value.
 				VAR=$(( $VAR + 1 ))
 			done
-			builtin echo "$VAR"
+			$ECHO "$VAR"
 		}
 	#
 	#	Display & Action
@@ -617,13 +617,13 @@
 			while [[ $c -lt $LIST_NUM ]]
 			do
 				n=$(myRND)
-				while echo "${L[@]}" | $GREP -q $n
+				while $ECHO "${L[@]}" | $GREP -q $n
 				do	n=$(myRND)
 				done
 				L[$c]=$n
 				((c++))
 			done
-			echo "${L[@]}"
+			$ECHO "${L[@]}"
 			unset L
 		elif $doPerm
 		then 	# This part (permutation) is originaly from RupertPumpkin
@@ -631,14 +631,14 @@
 			# but has been modified by sea to match this command functionality
 			declare -A P
 			R=$RANDOM
-			for x in $(eval builtin echo {${MIN}..${MAX}})
+			for x in $(eval $ECHO {${MIN}..${MAX}})
 			do
 				while 	[[ -n "${P[$R]}" ]]
 				do	R=$RANDOM
 				done
 				P[$R]="$x"
 			done
-			echo "${P[@]}"
+			$ECHO "${P[@]}"
 			unset P
 		else	myRND
 		fi
@@ -659,26 +659,26 @@
 		done
 
 		TIME="${1/[a-zA-Z]}"
-		UNIT="$(builtin echo ${1}|$TR -d [:digit:])"
+		UNIT="$($ECHO ${1}|$TR -d [:digit:])"
 		[[ -z "$UNIT" ]] && UNIT="s"
 
 		#set -x
 		if [[ "$1" == "$TIME$UNIT" ]]
 		then	# all Good
-			builtin echo >/dev/null
+			$ECHO>/dev/null
 		else
-			builtin echo "$SWARM_MSG_WAIT_USAGE"
+			$ECHO "$SWARM_MSG_WAIT_USAGE"
 			return 1
 		fi
 		if [[ -z "$UNIT" ]]
 		then	if [[ -z "$TIME" ]]
 			then
-				builtin echo "$SWARM_MSG_WAIT_USAGE"
+				$ECHO "$SWARM_MSG_WAIT_USAGE"
 				return 1
 			fi
-			if ! builtin echo "${UNIT:-s}"|${GREP:-grep} -v ^[smh]
+			if ! $ECHO "${UNIT:-s}"|${GREP:-grep} -v ^[smh]
 			then
-				builtin echo "$SWARM_MSG_WAIT_FAIL"
+				$ECHO "$SWARM_MSG_WAIT_FAIL"
 				return 1
 			fi
 		fi

@@ -102,26 +102,10 @@
 	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
 	TERM="${TERM:-GNU\057Linux}"
-	# Lets check for the most important output commands
-	# Saving results to variables
-	RESULT="$(enable | grep -e echo -e printf)"
-	NUM=$(echo "$RESULT" |wc -l)
-	# Assign variable according to result
-	if [[ 2 -eq "${NUM:-0}" ]]
-	then	# Both are found
-		ECHO="builtin echo"
-		PRINTF="builtin printf"
-	else	# Handle each on its own
-		echo "$RESULT" | grep -q echo && \
-			ECHO="builtin echo" || \
-			ECHO="swarm.util.echo"
-		echo "$RESULT" | grep -q printf && \
-			PRINTF="builtin printf" || \
-			PRINTF="\printf"
-	fi
-	unset RESULT NUM
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
+	export ECHO="${ECHO:-echo}"
+	export PRINTF="${PRINTF:-printf}"
 	export AWK=${AWK:-\gawk}
 	export GREP=${GREP:-\grep}
 	export SED=${SED:-\sed}

@@ -4,7 +4,7 @@ Shell Wrapper And Runtime Modifier - SWARM
 _SWARM is a framework to write application-like BASH scripts._
 
 
-As SWARM does not need to be installed - hence **Runtime Modifier** - 
+As SWARM does not need to be installed - hence **Runtime Modifier** -
 it is great for scripts you carry on your usb-thumbdrive, like rescue scripts.
 
 But the biggest bonus for portable scripts is the **Shell Wrapper** part.
@@ -31,8 +31,8 @@ The idea for something like this was born back in 1995, but it was not until 201
 when I decided to 'go all GNU+Linux' that I had an actual idea how to realize (and what to use for).
 
 
-But the real goal the started all this was my "sea's scripted tools" project, 
-which aims to have scripts that serve as solutions that work on minimal 
+But the real goal the started all this was my "sea's scripted tools" project,
+which aims to have scripts that serve as solutions that work on minimal
 installations as well as rescue tool that is EASY to use - even in rescue mode.
 
 You could do fun things like:
@@ -52,7 +52,7 @@ Use cases:
 For 100% single task scripts, SWARM is best placed in something like $HOME/bin\[/SWARM\].
 For projects that contain multiple scripts, I recomend to place SWARM inside the project directory.
 
-Whatever you do, unless the script is invoked by **swarm**, the **SWARM** directory 
+Whatever you do, unless the script is invoked by **swarm**, the **SWARM** directory
 must be in the same directory as the executed script.
 Only this verifies proper handling.
 
@@ -67,7 +67,7 @@ And where it is not, it is available in the Repo.
 
 2. Why not something else?
 I did consider C, but I did not want to compile.
-Also Python was considered, but with neither the C- nor Python solution 
+Also Python was considered, but with neither the C- nor Python solution
 "runtime" would have been an option.
 Not much else available on minimal installations.
 
@@ -87,7 +87,7 @@ What are scripts good for?
 * Scripts should be informative and easy to use
 * 1 script should only do 1 thing
 
-But while scripts should not be applications, there is no other (faster) way to 
+But while scripts should not be applications, there is no other (faster) way to
 give your scripts the same power for different projects, cross-distro-compatible,
 without the need to install anything to have a decent interface to present to endusers.
 
@@ -129,7 +129,7 @@ All 'color' references are to the __default-blue__ theme!
 * cfg.get "file" var
 * cfg.set "file" var "val"
 * download "url"
-* swarm _[options]_ "path" ; THE purpose of doing all this, everything else is just a gimmick ;)
+* tui _[options]_ "path" ; THE purpose of doing all this, everything else is just to comfort this ;)
 
 These are the core basics.
 Everything else provided is just for additional convenience.
@@ -143,8 +143,16 @@ even with different sized gui terminal windows.
 
 
 
-CREDITS & Sources:
-------------------
+CREDITS:
+--------
+
 * FedoraForum.org ; Staff & Members
 * UNIX.com ; Staff & Members, special thanks to mod: Peasant for the name suggestion!
 * https://community.unix.com/t/blog-thread-creating-a-shell-wrapper-and-runtime-modifier-swarm/377390/48
+
+
+Alpha Testers
+-------------
+
+* lsatenstein @ fedoraforum
+* Chubler_XL @ unix

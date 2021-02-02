@@ -38,7 +38,7 @@ bar()  { # [options] [MESSAGE]
 		tmp=""
 		[ ! -z "$MAX" ] && tmp="NUM"
 		$doBar && [ ! -z "$MAX" ] && tmp="BAR"
-		$ECHO"${tmp:-DASH}"
+		$ECHO "${tmp:-DASH}"
 	}
 	function bar.reset_tmp() { # ID
 	# Resets the counter according to passed ID

@@ -174,7 +174,7 @@
 		done
 		# Should not reach this point
 		# Other than while debug testing
-		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD:-${PWD_EXEC}}"
+		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD:-$(${PWD_EXEC})}"
 		unset tmp
 	else
 		# Or optionaly, use the 'install' method
@@ -397,12 +397,12 @@
 				;;
 			"words")
 				title "$SWARM_MSG_WORD_WORDS"
-				swarm_wordlist="$($builtin echo ${!SWARM_MSG_WORD_*})"
+				swarm_wordlist="$($ECHO ${!SWARM_MSG_WORD_*})"
 				declare C=0
 				for this_word in $swarm_wordlist
 				do
 					printe "$this_word" "${!this_word}"
-					C=$(( $C + 1 ))
+					((C++))		#C=$(( $C + 1 ))
 					[[ $C -eq 10 ]] && \
 						C=0 && \
 						title

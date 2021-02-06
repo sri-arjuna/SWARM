@@ -13,7 +13,6 @@ Grosse Functionen
 
 Kleine Functionen
 -----------------
-* download
 * swarm.os.install
 * asRoot
 *
@@ -22,6 +21,7 @@ Additions?
 ----------
 * cfg.set -a(ppend)?
 * swarm.str.usb -> BSD ???
+* download : certificates?
 
 
 KNOWN ISSUES

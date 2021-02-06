@@ -141,6 +141,11 @@ and and try to keep the intended text alignments/orientations.
 This ensures that the scripts keeps it's intended look and feel
 even with different sized gui terminal windows.
 
+LINKS:
+------
+
+* http://www.reddit.com/r/SWARM_BASH
+* http://www.github.com/sri-arjuna/SWARM        TODO
 
 
 CREDITS:

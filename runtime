@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2021.01.08	 	     #
-# Build:	52			     #
+# Changed:	2021.02.06	 	     #
+# Build:	53			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -75,7 +75,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8
-	SWARM[BUILD]=52
+	SWARM[BUILD]=53
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -228,6 +228,7 @@
 		source "$thisCFG"
 		$PRINTF "."
 	done
+
 #
 # SWARM Environment checks
 #
@@ -302,20 +303,20 @@
 		for tDir in "$SWARM_USER_DIR_CONF" "$SWARM_USER_DIR_LIBS"
 		do
 			# shellcheck disable=SC2154
-			$isDir >/dev/null || $MKDIR "$tDir"
+			$isDir "$tDir" >/dev/null || $MKDIR "$tDir"
 		done
 		# Parse and source User Files, if files exist
 		# Read configuration files before functions
 		for uf in "${SWARM_USER_DIR_CONF}/"* "${SWARM_USER_DIR_LIBS}/"*
 		do
+			# Dont work with an asterix
+			[[ '*' == "${uf:-1}" ]] && continue
 			# shellcheck disable=SC1090
-			if [[ ! -d "$uf" ]] && [[ -f "$uf" ]]
+			if [[ -f "$uf" ]]
 			then
 				source "$uf" && \
 					$PRINTF "." || \
 					init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
-			else
-				init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
 			fi
 		done
 	fi

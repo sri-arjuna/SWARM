@@ -10,8 +10,8 @@
 #
 	unset ${!len*}
 	swarm.update.geometry() { #
-		export COLUMNS="$($TPUT cols)"
-		export LINES="$($TPUT lines)"
+		[[ -z "$COLUMNS" ]] && export COLUMNS="$(${TPUT:-\tput} cols)"
+		[[ -z "$LINES" ]] && export LINES="$(${TPUT:-\tput} lines)"
 
 		# Set basic values
 		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
@@ -20,12 +20,11 @@
 		export clrBACK="${SWARM_THEME_DATA[color-back]}"
 		export BAR="${SWARM_THEME_DATA[bar]}"
 		export BAR_EMPTY="${SWARM_THEME_DATA[bar-empty]}"
-
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
 				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
+		# Now we can export it for sure
 		export BORDER_RIGHT
-
 		# Get some numbers
 		export lenLeft="${#BORDER_LEFT}"
 		export lenRight="${#BORDER_RIGHT}"

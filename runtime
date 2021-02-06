@@ -303,7 +303,7 @@
 		for tDir in "$SWARM_USER_DIR_CONF" "$SWARM_USER_DIR_LIBS"
 		do
 			# shellcheck disable=SC2154
-			$isDir "$tDir" >/dev/null || $MKDIR "$tDir"
+			$isDir "$tDir" >/dev/null || ${MKDIR:-swarm.util.mkdir} "$tDir"
 		done
 		# Parse and source User Files, if files exist
 		# Read configuration files before functions

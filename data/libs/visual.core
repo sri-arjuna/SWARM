@@ -248,6 +248,7 @@
 		local title_pre=""
 		local title_end=""
 		local MODE=basic
+		local doReturn=false
 
 		[[ "-" = "${1:0:1}" ]] && \
 			case ${1/-} in
@@ -259,7 +260,8 @@
 			h)	MODE=header
 				fix_header_r=0
 				shift	;;
-			'e'|'p') shift	;;
+			e) 	doReturn=true
+				shift	;;
 			esac
 
 
@@ -269,9 +271,7 @@
 			return 1
 
 		# Make sure values are udpated
-		#set +x
 		swarm.update.geometry
-		#set -x
 
 		# Get the actual string
 		local ARGS=("${@}")
@@ -300,31 +300,32 @@
 			case "$MODE" in
 			"basic")
 				if false; then
+				# Wish this would work, but all this shows are empty lines
 					local L_one="" L_two=""
 					local M_one="" M_two=""
 					local R_one="" R_two=""
 
-					[[ ${#L} -ge $(( $COLUMNS - 6 )) ]] && \
-						swarm.str.split "$L" | read L_one L_two || \
+					[[ ${#L} -ge $(( ($COLUMNS - 6)/3 )) ]] && \
+						swarm.str.split "$L" | while ${READ} L_one ;do read L_two;break;done || \
 						L_one="$L"
 
-					[[ ${#M} -ge $(( $COLUMNS - 6 )) ]] && \
-						swarm.str.split "$M" | read M_one M_two || \
+					[[ ${#M} -ge $(( ($COLUMNS - 6)/3 )) ]] && \
+						swarm.str.split "$M" | while ${READ} M_one ;do read M_two;break;done || \
 						M_one="$M"
 
-					[[ ${#R} -ge $(( $COLUMNS - 6 )) ]] && \
-						swarm.str.split "$R" | read R_one R_two || \
+					[[ ${#R} -ge $(( ($COLUMNS - 6)/3 )) ]] && \
+						swarm.str.split "$R" | while ${READ} R_one ;do read R_two;break;done || \
 						R_one="$R"
 
-					swarm.print.border
+					# This should be enough,
+					# as from here on further sub-splitting will be done
 					swarm.print.text "$L_one" "$M_one" "$R_one"
-header
 					swarm.print.border
 					swarm.print.text  "$L_two" "$M_two" "$R_two"
-
+					# We're done here, lets get out
 					return 0
 				fi
-				## Geht, aber nicht schön
+				## works, but not nice.. empty line???
 				if [[ -n "$L" ]]
 				then
 					[[ ${#L} -ge $(( $COLUMNS - 6 )) ]] && \
@@ -344,10 +345,6 @@ header
 									done || \
 									printe "$R"
 				fi
-					#shift
-					#[[ -z "$1" ]] && return 0
-				#done
-				#set +x
 				;;
 			"title")
 				swarm.str.split "$1" | title --
@@ -409,14 +406,16 @@ header
 			esac
 			;;
 		esac
-		#$PRINTF "${posEND}"
+		$PRINTF "${posEND}"
+		$doReturn && $PRINTF "\n"
 	}
 	swarm.str.split() { # "STRING"
 	# Splittes passed string in half at the nearest word
 	# and prints each part as a new line
 		[[ -z "$1" ]] && return 1
-		local tmp_count=$(( ( $(builtin echo "${1}" | $WC -c)  ) / 2 ))
-		$ECHO "$1" | fold -sw $tmp_count #| printe -1 --
+		#local tmp_count=$(( ( $($ECHO "${1}" | $WC -c)  ) / 2 ))
+		local tmp_count=$(( ${#1} / 2 ))
+		$ECHO "$1" | $FOLD -sw $tmp_count
 	}
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM
@@ -469,7 +468,7 @@ header
 				;;
 			esac
 		else	# It's TTY / plain console
-			value="$(builtin echo ${STATUS_TEXT[$1]})"
+			value="$($ECHO ${STATUS_TEXT[$1]})"
 			case ${#value} in
 			1)	value="  ${value^^} "	;;
 			2)	value=" ${value^^} "	;;
@@ -478,20 +477,10 @@ header
 			esac
 
 			case "$1" in
-			"0"|"10")	c_clr="${g}"	;;
-			"1"|"7"|"11")	c_clr="${r}"	;;
-			"2"|"99"|"111")	c_clr="${y}"	;;
+			"0"|"10")		c_clr="${g}"	;;
+			"1"|"7"|"11")		c_clr="${r}"	;;
+			"2"|"99"|"111") 	c_clr="${y}"	;;
 			"3"|"127"|"130")	c_clr="${p}"	;;
-			#"4")	c_clr="${g}"	;;
-			#"5")	c_clr="${g}"	;;
-			#"6")	c_clr="${g}"	;;
-			#"7")	c_clr="${g}"	;;
-			#"10")	c_clr="${g}"	;;
-			#"11")	c_clr="${g}"	;;
-			#"99")	c_clr="${g}"	;;
-			#"111")	c_clr="${g}"	;;
-			#"127")	c_clr="${g}"	;;
-			#"130")	c_clr="${g}"	;;
 			esac
 		fi
 		$PRINTF "[ ${c_clr}${value}${R} ]"

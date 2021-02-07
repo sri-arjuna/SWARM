@@ -128,6 +128,7 @@
 	export FIND=${FIND:-\find}
 	export TR=${TR:-\tr}
 	export WC=${WC:-\wc}
+	export FOLD="${FOLD:-\fold}"
 	export WHICH="swarm.util.which"	# Defined in core.env
 	export MKDIR="swarm.util.mkdir"	# Defined in core.env
 	# These are required for internal functions to avoid security breaches

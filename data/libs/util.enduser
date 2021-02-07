@@ -118,7 +118,7 @@
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		$PRINTF "$posEND\n"
+		$PRINTF "$posEND"
 	}
 	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line
@@ -262,12 +262,13 @@
 		local RET="$1"
 		local value="$(swarm.str.status $RET)"
 
-		swarm.print.border -e >&2
-		swarm.print.text -e "$2" "$3" "" >&1
+		swarm.print.border >&2
+		swarm.print.text  "$2" "$3" "" >&1
 
-		# Adjust fixer according to X or TTY
-		[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
-			gui_fixer="7" || gui_fixer=7
+		# Adjust fixer according to X or TTY, used to be required by TUI
+		#[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
+		#	gui_fixer="7" || \
+			gui_fixer=7
 
 		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
@@ -443,7 +444,7 @@
 			swarm.print.border >&2
 			$PRINTF "$POS      $POS " >&2
 		# Read the input
-			builtin read -n $pick_len NUM
+			$READ -n $pick_len NUM
 		# Catch invalid inputs
 			# Keep reading if NUM is empty
 			[[ -z "$NUM" ]] && continue

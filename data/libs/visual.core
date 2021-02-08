@@ -280,9 +280,9 @@
 		local R="${ARGS[2]}"
 		#echo " THIS  ${#ARGS[*]}   THIS --> ${ARGS[*]}"
 		#for a in "${ARGS[@]}"; do echo "N- $BASH_SOURCE - NN $a";done
-		local evalLeft=$($PRINTF "$1")
-		local evalMiddle=$($PRINTF "$2")
-		local evalRight=$($PRINTF "$3")
+		local evalLeft=$($PRINTF "$L")
+		local evalMiddle=$($PRINTF "$M")
+		local evalRight=$($PRINTF "$R")
 
 		# Retrieve their length
 		local lenEvalLeft=${#evalLeft}
@@ -323,18 +323,20 @@
 					swarm.print.border
 					swarm.print.text  "$L_two" "$M_two" "$R_two"
 					# We're done here, lets get out
-					return 0
+				#	return 0
 				fi
 				## works, but not nice.. empty line???
 				if [[ -n "$L" ]]
 				then
 					[[ ${#L} -ge $(( $COLUMNS - 6 )) ]] && \
-						swarm.str.split "$L" | printe -1 -- || \
+						swarm.str.split "$L" | printl -1 -- || \
 						printl "$L"
 				fi
 				if [[ -n "$M" ]]
 				then
-					swarm.str.split "$M" | printe -2 --
+					[[ ${#M} -ge $(( $COLUMNS - 6 )) ]] && \
+						swarm.str.split "$M" | printl -2 -- || \
+						printl "$M"
 				fi
 				if [[ -n "$R" ]]
 				then
@@ -350,7 +352,6 @@
 				swarm.str.split "$1" | title --
 				;;
 			"header")
-				#echo "$1" ; press
 				swarm.str.split "$1" | header --
 				;;
 			esac
@@ -468,7 +469,7 @@
 				;;
 			esac
 		else	# It's TTY / plain console
-			value="$($ECHO ${STATUS_TEXT[$1]})"
+			value="${STATUS_TEXT[$1]}"
 			case ${#value} in
 			1)	value="  ${value^^} "	;;
 			2)	value=" ${value^^} "	;;

@@ -28,13 +28,13 @@ source SWARM/runtime
 	USAGE() {
 	# Prints basic usage string
 	# Please adjust as soon you know the options, if any.
-		builtin echo "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+		$ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
 	}
 #
 # Catch arguments
 #
  	while :; do
- 		case \$1 in
+ 		case "$1" in
  		-h|-\?|--help)
  			USAGE
  			exit 0
@@ -42,7 +42,7 @@ source SWARM/runtime
  		--)
  			# General purpose pipe support, might need adjustment!
  			while read line;do
- 				$FUNCNAME "$line"
+ 				$0 "$line"
  			done
  			exit 0
  			;;
@@ -56,4 +56,4 @@ source SWARM/runtime
  	header --default "${@}"
  	title "Something"
  	printe "information"
- 	exit \$RET
+ 	exit $RET

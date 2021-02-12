@@ -25,17 +25,21 @@ User Interactions:
 
 * ask "question?" 	; catches any full text user input
 * yesno "question?" 	; the 'yn' is provided by language file and is supported in code
-* pick _[-a -m]_ $LIST 	; the 'select' wrapper, ; 0 (zero) will always be 'Back' and return 1 (back)
+* pick _[-a -m]_ $LIST 	; the 'select' wrapper, ; 0 (zero) will always be 'Back' and return 4 (back)
+
+
+With these few commands you have everything at hand to write application like scripts.
 
 
 
 Application Handlers:
 ---------------------
 
-* edit "file" 		; opens CLI or GUI appliaction
+* edit "file" 		; opens CLI or GUI application
 * filemgr "path" 	; opens CLI or GUI file manager
 * web "url" 		; opens CLI or GUI web browser
 * download "url" 	; Downloads an URL
+
 
 
 Handy Tools:
@@ -62,7 +66,3 @@ If you now extract the SWARM tarball within _~/bin_ and if everything works well
 Beeing in _~/bin_ enter the following in a console:
 
     SWARM/runtime new script full mytest.sh
-    
-   
-
-

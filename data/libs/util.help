@@ -214,6 +214,29 @@
 			swarm.help.usage "$FUNCNAME"
 			return 1
 		fi
-		man "$tManpage"
-		#status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
+		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
+	}
+#
+# Configuration handler
+#
+	swarm.eu.show.config() { #
+	# Shows the configuration menu for SWARM
+	#
+		title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
+
+		while
+			printe "$SWARM_MSG_PHRASE_SELECT_FILE"
+			tFile=$(pick -m RC $($LS $SWARM_USER_DIR_CONF/))
+		do
+			# If the selected option is 'back' quit the Loop
+			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break
+
+			# Everything else should be a valid option (if not, pick is buggy)
+			case "$tFile" in
+			RC)	cfg.edit "$SWARMRC"
+				;;
+			*)	cfg.edit "$tFile"
+				;;
+			esac
+		done
 	}

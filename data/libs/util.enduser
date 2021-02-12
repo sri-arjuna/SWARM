@@ -444,7 +444,7 @@
 			swarm.print.border >&2
 			$PRINTF "$POS      $POS " >&2
 		# Read the input
-			$READ -n $pick_len NUM
+			${READ:-read} -n $pick_len NUM
 		# Catch invalid inputs
 			# Keep reading if NUM is empty
 			[[ -z "$NUM" ]] && continue

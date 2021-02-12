@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2021.02.09	 	     #
-# Build:	55			     #
+# Changed:	2021.02.12	 	     #
+# Build:	56			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -49,11 +49,16 @@
 #
 # Version Check
 #
-	if [[ $BASH_VERSINFO -lt 4  ]] || [[ -z $BASH_VERSINFO ]]
-	then	printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
-	else	if [[ 4 -eq $BASH_VERSINFO ]]
-		then 	if [[ ${BASH_VERSION:2:1} -lt 3  ]]
-			then	printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+	if [[ -z ${BASH_VERSINFO[@]} ]] || [[ ${BASH_VERSINFO[0]} -lt 4  ]]
+	then	# Print error of no BASH variables where found
+		# Or if BASH version is too low
+		printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+	else	# Bash version seems is 4 or higher
+		if [[ 4 -eq ${BASH_VERSINFO[0]} ]]
+		then 	# Major matches
+			if [[ ${BASH_VERSINFO[1]} -lt 3  ]]
+			then	# Minor does not
+				printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
 			fi
 		fi
 	fi
@@ -75,7 +80,7 @@
 	export hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8
-	SWARM[BUILD]=55
+	SWARM[BUILD]=56
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -90,7 +95,7 @@
 # Set first time default
 #
 #	This is just ment as failsafe if PATH is not set
-#	to get the most elementary basics on/of most systems
+#	to get the most elementary basics on/of most default systems
 	posix_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 	configure_PATH="$BINDIR:$SBINDIR"
 	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
@@ -128,13 +133,16 @@
 	export FIND=${FIND:-\find}
 	export TR=${TR:-\tr}
 	export WC=${WC:-\wc}
-	export FOLD="${FOLD:-\fold}"
+	export FOLD=${FOLD:-\fold}
 	export WHICH="swarm.util.which"	# Defined in core.env
 	export MKDIR="swarm.util.mkdir"	# Defined in core.env
 	# These are required for internal functions to avoid security breaches
-	export -r PRINTABLE_PIPECHAR="$($ECHO -e \\u2502)" 2&>/dev/zero
-	export -r PRINTABLE_GREATER="$($ECHO -e \\u003e)" 2&>/dev/zero
-	export -r PRINTABLE_LESSER="$($ECHO -e \\u003c)" 2&>/dev/zero
+	# shellcheck disable=SC2155
+	export -r PRINTABLE_PIPECHAR="$(${ECHO:-echo} -e \\u2502)" 2&>/dev/zero
+	# shellcheck disable=SC2155
+	export -r PRINTABLE_GREATER="$(${ECHO:-echo} -e \\u003e)" 2&>/dev/zero
+	# shellcheck disable=SC2155
+	export -r PRINTABLE_LESSER="$(${ECHO:-echo} -e \\u003c)" 2&>/dev/zero
 #
 # Some other things
 #
@@ -315,6 +323,7 @@
 			# shellcheck disable=SC1090
 			if [[ -f "$uf" ]]
 			then
+				# shellcheck disable=SC2015
 				source "$uf" && \
 					$PRINTF "." || \
 					init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
@@ -342,11 +351,12 @@
 			#printe
 			builtin echo "$SWARM_MSG_WELCOME_INFOLINE3" | printe -2 --
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
-			builtin echo "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
+			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
+			$PRINTF '\n'
 			exit 0
 		else	# Has arguments, lets parse
 			$PRINTF "$(swarm.print.goto 0)"
-			case "$1" in
+			case "${1,,}" in
 			"basic")
 				shift
 				swarm.eu.show.basics
@@ -385,11 +395,11 @@
 				case "$2" in
 				"function")
 					shift 2
-					swarm.eu.new.function ${@}
+					swarm.eu.new.function "${@}"
 					;;
 				"script")
 					shift 2
-					swarm.eu.new.script ${@}
+					swarm.eu.new.script "${@}"
 					;;
 				*)
 					swarm.eu.new.menu
@@ -397,17 +407,35 @@
 				esac
 				exit $?
 				;;
-			"words")
+			"words"|"word")
 				title "$SWARM_MSG_WORD_WORDS"
+				# shellcheck disable=SC2086
 				swarm_wordlist="$($ECHO ${!SWARM_MSG_WORD_*})"
-				declare C=0
+				declare C=0 T=0
 				for this_word in $swarm_wordlist
 				do
-					printe "$this_word" "${!this_word}"
-					((C++))		#C=$(( $C + 1 ))
+					((C++))
+					((T++))
+					[[ $C -eq 11 ]] && \
+						C=1 && \
+						title
+					printe "$T" "$this_word" "${!this_word}"
+				done
+				;;
+			"phrase"|"phrases")
+				title "$SWARM_MSG_WORD_PHRASES"
+				# shellcheck disable=SC2086
+				swarm_wordlist="$($ECHO ${!SWARM_MSG_PHRASE_*})"
+				declare C=0 T=0
+				for this_word in $swarm_wordlist
+				do
+					((C++))
+					((T++))
 					[[ $C -eq 10 ]] && \
 						C=0 && \
 						title
+					printe "$T" "$this_word" "${!this_word}"
+
 				done
 				;;
 			"stats")
@@ -421,35 +449,39 @@
 			#
 			#	Action
 			#
+				# shellcheck disable=SC2164
 				cd "$SWARM_DIR_ROOT"
 				$ECHO "$LINER"
 				$ECHO -e "\t$SWARM_MSG_STATS_TITLE \"${PWD##*/}\""
 			# Size
 				$ECHO "$LINER"
+				# shellcheck disable=SC2016
 				swarm.str.dirlist . | swarm.str.dirsize -- | \
-					$AWK \
+					${AWK:-awk} \
 						-v FOLDER="$SWARM_MSG_STATS_FOLDERS" \
 						-v KB="$SWARM_MSG_WORD_KB" \
 						'{print $0;SUM=SUM+$1} END {print NR" "FOLDER" "SUM/1024" "KB}' | $SED s,"${SWARM_DIR_ROOT}\/",'',g
 			# Files
 				$ECHO "$LINER"
 				FILES=$($FIND|$GREP -ve ".git" | $WC -l)
-				eval $ECHO "$SWARM_MSG_STATS_FILES"
+				eval "$ECHO" "$SWARM_MSG_STATS_FILES"
 			# Lines
 				for F in $($FIND|$GREP -ve ".git" -ve ".jpg" -ve ".png" -ve ".gif")
 				do	if [[ -f "$F" ]]
 					then
-						val_num=$(\cat "$F"|$WC -l)
-						COMMENTS=$(( $COMMENTS + $($GREP ^"#" "$F" | $WC -l) ))
-						lines=$(( $lines + $val_num ))
-						BLANKS=$(( $BLANKS + $($GREP ^[[:space:]]$ "$F" | $WC -l) ))
+						# shellcheck disable=SC2016
+						val_num=$($WC -l "$F" | $AWK '{print $1}')
+						COMMENTS=$(( COMMENTS + $($GREP ^"#" "$F" | $WC -l) ))
+						lines=$(( lines + val_num ))
+						BLANKS=$(( BLANKS + $($GREP ^[[:space:]]$ "$F" | $WC -l) ))
 					fi
 				done
 				$ECHO -e "$SWARM_MSG_STATS_LINES: \t\t $lines"
 				$ECHO -e "$SWARM_MSG_STATS_COMMENTS: \t $COMMENTS"
 				$ECHO -e "$SWARM_MSG_STATS_BLANK: \t\t $BLANKS"
-				$ECHO -e "$SWARM_MSG_STATS_AVERAGE: \t $(( $lines / $FILES ))"
+				$ECHO -e "$SWARM_MSG_STATS_AVERAGE: \t $(( lines / FILES ))"
 
+				# shellcheck disable=SC2164
 				cd "$OLDPWD"
 			;;
 			esac

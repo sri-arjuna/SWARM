@@ -56,7 +56,7 @@ swarm.str.seconds2TIME() { # --> NEW ONE
 	[[ "$minutes" = "0" ]] && minutes=""
 
 
-	builtin echo "${hours}${minutes}$seconds"
+	$ECHO "${hours}${minutes}$seconds"
 }
 swarm.str.filesize() { # [ -k -m ] FILE
 # Returns the filesize in bytes
@@ -66,9 +66,20 @@ swarm.str.filesize() { # [ -k -m ] FILE
 	for opt in "${@}"
 	do
 		case "$opt" in
-		"-k")	MODE="kilo" ; VAR="$opt" ; shift	;;
-		"-m")	MODE="mega" ; VAR="$opt" ; shift	;;
+		"-k")	MODE=kilo ; VAR="$opt" ; shift	;;
+		"-m")	MODE=mega ; VAR="$opt" ; shift	;;
 		esac
+		if [[ -d "$1" ]]
+		then
+			for f in "$1"/*
+			do
+				#set -x
+				[[ -f "$f" ]] && $FUNCNAME "$VAR" "$f"
+				#set +x
+			done
+			continue
+		fi
+		[[ -z "$1" ]] && return 0
 	done
 # Action
 	if [[ "$1" == "--" ]]
@@ -211,8 +222,8 @@ swarm.str.num2char() { # NUM
 	out=""
 	# Quoting these echo's will break the output
 	[ "$num" -gt 700 ] && \
-		list=( $(builtin echo {a..z} {a..z}{a..z} {a..z}{a..z}{a..z} ))	|| \
-		list=( $(builtin echo {a..z} {a..z}{a..z} )) 	# Be fast for letters in range..
+		list=( $(printf '%s\n' {a..z} {a..z}{a..z} {a..z}{a..z}{a..z} ))	|| \
+		list=( $(printf '%s\n' {a..z} {a..z}{a..z} )) 	# Be fast for letters in range..
 	out="${list[$num]}"
 	$PRINTF '%s\n' "$out"
 }
@@ -312,11 +323,11 @@ swarm.str.extension() { # FILENAME
 	# Tar is the only (known to me) file extension with 2 strings
 	local TAR=""
 	# Workaround for tarballs...
-	builtin echo "$1" | $GREP -q ".tar" && \
+	$ECHO "$1" | $GREP -q ".tar" && \
 		TAR="tar." || TAR=""
 	if [ "$ext" = "$1" ]
-	then	builtin echo ""
-	else 	builtin echo "$TAR$ext"
+	then	$ECHO ""
+	else 	$ECHO "$TAR$ext"
 	fi
 }
 swarm.str.genfilename() { # FILENAME.EXT [NEXT_EXT]
@@ -344,9 +355,9 @@ swarm.str.genfilename() { # FILENAME.EXT [NEXT_EXT]
 		done
 
 		# Finally a file that does not exist yet
-		builtin echo "$NAME_CHECK" >&1
+		$ECHO "$NAME_CHECK" >&1
 	else	# File does not exist, and can be used
-		builtin echo "$NAME_INIT"  >&1
+		$ECHO "$NAME_INIT"  >&1
 	fi
 }
 swarm.str.usb() { #
@@ -401,7 +412,7 @@ swarm.str.usb() { #
 #	or so you can select to (not) use it automatically
 #
 	#echo "if [ "$(echo $list|wc -l)" -eq 1 ] && [ -z "$usbAsk" ] "
-	if [[ "$(builtin echo $list|$WC -w)" -eq 1 ]] && [[ -z "$usbAsk" ]]
+	if [[ "$($ECHO $list|$WC -w)" -eq 1 ]] && [[ -z "$usbAsk" ]]
 	then	# There is no setting yet, first time usage
 		printe  "$SWARM_MSG_USB_ONLY_AVAIL : ${list}" >&2
 		if yesno "$SWARM_MSG_USB_CARD_LISTED" >&2
@@ -429,5 +440,5 @@ swarm.str.usb() { #
 	else	targetUsb="$(pick -a $list)"
 	fi
 	tDev="$(readlink -f $devDisk/$targetUsb)"
-	builtin echo "$tDev" >&1
+	$ECHO "$tDev" >&1
 }

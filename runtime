@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2021.02.12	 	     #
-# Build:	56			     #
+# Changed:	2021.02.14	 	     #
+# Build:	57			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -73,14 +73,13 @@
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	export isSWARMfirstTime=true
 	# hasCOLUMNS is for internal use only
-	# shellcheck disable=SC2015
 	[[ -n "$COLUMNS" ]] && \
-		export hasCOLUMNS=true || \
-		export hasCOLUMNS=false
-	export hasCOLUMNS=false
+		hasCOLUMNS=true || \
+		hasCOLUMNS=false
+	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8
-	SWARM[BUILD]=56
+	SWARM[BUILD]=57
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"

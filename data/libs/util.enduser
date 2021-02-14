@@ -731,16 +731,6 @@
 	printfile() { # FILE | --
 	# Prints all given files line by line, separated by "title 'filename'"
 	# -- or no arguments will use read
-		printfile.printable_line() { # "STRING"
-		# Removes offendinc characters from STRING
-		# Returns 'clean' STRING
-
-
-			# For as long builtin echo exists, this is kept for performance reasons.
-			# It is useless use of physical file access to print something to screen
-			# that could be achieve by mere memory.
-			builtin echo
-		}
 		local tmpline="" tmplineb=""
 		for file in "${@}"
 		do
@@ -759,10 +749,4 @@
 				done
 			fi
 		done
-		#wait 5s
-	}
-	printfile() { # FILE | --
-	# Prints all given files line by line, separated by "title 'filename'"
-	# -- or no arguments will use read
-		echo_
 	}

@@ -32,10 +32,10 @@ Target Audience:
 
 * Commandline enthusiasts
 * System Administrators
-* Headless device users
 * Anyone interested in scripting
 
-to write comfortable scripts for themself, the community and/or for (their) end users.
+Basicly everyone one has or wants to write comfortable scripts for themself, the community and/or for (their) end users.
+
 
 
 Whats the purpose?

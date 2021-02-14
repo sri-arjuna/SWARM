@@ -7,7 +7,7 @@ I tried to be as meaningful and self-explaining and short for all functions.
 On some occasions it was not possible for compatibility reasons.
 
 For 100% single task scripts, SWARM is best placed in something like _$HOME/bin\[/SWARM\]_.
-For projects that contain multiple scripts, I recomend to place SWARM inside the project directory.
+For projects that contain multiple scripts, I recomend to place SWARM inside the project directory (or create a symlink to its location).
 
 Whatever you do, unless the script is invoked by **swarm**, the **SWARM** directory
 must be in the same directory as the executed script.
@@ -24,6 +24,8 @@ When actualy using in a script, you would call it like:
 
     #!/usr/bin/env bash
     source ./SWARM/runtime
+
+After that you have all variables and functions of SWARM available. See __Basic Visuals__.
 
 
 
@@ -103,3 +105,27 @@ Handy Tools:
 
 
 
+But there is more:
+------------------
+
+While the functions listed here should help to get almost all possible daily tasks covered, there is still more!
+You can source the runtime in a terminal and then type:
+
+    swarm.<hit the tab button>
+    
+You then will be presented with a list of all (other/remaining) functions SWARM has to offer.
+But be aware, some of those function are already 'wrapped' to variables or are only used for backend functionality.
+Either way, here is the current output of the time I'm writing this document:
+
+    \[~/prjs/SWARM\] 0 $ . ./runtime 
+    .............\[~/prjs/SWARM\] 1 $ swarm.str.
+    swarm.str.ascii2num     swarm.str.extension     swarm.str.num2char      swarm.str.split
+    swarm.str.bool2str      swarm.str.filesize      swarm.str.num2roman     swarm.str.status
+    swarm.str.dirlist       swarm.str.genfilename   swarm.str.num2uni       swarm.str.usb
+    swarm.str.dirsize       swarm.str.num2ascii     swarm.str.seconds2TIME  
+    
+    \[~/prjs/SWARM\] 0 $ swarm.util.
+    swarm.util.cp        swarm.util.hasWhich  swarm.util.isGUI     swarm.util.mkdir     swarm.util.which
+    swarm.util.echo      swarm.util.isDir     swarm.util.isRoot    swarm.util.tar
+
+Each of these functions has its own manpage, which you may directly access by following this example: **./runtime help swarm.str.genfilename**

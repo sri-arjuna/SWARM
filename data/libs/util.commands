@@ -10,18 +10,21 @@
 	header() { # LEFT CENTER RIGHT
 	# This prints a full line in blue (default-back), with white (default-front) text
 	# TODO long string adjustments TODO, uses script_{name,version} before it uses its SWARM counterparts
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.print.border -h
 		case "$1" in
 		"--")
 			shift
-			while read line;do
+			while $READ -r line;do
+				# shellcheck disable=SC2154
 				header "" "$line" ""
 			done
 			return 0
 			;;
 		"--default")
 			shift
+			# shellcheck disable=SC2068
 			swarm.print.text -h \
 				"${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro|$SED s,'"','',g))" \
 				" " \
@@ -31,15 +34,17 @@
 			swarm.print.text -h "$1" "$2" "$3"
 			;;
 		esac
+		# shellcheck disable=SC2154
 		$PRINTF "$posEND\n"
 	}
 	title() { # Text
 	# This prints a single centered string on a line
 	# It has blue borders and fills the inner line with white (Default-{front,back})
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		if [[ "--" == "$1" ]]
 		then
-			while read line;do
+			while $READ -r line;do
 				title "$line"
 			done
 			return 0
@@ -52,6 +57,7 @@
 	printe() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#set -x
 		local MODE="none"
@@ -72,16 +78,16 @@
 			case "$MODE" in
 			"2")
 				# Read pipe, expect 2 lines
-				while read LEFT
+				while $READ -r LEFT
 				do
-					read RIGHT
+					$READ -r RIGHT
 					printe "$LEFT" "" "$RIGHT"
 				done
 				return 0
 				;;
 			"1")
 				# Read pipe, expect 1 lines
-				while read LEFT
+				while $READ -r LEFT
 				do
 					printe "$LEFT"
 				done
@@ -89,9 +95,9 @@
 				;;
 			*)
 				# Read pipe, expect 3 lines (default)
-				while read LEFT
+				while $READ -r LEFT
 				do
-					read CENTER; read RIGHT
+					$READ -r CENTER; $READ -r RIGHT
 					printe "$LEFT" "$CENTER" "$RIGHT"
 				done
 				return 0
@@ -123,6 +129,7 @@
 	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#set -x
 		local MODE="none"
@@ -142,16 +149,16 @@
 			case "$MODE" in
 			"2")
 				# Read pipe, expect 2 lines
-				while read LEFT
+				while $READ -r LEFT
 				do
-					read RIGHT
+					$READ -r RIGHT
 					printe "$LEFT" "" "$RIGHT"
 				done
 				return 0
 				;;
 			"1")
 				# Read pipe, expect 1 lines
-				while read LEFT
+				while $READ -r LEFT
 				do
 					printe "$LEFT"
 				done
@@ -159,9 +166,9 @@
 				;;
 			*)
 				# Read pipe, expect 3 lines (default)
-				while read LEFT
+				while $READ -r LEFT
 				do
-					read CENTER; read RIGHT
+					$READ -r CENTER; $READ -r RIGHT
 					printe "$LEFT" "$CENTER" "$RIGHT"
 				done
 				return 0
@@ -195,6 +202,7 @@
 	yesno() { # "What question?"
 	# Ask a yes/no question, returns 0/true for yes and 1/false for no
 	# y/n are taken from language file and are used in code
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local Y="${SWARM_MSG_WORD_YES:0:1}"
 		local N="${SWARM_MSG_WORD_NO:0:1}"
@@ -212,15 +220,17 @@
 		swarm.print.border -e
 		# Print the text
 		local yn="${SWARM_MSG_WORD_YES:0:1}${SWARM_MSG_WORD_NO:0:1}"
-		local str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${yn,,})"
+		local str1=""
+		str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${yn,,})"
 		# Move the cursor
-		local str2="$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
+		local str2=""
+		str2="$(swarm.print.goto $(( COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
 		local RET=""
 		while [[ -z "$RET" ]]
 		do
 			$PRINTF "$str1"
 			$PRINTF "$str2"
-			read -n 1 answer
+			read -r -n 1 answer
 
 			case "$answer" in
 			"+"|"${Y,,}")
@@ -233,11 +243,12 @@
 		done
 		# Leave line
 		$PRINTF "$posEND\n"
-		return $RET
+		return "$RET"
 	}
 	status() { # [ -r -c] $? ["Text Left"] ["Text Center"]
 	# Prints text and exit with passed return code
 	#
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		unset RET TXT1 TXT2
 		local doReturn=false
@@ -260,7 +271,7 @@
 			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
 			return 99
 		local RET="$1"
-		local value="$(swarm.str.status $RET)"
+		local value="" ; value=$(swarm.str.status "$RET")
 
 		swarm.print.border >&2
 		swarm.print.text  "$2" "$3" "" >&1
@@ -270,18 +281,20 @@
 		#	gui_fixer="7" || \
 			gui_fixer=7
 
-		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		$PRINTF "$value" >&1
 
+		# shellcheck disable=SC2015
 		$doReturn && \
 			$PRINTF "$(swarm.print.goto 0)" || \
 			$PRINTF "$posEND\n"
-		return $RET
+		return "$RET"
 	}
 	printlist() { # [options] $LIST or ${ARRAYS[@]}
 	# Prints up to 3 'indexed'/numbered entries per row
 	# Options -12arn ; 1 or 2 rows (instead of 3=default), alpha, roman, num=default
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Variable defaults (options)
@@ -329,20 +342,20 @@
 		#
 		# Action
 		#
-			unset OUT[@]
+			unset "${OUT[@]}"
 			OUT[0]=""
 			local shown=false
-			local MAX="$(( $ROWS - 1 ))"
+			local MAX=$(( ROWS - 1 ))
 			local CUR=0
 			local DONE=0
 			local count=""
 			for OPT in "${ARGS[@]}"
-			do	$as_menu || DONE="$(( $DONE + 1))"
+			do	$as_menu || ((DONE++))
 				# Do the visible counter
 				case "$MODE" in
 				num)	count="$DONE"
 					;;
-				alpha)	count="$(swarm.str.num2char $(( $DONE - 1 )) )"
+				alpha)	count="$(swarm.str.num2char $(( DONE - 1 )) )"
 					;;
 				roman)	count="$(swarm.str.num2roman $DONE)"
 					;;
@@ -351,26 +364,26 @@
 				# Add the string to array, or print array
 				if [ "$CUR" -le "$MAX" ]
 				then	len=0
-					for O in "${OUT[@]}";do len=$[ $len + ${#O} ];done
-					sum="$(( $len + 2  + ( ${#BORDER_LEFT} * 2 ) ))"
+					for O in "${OUT[@]}";do len=$(( len + ${#O} ));done
+					sum="$(( len + 2  + ( ${#BORDER_LEFT} * 2 ) ))"
 
 					if [ "$sum" -lt "$COLUMNS" ]
 					then	OUT["$CUR"]="${count}${SEP}${OPT}"
 						shown=false
-						CUR="$(( $CUR + 1 ))"
+						((CUR++))
 					else	printe  "${OUT[@]}" >&2
-						CUR=0 && unset OUT[@]
+						CUR=0 && unset "${OUT[@]}"
 						[ -z "$OPT" ] && shown=true
 						OUT["$CUR"]="${count}${SEP}${OPT}"
-						CUR="$(( $CUR + 1 ))"
+						((CUR++))
 					fi
 				else 	printe  "${OUT[@]}" >&2
-					CUR=0 && unset OUT[@]
+					CUR=0 && unset "${OUT[@]}"
 					[ -z "$OPT" ] && shown=true
 					OUT["$CUR"]="${count}${SEP}$OPT"
-					CUR="$(( $CUR + 1 ))"
+					((CUR++))
 				fi
-				$as_menu && DONE="$(( $DONE + 1))"
+				$as_menu && ((DONE++))
 			done
 		#
 		# Display
@@ -381,13 +394,14 @@
 	pick() { # [-1 -2 -a -m] $LIST or ${ARRAYS[@]}
 	# Select an item of a LIST or an ARRAY, that will be returned
 	# Use -a for autoselect if only 1 entry, and -m as this will present 'Back' (translated)
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Variables
 		#
-			local counter=0
 			local AUTO=false
-			local ROWS="3"
+			local ROWS=""
+			ROWS="3"
 			local as_menu=false
 		#
 		# Catch arguments
@@ -401,7 +415,7 @@
 					"a")	AUTO=true
 						shift
 						;;
-					"m")	trap "return 130" INT ABRT KILL
+					"m")	trap "return 130" INT ABRT
 						as_menu=true
 						shift
 						;;
@@ -410,18 +424,20 @@
 			done
 			# Can not be set earlier because of possible options
 			# Which state wether it is 'as menu' or default
+			# shellcheck disable=SC2015
 			$as_menu && \
 				local ARGS=( "${SWARM_MSG_WORD_BACK}" "${@}" ) || \
 				local ARGS=("${@}")
 		# Handle auto-pick (only 1 option)
-			"$AUTO" && \
+			$AUTO && \
 				[ "$#" -eq 1 ] && \
-				$PRINTF '%s\n' "$ARGS" >&1 && \
+				$PRINTF '%s\n' "${ARGS[@]}" >&1 && \
 				return 4
 		# Show the items to pick from
+			# shellcheck disable=SC2015
 			$as_menu && \
-				printlist -n -$ROWS -0 "${ARGS[@]}" || \
-				printlist -n -$ROWS "${ARGS[@]}"
+				printlist -n -"$ROWS" -0 "${ARGS[@]}" || \
+				printlist -n -"$ROWS" "${ARGS[@]}"
 		# Set dynamic values
 			# Amount of arguments
 			local pick_count=${#ARGS[@]}
@@ -429,33 +445,36 @@
 			local pick_len=${#pick_count}
 			# Special handling
 			local invalid=true
-			local todo=false
+			#local todo=false
 			local NUM=""
-			local POS="$(swarm.print.goto $(( $identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
+			local POS=""
+			# shellcheck disable=SC2154
+			POS="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
+			# shellcheck disable=SC2015
 			$as_menu && \
 				local min=0 || \
 				local min=1
 		#
 		# Visuals
 		#
-		while $invalid
+		while ${invalid:-true}
 		do
 		# Print the input line:
 			swarm.print.border >&2
 			$PRINTF "$POS      $POS " >&2
 		# Read the input
-			${READ:-read} -n $pick_len NUM
+			${READ:-read} -n "$pick_len" NUM
 		# Catch invalid inputs
 			# Keep reading if NUM is empty
 			[[ -z "$NUM" ]] && continue
 			# Check for arrow keys, and make sure NUM is numeric only : Thank you MIG
 			[[ $NUM =~ ^[0-9]+$ ]] || continue
 			# If it's exactly 0, it's BACK
-			[[ ${NUM} -lt $pick_len ]] && todo=false #$PRINTF "\n" && $PRINTF "${ARGS[$NUM]}" >&1 && return 4
+			#[[ ${NUM} -lt $pick_len ]] && todo=false #$PRINTF "\n" && $PRINTF "${ARGS[$NUM]}" >&1 && return 4
 			# Keep reading if it is not greater than 'min'-imum
 			[[ ${NUM} -ge $min ]] || continue
 			# Check if the 0 index is missing
-			$as_menu || NUM=$(( $NUM - 1))
+			$as_menu || ((NUM--))
 			# Keep reading if it is greater than pick_count
 			[[ $NUM -gt $pick_count ]] && continue
 		# Exit the loop
@@ -463,7 +482,7 @@
 		done
 
 		# Output
-		$ECHO ${ARGS[$NUM]} >&1
+		$ECHO "${ARGS[$NUM]}" >&1
 		#set -x
 		[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&2
 		#set +x
@@ -513,15 +532,18 @@
 		#$doReturn && \
 		#	$PRINTF "$(swarm.print.goto 0)" && \
 		#	(var=$(builtin read -u buffer n0 2>/dev/null)) & || \
-			read
+			read -r
 	}
 	ask() { # "A question?"
 	# Reads a user's input
 	# Returns the buffer
+		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
-		hideText=""
-		notEmpty=false
+		local hideText=""
+		local notEmpty=false
+		local buffer=""
+		local STR=""
 	# Catch options
 		for opt in "${@}"
 		do
@@ -538,8 +560,8 @@
 		done
 	# Define the proper string to display
 		[[ -z "$1" ]] && \
-			local STR="$(swarm.print.goto $(( $identRight + 1 ))) ${SWARM_THEME_DATA[read]}" || \
-			local STR="$(swarm.print.goto $(( $identRight + 1 ))) $1 ${SWARM_THEME_DATA[read]}"
+			STR="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_DATA[read]}" || \
+		 	STR="$(swarm.print.goto $(( identRight + 1 ))) $1 ${SWARM_THEME_DATA[read]}"
 	# Does it need a loop?
 		if $notEmpty
 		then
@@ -547,12 +569,12 @@
 			do
 				swarm.print.border >&2
 				$PRINTF "$STR " >&2
-				read $hideText buffer
+				$READ $hideText buffer
 			done
 		else
 			swarm.print.border >&2
 			$PRINTF "$STR " >&2
-			read $hideText buffer
+			$READ $hideText buffer
 		fi
 	# Output
 		$ECHO "$buffer" >&1
@@ -576,7 +598,7 @@
 			case $# in
 			1|2)	# If 2, too many arguments, ignoring...
 				MIN=$(( $1 ))
-				MAX=$(( $1 + $PERM_NUM ))
+				MAX=$(( $1 + PERM_NUM ))
 				;;
 			esac
 			shift 2
@@ -602,11 +624,11 @@
 		myRND() { #
 		#
 		#
-			VAR=$[ $RANDOM % $MAX ]
+			VAR=$(( RANDOM % MAX ))
 			while  [[ $VAR -lt $MIN ]] || [[ $VAR -gt $MAX ]]
-			do	VAR=$[ $RANDOM % $MAX ]
+			do	VAR=$(( RANDOM % MAX ))
 				# This is required, otherwise one never gets the 'max' value.
-				VAR=$(( $VAR + 1 ))
+				((VAR++))
 			done
 			$ECHO "$VAR"
 		}
@@ -618,7 +640,7 @@
 			while [[ $c -lt $LIST_NUM ]]
 			do
 				n=$(myRND)
-				while $ECHO "${L[@]}" | $GREP -q $n
+				while $ECHO "${L[@]}" | $GREP -q "$n"
 				do	n=$(myRND)
 				done
 				L[$c]=$n
@@ -632,7 +654,7 @@
 			# but has been modified by sea to match this command functionality
 			declare -A P
 			R=$RANDOM
-			for x in $(eval $ECHO {${MIN}..${MAX}})
+			for x in $(eval "$ECHO" "{${MIN}..${MAX}}")
 			do
 				while 	[[ -n "${P[$R]}" ]]
 				do	R=$RANDOM
@@ -660,7 +682,7 @@
 		done
 
 		TIME="${1/[a-zA-Z]}"
-		UNIT="$($ECHO ${1}|$TR -d [:digit:])"
+		UNIT=$($ECHO "${1}"|$TR -d [[:digit:]])
 		[[ -z "$UNIT" ]] && UNIT="s"
 
 		#set -x
@@ -688,19 +710,14 @@
 		[[ -z "$2" ]] && \
 			MSG="$SWARM_MSG_WAIT_TIME_LEFT" || \
 			MSG="$2"
-		case ${UNIT,,} in
-		s)	seconds="$TIME"	;;
-		m)	minutes="$TIME"	;;
-		h)	hours="$TIME"	;;
-		*)	status 1 "$SWARM_MSG_WAIT_USAGE"
-			return $?
-			;;
-		esac
 
 		case "${UNIT,,}" in
 		s)	seconds_total="$TIME"	;;
-		m)	seconds_total="$(( 60 * $TIME ))"	;;
-		h)	seconds_total="$(( 60 * 60 * $TIME ))"	;;
+		m)	seconds_total="$(( 60 * TIME ))"	;;
+		h)	seconds_total="$(( 60 * 60 * TIME ))"	;;
+		*)	status 1 "$SWARM_MSG_WAIT_USAGE"
+			return $?
+			;;
 		esac
 	#
 	#	Action - loop
@@ -708,12 +725,12 @@
 		seconds_total="${seconds_total//\/}"
 		while [ $seconds_total -ge 0 ]
 		do 	# Get total TIME string and subtract 1 second
-			TIME_string="$(swarm.str.seconds2TIME $seconds_total)"
+			TIME_string=$(swarm.str.seconds2TIME "$seconds_total")
 			((seconds_total--))
 
 			# Display to user
 			swarm.print.border
-			swarm.print.text -p  "${2:-$MSG}" " " "$TIME_string"
+			swarm.print.text  "${2:-$MSG}" " " "$TIME_string"
 
 			# Wait -- Lets give the system time to 'update' itself...
 			sleep 0.999
@@ -736,13 +753,13 @@
 		do
 			if [[ -f "$file" ]]
 			then	title "$file"
-				while read line;do
+				while $READ -r line;do
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
 					printe "${tmplineb/\</${PRINTABLE_LESSER}}"
 				done<"$file"
 			else	title ""
-				while read line;do
+				while $READ -r line;do
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
 					printe "${tmplineb/\</${PRINTABLE_LESSER}}"

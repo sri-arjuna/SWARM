@@ -342,7 +342,8 @@
 		#
 		# Action
 		#
-			unset "${OUT[@]}"
+			# shellcheck disable=SC2184
+			unset OUT[@]
 			OUT[0]=""
 			local shown=false
 			local MAX=$(( ROWS - 1 ))
@@ -372,13 +373,15 @@
 						shown=false
 						((CUR++))
 					else	printe  "${OUT[@]}" >&2
-						CUR=0 && unset "${OUT[@]}"
+						# shellcheck disable=SC2184
+						CUR=0 && unset OUT[@]
 						[ -z "$OPT" ] && shown=true
 						OUT["$CUR"]="${count}${SEP}${OPT}"
 						((CUR++))
 					fi
 				else 	printe  "${OUT[@]}" >&2
-					CUR=0 && unset "${OUT[@]}"
+					# shellcheck disable=SC2184
+					CUR=0 && unset OUT[@]
 					[ -z "$OPT" ] && shown=true
 					OUT["$CUR"]="${count}${SEP}$OPT"
 					((CUR++))

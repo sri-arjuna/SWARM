@@ -1,7 +1,31 @@
 Shell Wrapper And Runtime Modifier Manual
 =========================================
 
-This document will cover all variables and functions available by using SWARM.
+This document will cover all variables and functions available by using SWARM. It might document functions or variables that are not yet available.
+
+But if you find that something is missing, please contact me!
+
+However, this is only for an overview, for full details on the functions some variables refer to, please see their according manpage.
+
+But before we go into the use of SWARM in your own scripts, lets cover what arguments SWARM has:
+
+Arguments
+---------
+
+* config		; This will start **cfg.edit** and provide a comfortable config editor for the cli
+* demo			; This will show a demonstration script and show its code at the end.
+* help			; You can pass a functionname to directly open the according manpage, or browse through the menu and read each manpage individualy
+* log			; Shows the logfile
+* new			; Pass: _script_, _function_ or _swarm_ to get some code/script
+* words | phrases	; Prints a list of translateable strings (So if SWARM gets translated, those strings will be too)
+
+
+Internal Arguments:
+-------------------
+* stats			; Just some stats of the project
+* tar			; Creates ~/swarm-<build>.tar.gz, excl git repository / hidden files
+* tarball		; Creates ~/swarm-full-<build>.tar.gz, incl git repository
+
 
 
 Booleans
@@ -24,7 +48,7 @@ Returns **true** if _UID_ or _EUID_ is 0.
 
 ___$isGUI___
 
-Returns **true** if $XDG_SESSION_DESKTOP
+Returns **true** if $XDG_SESSION_DESKTOP is not empty (How to handle Wayland / Sway?)
 
 
 
@@ -56,12 +80,12 @@ and provide the required information of the system and it's paths!
 
 ___$ECHO___
 
-Basicly this is only for mental-compatibility reasons and uses printf instead
+Uses either the builtin command or the physical file, prefers builtin.
 
 
 ___$PRINTF___
 
-Refers to printf
+Uses either the builtin command or the physical file, prefers builtin.
 
 
 ___$AWK___
@@ -81,12 +105,12 @@ Refers to sed
 
 ___$SU___
 
-Refers to su
+Refers to su, must be empty if not installed!
 
 
 ___$SUDO___
 
-Refers to sudo
+Refers to sudo, must be empty if not installed!
 
 
 ___$LS___
@@ -94,9 +118,14 @@ ___$LS___
 Refers to ls
 
 
-___$MKDIR___
+___$MKDIR\_EXEC___
 
 Refers to mkdir
+
+
+___$MKDIR___
+
+Refers to swarm.util.mkdir which uses __$MKDIR\_EXEC__
 
 
 ___$RMDIR___
@@ -161,22 +190,30 @@ Variables - Utils
 
 ___$CURL___
 
-Refers to curl
+Refers to curl.
+This variable is not supposed to be used, please use the **download** function instead.
 
 
 ___$WGET___
 
 Refers to wget
+This variable is not supposed to be used, please use the **download** function instead.
 
 
 ___$CURLWGET___
 
 Refers to the first available installed command (default if both avilable: curl)
+This variable is not supposed to be used, please use the **download** function instead.
+
+
+___$DD\_EXEC___
+
+Refers to dd
 
 
 ___$DD___
 
-Refers to dd
+Refers to swarm.util.dd which uses __$DD\_EXEC__
 
 
 ___$FIND___
@@ -196,7 +233,7 @@ Refers to less
 
 ___$MORELESS___
 
-Refers to more or less, user settings (default if both available: more)
+Refers to more or less, user settings (default if both available it selects _more_ automaticly)
 
 
 ___$FIND___
@@ -291,7 +328,7 @@ Refers to the RC conf file (default: $HOME/.swarmrc ; Fallback: ./.swarmrc)
 Functions - INIT & later
 -------------------------
 
-Functions defined here are for internal use only.
+Functions defined here are for internal use only, as they refer to the __$SWARM_LOG__
 
 
 ___init.msg()___
@@ -315,6 +352,7 @@ Checks if **$LOG** can be written. If so, write **$DATE_CUR** to **$LOG** and se
 If it can not write the logfile, it sets **$isRO=true**
 
 _This is done during init, no need to call it again!_
+
 
 
 Functions - CORE

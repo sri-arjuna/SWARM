@@ -53,8 +53,20 @@ Due to this, some issues are to be expected in the early public phases
 
 ROADMAP:
 --------
-0.8 bar
--- small functions
-0.9 cfg.edit
+-- = todo
+++ = done
+
+0.8 
+++ bar
+++ small functions
+0.8.5
+++ cfg.edit RAW/wip
+-- rework swarm.util.'file stuff'
+-- keep updating: docs/*
+0.9
+-- cfg.edit - finalize
 -- additions & fixes
-1.0 swarm
+0.9.5 
+-- swarm / WIP
+1.0
+-- final bug fixes

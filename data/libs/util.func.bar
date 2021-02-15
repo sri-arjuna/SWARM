@@ -4,8 +4,9 @@ bar()  { # [options] [MESSAGE]
 #
 	# internals
 	local TYPE=""		# Start with no display mode
-	local INDI=(  '/' '-' '\' '|' )	# Dont use tui-indi, for asynchronus display
-	local TOTAL=$[ ${#INDI[@]} -1 ]
+	# shellcheck disable=SC1003
+	local INDI=( '/' '-' '\' '|' )	# For asynchronus display
+#	local TOTAL=$(( ${#INDI[@]} -1))
 	#WIDTH=${COLUMNS:-$(tput cols)}
 	# id file?
 	local ID_CUR="$$"	# -i ID storage id
@@ -20,7 +21,6 @@ bar()  { # [options] [MESSAGE]
 	# opts
 	local MAX=""
 	local VAL #="1"		# This is used as index for the dash animation
-	local CURRENT=""
 	#local BAR='='
 	# Display
 	local PROGRESS=""
@@ -32,6 +32,7 @@ bar()  { # [options] [MESSAGE]
 #
 #	Functions
 #
+	#shellcheck disable=SC2120
 	function bar.simple_status() {
 	# Generates a single string to represent the actual task/case
 	#
@@ -59,6 +60,7 @@ bar()  { # [options] [MESSAGE]
 		fi
 		export SWARM_PROGRESS_BAR_IDS
 	}
+	#shellcheck disable=SC2120
 	function bar.read_tmp() {
 	# Reads VAL in the temp file according to passed id
 	# Returns VAL
@@ -71,7 +73,7 @@ bar()  { # [options] [MESSAGE]
 #	Catching Arguments
 #
 	while : #for opt in "${@}" #while getopts "c:CB:bi:lm:rh" name
-	do 	case $1 in
+	do 	case "$1" in
 		-B)	BAR="$2"
 			hadOpts=true
 			;;
@@ -86,18 +88,19 @@ bar()  { # [options] [MESSAGE]
 			STR_COLORS_RAW="$2"
 			# Vars
 			local c=0
-			local str_color str_num
+			local str_color
 			declare -ag SWARM_BAR_COLORS
 			declare -ag SWARM_BAR_VALUE
 			# Parse values
-			while read item
+			while $READ -r item
 			do
-				str_color="$($ECHO ${item} | $TR -d [:digit:])"
-				str_value="$($ECHO ${item} | $TR -d [:alpha:])"
+				# shellcheck disable=SC2154
+				str_color=$($ECHO "${item}" | $TR -d [[:digit:]])
+				str_value=$($ECHO "${item}" | $TR -d [[:alpha:]])
 				SWARM_BAR_COLORS=($str_color)
 				SWARM_BAR_VALUE=($str_value)
-				c=$(( $c + 1 ))
-			done<<<$($ECHO "$STR_COLORS_RAW" | $SED s/','/'\n'/g )
+				((c++))
+			done<<<"$($ECHO "$STR_COLORS_RAW" | $SED s/','/'\n'/g )"
 			hadOpts=true
 			;;
 		-i)	ID="$2"
@@ -113,14 +116,16 @@ bar()  { # [options] [MESSAGE]
 			;;
 		--) 	shift ; break ;;
 		--help|-?)
-			swarm.help.usage $FUNCNAME
+			# shellcheck disable=SC2128
+			swarm.help.usage "$FUNCNAME"
 			return "${RET_HELP:-99}"
 			;;
 		*)	break ;;
 		esac
+		# shellcheck disable=SC2015
 		$hadOpts && \
 			shift 2 || \
-			shift 1 #$(($OPTIND - 1))
+			shift 1
 		hadOpts=false
 	done
 
@@ -140,16 +145,17 @@ bar()  { # [options] [MESSAGE]
 #
 	case "${TYPE^^}" in
 	DASH)
-		bar.save_tmp "$(( $VAL + 1 ))"
+		bar.save_tmp "$(( VAL + 1 ))"
 		;;
 	BAR)
 		if [ -z "$MAX" ] || [ -z "$VAL" ]
 		then	# Improper handling
-			swarm.help.usage $FUNCNAME
+			# shellcheck disable=SC2128
+			swarm.help.usage "$FUNCNAME"
 			#tui-status 1 "$(eval_gettext 'Usage: $ME [-r] [-m \$MAV_VALUE]  [-bc \$CUR_VALUE] [-l]]  \"msg\"')"
 			#exit 1
 		fi
-		bar.save_tmp "$(( $VAL + 1 ))"
+		bar.save_tmp "$(( VAL + 1 ))"
 	esac
 #
 #	Generate output string, and save values
@@ -159,7 +165,7 @@ bar()  { # [options] [MESSAGE]
 	case "${TYPE}" in
 	DASH)	# Regular animated dash
 		[[ "$VAL" -gt 3 ]] && VAL=0
-		n=$(( $WIDTH - ${#BORDER_LEFT} - 8 ))
+		n=$(( WIDTH - ${#BORDER_LEFT} - 8 ))
 		POS="\033[${n}G"
 		POS=""
 
@@ -173,8 +179,9 @@ bar()  { # [options] [MESSAGE]
 		esac
 		;;
 	NUM)	# Show increments number
-		[ $VAL -gt $MAX ] && \
-			swarm.help.usage $FUNCNAME
+		# shellcheck disable=SC2128
+		[[ $VAL -gt $MAX ]] && \
+			swarm.help.usage "$FUNCNAME"
 			#echo "$(eval_gettext '$ME: Should have called \"${TUI_FONT_BOLD}$ME -r\" first!${TUI_FONT_RESET}')" >&2
 		STATUS="[ $VAL / $MAX ]"
 		;;
@@ -182,15 +189,17 @@ bar()  { # [options] [MESSAGE]
 		fixer_fix=0
 		if "$longBar"
 		then	# Show also procent ($STATUS)
-			procent="$( $ECHO $MAX $VAL | $AWK '{print (100/$1*$2) }' )"
+			# shellcheck disable=SC2016
+			procent=$( $ECHO "$MAX" "$VAL" | $AWK '{print (100/$1*$2) }' )
 			[ -z "$MESSAGE" ] && fixer_fix=0 || fixer_fix=5	# Does this depend on $WIDTH?
 
 			# How many procent?
 			pro="${procent/.*/}"
 			[ "$pro" -gt 100 ] && \
 				pro=100
+			# shellcheck disable=SC2034
 			[ "$pro" -ne 100 ] && \
-				cent="$( while IFS='.' read P C;do [ -z "$C" ] && $ECHO 00 || $ECHO $C;done<<<$procent)" && \
+				cent=$( while IFS='.' $READ -r P C;do [ -z "$C" ] && $ECHO 00 || $ECHO "$C";done<<<"$procent") && \
 				cent="${cent:0:2}" || \
 				cent=00
 			case ${#pro} in
@@ -198,41 +207,48 @@ bar()  { # [options] [MESSAGE]
 			2)	fixer=14 ;;
 			3)	fixer=15 ;;
 			esac
-			length=$(( $numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - ${fixer} - $fixer_fix  ))
+			# shellcheck disable=SC2154
+			length=$(( numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - fixer - fixer_fix  ))
 			#STATUS="[ ${pro}.${cent}%% ]"		# Nope
 			STATUS="[ ${pro}.${cent}%% ]"	# Ok, what?
-			len=$( $ECHO $length $procent | $AWK '{print ($1/100*$2) }' )
+			# shellcheck disable=SC2016
+			len=$( $ECHO "$length" "$procent" | $AWK '{print ($1/100*$2) }' )
 		else	STATUS=""
 			[ -z "$MESSAGE" ] && fixer_fix=7	# Does this depend on $WIDTH?
 			# The length that is available to print bars
 			[ -z "$MESSAGE" ] && \
 				fixer=16 || \
 				fixer=14
-			length=$(( $numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - ${fixer} - $fixer_fix ))
-			len=$( $ECHO $length $MAX $VAL | $AWK '{print ($1/$2*$3) }' )
+			length=$(( numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - fixer - fixer_fix ))
+			# shellcheck disable=SC2016
+			len=$( $ECHO "$length" "$MAX" "$VAL" | $AWK '{print ($1/$2*$3) }' )
 		fi
 #		echo "len: $len // length: $length // width: $WIDTH // numEND: $numEND"
 		# Colorize?
-		if [[ -z "$SWARM_BAR_COLORS" ]]
+		if [[ -z "${SWARM_BAR_COLORS[@]}" ]]
 		then
-			bars=$($PRINTF '%*s' ${len/.*})
+			bars=$($PRINTF '%*s' "${len/.*}")
+			# shellcheck disable=SC2140
 			bars=$($ECHO "$bars"|$SED s," ","\\$BAR",g)
 		else
-			local bars_counter=$(( $numEND - ( 2 * $identRight ) ))
+			# shellcheck disable=SC2154
+			local bars_counter=$(( numEND - ( 2 * identRight ) ))
 			local bars_curret=0
 			local arr_count=0
 			local clr_now="${SWARM_BAR_COLORS[0]}"
-			local clr_color="$(swarm.color.fg $clr_now)"
+			local clr_color=""
+			clr_color=$(swarm.color.fg "$clr_now")
 			local num_next="${SWARM_BAR_VALUE[0]}"
 			bars=""
 			while [[ $bars_curret -lt $bars_counter ]]
 			do
+				# shellcheck disable=SC2154
 				bars+="${clr_color}${BAR}${c_reset}"
-				bars_curret=$(( $bars_curret + 1 ))
+				((bars_curret++))
 				[[ $num_next -lt $bars_curret ]] && \
-					arr_count=$(( $arr_count + 1 )) && \
+					((arr_count++)) && \
 					clr_now="${SWARM_BAR_COLORS[$arr_count]}" && \
-					clr_color="$(swarm.color.fg $clr_now)" && \
+					clr_color=$(swarm.color.fg "$clr_now") && \
 					num_next="${SWARM_BAR_VALUE[$arr_count]}"
 			done
 		#	set +x
@@ -255,7 +271,7 @@ bar()  { # [options] [MESSAGE]
 		;;
 	DASH)
 		swarm.print.text "$MESSAGE" "" "$STATUS"
-		VAL=$(( $VAL + 1 ))
+		((VAL++))
 		if [[ "${TYPE^^}" == "DASH" ]]
 		then
 			[[ $VAL -ge 4 ]] && VAL=1
@@ -274,13 +290,13 @@ bar()  { # [options] [MESSAGE]
 			else 	# With message
 				swarm.print.text "$MESSAGE" "" "${PROGRESS}${STATUS}"
 			fi
-		else	if [[ -z "$MESSAGE" ]]
-			then 	# No message
-				$PRINTF "$posLEFT${PROGRESS}\n"
-				#printf "\n"
-			else 	# With message
-				swarm.print.text "$MESSAGE" "" "${PROGRESS}"
-			fi
+		elif [[ -z "$MESSAGE" ]]
+		then 	# No message
+			# shellcheck disable=SC2154
+			$PRINTF "$posLEFT${PROGRESS}\n"
+			#printf "\n"
+		else 	# With message
+			swarm.print.text "$MESSAGE" "" "${PROGRESS}"
 		fi
 		;;
 	esac

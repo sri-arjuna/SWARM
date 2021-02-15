@@ -5,17 +5,20 @@ Checklist upon adding new functions:
 
 
 
-Grosse Functionen
------------------
-2) cfg.edit
-3) swarm
+Missing: Big Functions
+----------------------
+
+* cfg.edit - wip
+* swarm - todo
 
 
-Kleine Functionen
------------------
+Missing: Small Functions
+----------------------
+
 * swarm.os.install
 * asRoot
 *
+
 
 Additions?
 ----------
@@ -24,15 +27,17 @@ Additions?
 * download : certificates?
 
 
+
 KNOWN ISSUES
 ------------
+
 print{e,l}, header,title:	String splitting
 swarm.str.split			speed, empty line???
 bar				alignment
-swarm.util.cp @ $CP		on/e line output
-swarm.util.mv @ $MV		on/e line output
+swarm.util.cp @ $CP		on/e line output, subdir & error handling
+swarm.util.mv @ $MV		on/e line output, subdir & error handling
 swarm.str.usb			linux works, BSD/arm not so sure
-wait
+wait				time display borked
 yesno ??
 printfile			leading spaces missing / possible performance ??
 

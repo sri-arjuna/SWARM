@@ -374,7 +374,8 @@
 				# shellcheck disable=SC2164
 				cd "${SWARM_DIR_ROOT}/.."
 				F="$HOME/swarm-${SWARM[BUILD]}-full.tar.gz"
-				$TAR -acf "$F" "${SWARM_DIR_ROOT##*/}" # 2&>/dev/null
+				tar -acf "$F" "${SWARM_DIR_ROOT##*/}" 2&>/dev/null
+				[[ -f "$F" ]]
 				status $? "$F"
 				cd "$OLDPWD"
 				;;
@@ -382,7 +383,8 @@
 				# shellcheck disable=SC2164
 				cd "${SWARM_DIR_ROOT}/.."
 				F="$HOME/swarm-${SWARM[BUILD]}.tar.gz"
-				$TAR -acf "$F" --exclude ".git" "${SWARM_DIR_ROOT##*/}" | $GREP -v -i "imp" 2&>/dev/null
+				tar -acf "$F" --exclude ".git" "${SWARM_DIR_ROOT##*/}"  2&>/dev/null
+				[[ -f "$F" ]]
 				status $? "$F"
 				cd "$OLDPWD"
 				;;

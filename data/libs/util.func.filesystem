@@ -112,8 +112,11 @@ swarm.util.cd() { # DIR
 			printe "$SWARM_MSG_WORD_PASSED:" "$1"
 			printe "$SWARN_MSG_WORD_EXPECTED:" "$1"
 			if yesno "$SWARM_MSG_WORD_CREATE: $1"
-			then 	$MKDIR "$1"
-				cd "$1"
+			then 	if $MKDIR "$1"
+				then	cd "$1"
+				else 	status $? "$SWARM_MSG_PHRASE_COULDNOTCREATE:" "$1"
+					return 1
+				fi
 				return 0
 			else 	return 1
 			fi
@@ -122,11 +125,48 @@ swarm.util.cd() { # DIR
 			printe "$SWARM_MSG_WORD_CURRENT $SWARM_MSG_WORD_DIR:" "$PWD"
 			printe "$SWARN_MSG_WORD_EXPECTED:" "$PWD/$1"
 			if yesno "$SWARM_MSG_WORD_CREATE: $PWD/$1"
-			then 	$MKDIR "$PWD/$1"
-				cd "$1"
+			then 	if $MKDIR "$PWD/$1"
+				then	cd "$1"
+				else 	status $? "$SWARM_MSG_PHRASE_COULDNOTCREATE:" "$PWD/$1"
+					return 1
+				fi
 				return 0
 			else 	return 1
 			fi
 		fi
 	fi
+}
+swarm.util.rm() { # FILE1 DIR2
+# Deletes files and dirs recurisvly.
+# Ask before removing a directory.
+	if [[ -z "$1" ]]
+	then	# Expecting at least one argument
+		swarm.help.usage "${FUNCNAME[@]}"
+		return 1
+	fi
+	local args="" msg="" rmAsk=false
+	for item in "${@}"
+	do
+		rmAsk=false
+		if [[ -f "$item" ]]
+		then 	obj="$SWARM_MSG_WORD_FILE"
+		elif [[ -L "$item" ]]
+		then 	obj="$SWARM_MSG_WORD_FILE"
+		elif [[ -d "$item" ]]
+		then	# Ask in case of folders
+			rmAsk=true
+			obj="$SWARM_MSG_WORD_DIR"
+			args="-fr"
+		else	status 1 "$SWARM_MSG_PHRASE_FILENOTFOUND: $item"
+			rmAsk=false
+			continue
+		fi
+		if $rmAsk
+		then	yesno "$SWARM_MSG_WORD_DELETE $obj: $item?" || continue
+		fi
+		msg="$SWARM_MSG_WORD_DELETED $obj $item"
+		$RM_EXEC $args "$item"
+		status $? "$msg" && init.log "$msg"
+		RET=$(( RET + $? ))
+	done
 }

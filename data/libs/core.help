@@ -612,7 +612,7 @@
 			out="$SWARM_MSG_BAR_USAGE"
 			;;
 		"swarm.util.cd")
-			out="$SWARM_MSG_CP_USAGE"
+			out="$SWARM_MSG_CD_USAGE"
 			;;
 		"")
 			out="$"

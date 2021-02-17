@@ -118,13 +118,13 @@ But be aware, some of those function are already 'wrapped' to variables or are o
 Either way, here is the current output of the time I'm writing this document:
 
     \[~/prjs/SWARM\] 0 $ . ./runtime
-    .............\[~/prjs/SWARM\] 1 $ swarm.str.
+    .............\[~/prjs/SWARM\] 1 $ swarm.str.<hit-tab>
     swarm.str.ascii2num     swarm.str.extension     swarm.str.num2char      swarm.str.split
     swarm.str.bool2str      swarm.str.filesize      swarm.str.num2roman     swarm.str.status
     swarm.str.dirlist       swarm.str.genfilename   swarm.str.num2uni       swarm.str.usb
     swarm.str.dirsize       swarm.str.num2ascii     swarm.str.seconds2TIME  
 
-    \[~/prjs/SWARM\] 0 $ swarm.util.
+    \[~/prjs/SWARM\] 0 $ swarm.util.<hit-tab>
     swarm.util.cp        swarm.util.hasWhich  swarm.util.isGUI     swarm.util.mkdir     swarm.util.which
     swarm.util.echo      swarm.util.isDir     swarm.util.isRoot    swarm.util.tar
 

@@ -287,15 +287,6 @@
 	# shellcheck disable=SC1090
 	source "$SWARMRC"
 #
-# Prepare language for user caused errors
-# As well as for all helpfiles and manpages
-# that the user may call/ask by ./runtime help
-#
-	# Only update language if LC_ALL is empty
-	[[ -z "$LC_ALL" ]] && \
-		swarm.update.lang && \
-		swarm.update.lang.status
-#
 # Load the users functions now
 # if he has some that is
 #
@@ -330,6 +321,15 @@
 		done
 	fi
 #
+# Prepare language for user caused errors
+# As well as for all helpfiles and manpages
+# that the user may call/ask by ./runtime help
+#
+	# Only update language if LC_ALL is empty
+	[[ -z "$LC_ALL" ]] && \
+		swarm.update.lang && \
+		swarm.update.lang.status
+#
 # Starting SWARM visuals now
 #
 	swarm.init.theme "$SWARM_THEME"
@@ -347,8 +347,7 @@
 			title	"$SWARM_MSG_WELCOME_TITLE"
 			status 1 "$SWARM_MSG_WELCOME_INFOLINE1"
 			status 111 "$SWARM_MSG_WELCOME_INFOLINE2"
-			#printe
-			builtin echo "$SWARM_MSG_WELCOME_INFOLINE3" | printe -2 --
+			printe "$SWARM_MSG_WELCOME_INFOLINE3" "${SWARM_USER_DIR_SCRIPTS}/SWARM"
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
 			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
 			$PRINTF '\n'
@@ -356,11 +355,6 @@
 		else	# Has arguments, lets parse
 			$PRINTF "$(swarm.print.goto 0)"
 			case "${1,,}" in
-			"basic")
-				shift
-				swarm.eu.show.basics
-				exit $?
-				;;
 			"config")
 				shift
 				swarm.eu.show.config
@@ -377,18 +371,20 @@
 				exit $?
 				;;
 			"tarball")
-				(
-					# shellcheck disable=SC2164
-					cd "${SWARM_DIR_ROOT}/.."
-					tar -acf "$HOME/swarm-${SWARM[BUILD]}-full.tar.gz" "${SWARM_DIR_ROOT##*/}"
-				)
+				# shellcheck disable=SC2164
+				cd "${SWARM_DIR_ROOT}/.."
+				F="$HOME/swarm-${SWARM[BUILD]}-full.tar.gz"
+				$TAR -acf "$F" "${SWARM_DIR_ROOT##*/}" # 2&>/dev/null
+				status $? "$F"
+				cd "$OLDPWD"
 				;;
 			"tar")
-				(
-					# shellcheck disable=SC2164
-					cd "${SWARM_DIR_ROOT}/.."
-					tar -acf "$HOME/swarm-${SWARM[BUILD]}.tar.gz" --exclude ".git" "${SWARM_DIR_ROOT##*/}"
-				)
+				# shellcheck disable=SC2164
+				cd "${SWARM_DIR_ROOT}/.."
+				F="$HOME/swarm-${SWARM[BUILD]}.tar.gz"
+				$TAR -acf "$F" --exclude ".git" "${SWARM_DIR_ROOT##*/}" | $GREP -v -i "imp" 2&>/dev/null
+				status $? "$F"
+				cd "$OLDPWD"
 				;;
 			"new")
 				case "$2" in

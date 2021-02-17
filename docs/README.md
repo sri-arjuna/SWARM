@@ -41,15 +41,15 @@ Basicly everyone one has or wants to write comfortable scripts for themself, the
 Whats the purpose?
 ------------------
 
-The main goal was **swarm**, the function named like the project, 
+The main goal was **swarm**, the function named like the project,
 which is they key function to the initial project of mine named: **Script-Tools**
 
 This functions main purpose is to browse directories, list and execute scripts
-from with the 'browser' but also beeing able to pass directores, scripts and their options 
+from with the 'browser' but also beeing able to pass directores, scripts and their options
 and values directly to the script which passes the arguments down the specified script.
 
-All this while beeing highly customizeable, like showing the content of a defined textfile as 
-a general info while browsing, or showing a specific 'help' (if passed) for folders 
+All this while beeing highly customizeable, like showing the content of a defined textfile as
+a general info while browsing, or showing a specific 'help' (if passed) for folders
 when called from the command line.
 
 The idea for something like this was born back in 1995, but it was not until 2011,
@@ -60,17 +60,37 @@ to particpiate in the project: _"Script-Tools"_ of mine, which aims to be a tool
 as in across all kind of distros a configuration, tweak, rescue and fun tool.
 
 As in, but not limited to:
-* Select & apply GRUB(2) themes 
+* Select & apply GRUB(2) themes
 * Change keyboard layout
 * Tweak login managers
 * Manage & Connect: Wireless Networks & NAS/SAN
 * EFI handler
 
-So if you are either interested in this tool as such, or hopefully even in participating, 
+So if you are either interested in this tool as such, or hopefully even in participating,
 please have a look here:
 * Script-Tools(https://github.com/sri-arjuna/script-tools)
 
 Otherwise, I hope you enjoy writing scripts with SWARM as much as I do.
+
+
+Pseudo installation
+-------------------
+
+While SWARM does not need to be installed, it is most comfortable to have its folder
+in the path where you have all the scripts you execute from the terminal.
+
+In most cases this probably is: $HOME/bin
+
+But of course you can re-use whatever other path you might have in use.
+
+If you have nothing like this just yet, lets make it:
+
+    mkdir "$HOME/bin"
+    echo 'PATH+=":$HOME/bin" >> "$HOME/.bashrc"
+    cd "$HOME/bin"
+    git clone "http://github.com/sri-arjuna/SWARM.git"
+
+Read the First Steps['docs/First Steps.md'] from here on.
 
 
 Reason why?

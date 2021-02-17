@@ -488,6 +488,12 @@
 				# shellcheck disable=SC2164
 				cd "$OLDPWD"
 			;;
+			remove)
+				title "$SWARM_MSG_WORD_REMOVE: SWARM"
+				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION?" || exit 1
+				rm "$SWARMRC"
+				[[ -d "$SWARM_USER_DIR_BASE" ]] && rm -fr "$SWARM_USER_DIR_BASE"
+			;;
 			esac
 		fi
 	fi

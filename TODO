@@ -3,6 +3,10 @@ Checklist upon adding new functions:
 2. Put english manpage in ./data/lang/en_GB/man
 3. Verify 'function - usage' uses string from file
 
+TODO MANPAGE:
+-------------
+
+* swarm.util.cp
 
 
 Missing: Big Functions
@@ -25,7 +29,7 @@ Additions?
 * cfg.set -a(ppend)?
 * swarm.str.usb -> BSD ???
 * download : certificates?
-
+* swarm.str.dirlist *dirtree
 
 
 KNOWN ISSUES
@@ -40,6 +44,7 @@ swarm.str.usb			linux works, BSD/arm not so sure
 wait				time display borked
 yesno ??
 printfile			leading spaces missing / possible performance ??
+printlist			rework due to shellcheck
 
 
 Statement
@@ -48,6 +53,12 @@ Framework core functions were written from scratch, again,
 wheres most functions have been migrated from its initial form TUI.
 
 Due to this, some issues are to be expected in the early public phases
+
+
+Shellcheck recheck:
+-------------------
+* SC2162: read -r // gibt support für \.. will ich das?
+* undo unset quoting // # shellcheck disable=SC2184
 
 
 

@@ -255,7 +255,7 @@ swarm.str.num2roman() { # NUM
 		0)	out+=""	;;
 		[123])	while [ "$N" -gt 0 ]
 			do	out+="$one"
-				((N++))
+				((N--))
 			done
 			;;
 		4)	out+="$one$five"	;;
@@ -264,7 +264,7 @@ swarm.str.num2roman() { # NUM
 			N="$((N-5))"
 			while [ "$N" -gt 0 ]
 			do	out+="$one"
-				((N++))
+				((N--))
 			done
 			;;
 		9)	while [ "$N" -lt 10 ]

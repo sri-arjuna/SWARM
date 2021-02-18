@@ -161,7 +161,7 @@ swarm.util.tar() { # DIR1 DIR2 ...
 }
 swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 # Copies SOURCE to TARGET
-# Returns 1 if TARGET-dir does not exist
+# Returns 1 if TARGET-dir does not exist and was not create
 	# shellcheck disable=SC2128
 	[[ -z "${@}" ]] && swarm.help.usage "$FUNCNAME" && return 1
 	#local force_Overwrite=false
@@ -220,7 +220,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			$show_Longnames && src_show="$src" || src_show="${src##*/}"
 			bar -m "$MAX" -c "$COUNT" "$SWARM_MSG_WORD_COPYING : $src"
 			# shellcheck disable=SC2086
-			$CP $optargs "$src_show" "$cp_target"
+			$CP_EXEC $optargs "$src" "$cp_target"
 			#$PRINTF "$POS_END\n"
 			status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
 			((COUNT++))

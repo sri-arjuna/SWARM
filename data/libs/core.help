@@ -218,7 +218,7 @@
 	#
 		local str_title="Demo Screen"
 		local C=0 M=5
-		local list=""
+		local -a array
 
 		header --default "$str_title"
 		title "$str_title"
@@ -232,9 +232,16 @@
 
 		title
 		printe "Contents of: /"
-		list="$(ls -1 /)"
-		printlist -r "$list"
+		#set -x
 
+		#array=( $(ls -1 /) )
+		#array=( $(for f in $(ls -1 /);do echo "$f";done) )
+		#array=( $(cd / ; printf '%s\n' *) )
+		cd / ; array=( * )
+		cd "$OLDPWD"
+		printlist -r "${array[@]}"
+		#for item in "${array[@]}";do printf '%s\n' "${item}";done
+#set -x
 		title
 		yesno "Do you like using: \"$DESKTOP\" on \"$DISTRO\"?" >&1
 		status $? "Your answer was: $(swarm.str.bool2str -y $?)"
@@ -275,7 +282,7 @@
 
 		title "Copy"
 		#swarm.util.cp
-		$CP -r "$0" docs/* docs "$SWARM_TMP_DIR"
+		$CP -r "$0" ./docs/* docs "$SWARM_TMP_DIR"
 		wait 3s
 		title "Source Code"
 		#shellcheck disable=SC2128

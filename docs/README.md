@@ -68,7 +68,7 @@ As in, but not limited to:
 
 So if you are either interested in this tool as such, or hopefully even in participating,
 please have a look here:
-* Script-Tools(https://github.com/sri-arjuna/script-tools)
+* [Script-Tools](https://github.com/sri-arjuna/script-tools)
 
 Otherwise, I hope you enjoy writing scripts with SWARM as much as I do.
 
@@ -117,8 +117,8 @@ Yeah baby, Steam-Punk! :D
 LINKS:
 ------
 
-* http://www.reddit.com/r/SWARM_BASH
-* http://www.github.com/sri-arjuna/SWARM        TODO
+* [Reddit](http://www.reddit.com/r/SWARM_BASH)
+* [GitHub](http://www.github.com/sri-arjuna/SWARM)
 
 
 CREDITS:

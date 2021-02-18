@@ -3,6 +3,7 @@ Checklist upon adding new functions:
 2. Put english manpage in ./data/lang/en_GB/man
 3. Verify 'function - usage' uses string from file
 
+
 TODO MANPAGE:
 -------------
 
@@ -10,27 +11,28 @@ TODO MANPAGE:
 * swarm.util.rm
 
 
-Missing: Big Functions
+Missing: Small Functions
+----------------------
+
+* swarm.os.install
+* asRoot
+* swarm.str.dirlist *dirtree
+
+
+1.0 Blockers
 ----------------------
 
 * cfg.edit - wip
 * swarm - todo
 
 
-Missing: Small Functions
-----------------------
-
-* swarm.os.install
-* asRoot
-*
-
-
-Additions?
-----------
+Post 1.0-XX build?
+-------------------
 * cfg.set -a(ppend)?
 * swarm.str.usb -> BSD ???
 * download : certificates?
-* swarm.str.dirlist *dirtree
+* add roman2num :: https://www.unix.com/302928187-post7.html
+* add bar dir/item [x/Y] if cp entrie is a dir // same with mv
 
 
 KNOWN ISSUES

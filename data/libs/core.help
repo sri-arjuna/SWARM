@@ -682,7 +682,7 @@
 			case "$tFile" in
 			RC)	cfg.edit "$SWARMRC"
 				;;
-			*)	cfg.edit "$tFile"
+			*)	cfg.edit "$SWARM_USER_DIR_CONF/$tFile"
 				;;
 			esac
 		done

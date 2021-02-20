@@ -673,7 +673,7 @@
 		while
 			printe "$SWARM_MSG_PHRASE_SELECT_FILE"
 			#shellcheck disable=SC2046
-			tFile=$(pick -m "RC" $($LS "$SWARM_USER_DIR_CONF/"))
+			tFile=$(pick -m "RC" $($LS -1 "$SWARM_USER_DIR_CONF/"))
 		do
 			# If the selected option is 'back' quit the Loop
 			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break

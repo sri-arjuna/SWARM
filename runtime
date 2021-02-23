@@ -105,7 +105,18 @@
 	# clearing the ENV by the use of swarm.cleanup
 	export PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
-	TERM="${TERM:-GNU\057Linux}"
+	TERM="${TERM:-GNU-Linux}"
+	if [[ "" == "${TERM/GNU-Linux}" ]] || [[ "dumb" == "${TERM}" ]]
+	then	TERM="xterm"
+			# This is required to work within a SSH env
+			export TERM
+			# Skip selection if COLUMNS were preset
+			if [[ -z "$COLUMNS" ]]
+			then	echo "How many COLUMNS does your terminal have?"
+					select COLUMNS in 60 70 80 90 100 110 120 130 140 150;do break;done
+			fi
+			export COLUMNS
+	fi
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
 	export ECHO="${ECHO:-echo}"
@@ -149,7 +160,7 @@
 	# Use these to set the date variable: `
 	export DATE_TODAY="$DATE +%F"
 	export DATE_TIME="$DATE +%T"
-	export DATE_TIME_LOG="$DATE +%T.%s"
+	export DATE_TIME_LOG="$DATE +%T.%N"
 #
 # Get proper SWARM root dir
 #
@@ -162,7 +173,7 @@
 	then
 		# Find the path that holds this script
 		# Evaluate best chance for the dirs
-		for tmp in $0 ${PWD:-$($PWD_EXEC)} .. ${PWD:-$($PWD_EXEC)}/..
+		for tmp in "$0" "${PWD:-$($PWD_EXEC)}" ".." "${PWD:-$($PWD_EXEC)}/.."
 		do
 			if [[ "SWARM" == "${tmp##*/}" ]]
 			then	# We're in it already

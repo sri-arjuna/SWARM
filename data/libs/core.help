@@ -621,8 +621,8 @@
 		"swarm.util.cd")
 			out="$SWARM_MSG_CD_USAGE"
 			;;
-		"")
-			out="$"
+		"swarm.os.install")
+			out="$SWARM_MSG_INSTALL_USAGE"
 			;;
 		"")
 			out="$"

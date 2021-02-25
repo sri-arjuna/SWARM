@@ -6,7 +6,7 @@
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
 # Changed:	2021.02.25	 	     #
-# Build:	60			     #
+# Build:	61			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -79,7 +79,7 @@
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8.6
-	SWARM[BUILD]=60
+	SWARM[BUILD]=61
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"

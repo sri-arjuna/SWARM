@@ -253,16 +253,10 @@
 
 		title
 		printe "Contents of: /"
-		#set -x
-
-		#array=( $(ls -1 /) )
-		#array=( $(for f in $(ls -1 /);do echo "$f";done) )
-		#array=( $(cd / ; printf '%s\n' *) )
-		cd / ; array=( * )
-		cd "$OLDPWD"
+		$CD / ; array=( * )
+		$CD "$OLDPWD"
 		printlist -r "${array[@]}"
-		#for item in "${array[@]}";do printf '%s\n' "${item}";done
-#set -x
+		
 		title
 		yesno "Do you like using: \"$DESKTOP\" on \"$DISTRO\"?" >&1
 		status $? "Your answer was: $(swarm.str.bool2str -y $?)"

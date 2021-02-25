@@ -113,7 +113,7 @@
 			# Skip selection if COLUMNS are preset
 			if [[ -z "$COLUMNS" ]]
 			then	echo "How many COLUMNS (width) does your terminal have?"
-				select COLUMNS in 60 70 80 90 100 110 120 150 239;do break;done
+				select COLUMNS in 60 70 80 90 100 110 120 150 200 239;do break;done
 				export COLUMNS
 			fi
 			# Skip selection if LINES are preset

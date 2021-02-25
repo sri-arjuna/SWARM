@@ -17,9 +17,9 @@ Designated Audience
 What this file does and what not
 --------------------------------
 
-	* It is all about the syntax required to work best cross-plattform
-	* It is not about the commands provided with SWARM, but please see
-	  the [./MANUAL.md]Manual for that too.
+* It is all about the syntax required to work best cross-plattform
+* It is not about the commands provided with SWARM, but please see
+  the [Manual](./MANUAL.md) for that too.
 
 
 
@@ -35,7 +35,7 @@ This is a BASH framework, so in case of doubt, use BASH'ism.
 * All functions returing a string to work with, must start with _swarm.str._
 * All functions that aim to replace a coreutil, must start with _swarm.util._
 * All functions that return a list, must start with _swarm.list._
-
+* Functions that start with _swarm.print._ are NOT shown to endusers (./runtime help) (manpage is to be shown however)
 
 Lists
 =====

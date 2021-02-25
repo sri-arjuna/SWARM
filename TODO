@@ -6,24 +6,33 @@ Checklist upon adding new functions:
 
 TODO MANPAGE:
 -------------
-
 * swarm.util.cp
 * swarm.util.rm
+* swarm.os.install
 
 
 Missing: Small Functions
 ----------------------
-
-* swarm.os.install
+* swarm.os.install, WIP
 * asRoot
 * swarm.str.dirlist *dirtree
 
 
 1.0 Blockers
 ----------------------
-
-* cfg.edit - wip
 * swarm - todo
+
+
+KNOWN ISSUES
+------------
+print{e,l}, header,title:	String splitting
+swarm.str.split			empty line???
+bar				alignment
+swarm.str.usb			linux works, BSD/arm not so sure
+wait				time display borked
+yesno ??			fix empty line in ssh session?
+printfile			leading spaces missing / possible performance ??
+printlist			rework due to shellcheck
 
 
 Post 1.0-XX build?
@@ -33,21 +42,8 @@ Post 1.0-XX build?
 * download : certificates?
 * add roman2num :: https://www.unix.com/302928187-post7.html
 * add bar dir/item [x/Y] if cp entrie is a dir // same with mv
-
-
-KNOWN ISSUES
-------------
-
-print{e,l}, header,title:	String splitting
-swarm.str.split			speed, empty line???
-bar				alignment
-swarm.util.cp @ $CP		on/e line output, subdir & error handling
-swarm.util.mv @ $MV		on/e line output, subdir & error handling
-swarm.str.usb			linux works, BSD/arm not so sure
-wait				time display borked
-yesno ??
-printfile			leading spaces missing / possible performance ??
-printlist			rework due to shellcheck
+* swarm.util.cp @ $CP		on/e line output, subdir & error handling
+* swarm.util.mv @ $MV		on/e line output, subdir & error handling
 
 
 Statement
@@ -67,20 +63,25 @@ Shellcheck recheck:
 
 ROADMAP:
 --------
--- = todo
-++ = done
 
-0.8 
-++ bar
-++ small functions
-0.8.5
-++ cfg.edit RAW/wip
--- rework swarm.util.'file stuff'
--- keep updating: docs/*
-0.9
--- cfg.edit - finalize
--- additions & fixes
-0.9.5 
--- swarm / WIP
-1.0
--- final bug fixes
+    -- = todo
+    ++ = done
+    ______
+    0.8
+    ++ bar
+    ++ small functions
+    0.8.5
+    ++ cfg.edit RAW/wip
+    -- rework swarm.util.'file stuff'
+    -- keep updating: docs/*
+    0.9
+    ++ cfg.edit
+    -+ additions & fixes
+    0.9.5
+    -- swarm.os.install - finalize
+    0.9.6
+    -- asRoot
+    0.9.8
+    -- swarm / WIP
+    1.0
+    -- final bug fixes

@@ -12,8 +12,8 @@ swarm.str.seconds2TIME() { # SECONDS
 	local minutes=0
 	local seconds=0
 	# subtraction
-	local sub_hrs=0
-	local sub_min=0
+#	local sub_hrs=0
+#	local sub_min=0
 
 
 	# Get hours

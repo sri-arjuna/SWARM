@@ -90,7 +90,7 @@ If you have nothing like this just yet, lets make it:
     cd "$HOME/bin"
     git clone "http://github.com/sri-arjuna/SWARM.git"
 
-Read the [First Steps](./docs/First Steps.md) from here on.
+Read the [First Steps](./docs/First_Steps.md) from here on.
 
 
 Reason why?

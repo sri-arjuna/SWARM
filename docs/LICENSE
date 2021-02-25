@@ -11,7 +11,7 @@ so writing a script project while using SWARM and distribunting them together fo
 
 First and foremost, keep in mind that if you use SWARM, you probably will use 'swarm' for your project.
 The function 'swarm' does provide a way to add your own libraries to your project collected in your projects root directory.
-This is the recomended method for fine-tuning.
+This is the recomended method for fine-tuning (your project).
 
 If you should have a very special approach, you can write your own scripts using the internal function names and save them under:
 $SWARM_USER_DIR_{CONF,LIBS} (default: ~/.config/swarm/{conf,libs}

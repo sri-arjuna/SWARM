@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2021.02.18	 	     #
-# Build:	59			     #
+# Changed:	2021.02.25	 	     #
+# Build:	60			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -78,8 +78,8 @@
 		hasCOLUMNS=false
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
-	SWARM[VERSION]=0.8.5
-	SWARM[BUILD]=59
+	SWARM[VERSION]=0.8.6
+	SWARM[BUILD]=60
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -499,9 +499,9 @@
 			;;
 			remove)
 				title "$SWARM_MSG_WORD_REMOVE: SWARM"
-				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION?" || exit 1
-				rm "$SWARMRC"
-				[[ -d "$SWARM_USER_DIR_BASE" ]] && rm -fr "$SWARM_USER_DIR_BASE"
+				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC, $SWARM_USER_DIR_BASE)?" || exit 1
+				$RM_EXEC "$SWARMRC"
+				[[ -d "$SWARM_USER_DIR_BASE" ]] && $RM_EXEC -fr "$SWARM_USER_DIR_BASE"
 			;;
 			esac
 		fi

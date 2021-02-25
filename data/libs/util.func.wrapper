@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 edit() { # [ -c ] FILE1 FILE2 FILE3 ...
-# Lets you
-#
+# Lets you edit a file without the need to care what the user has installed
+# Uses console apps as fallback
 	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 # Variables
 	local cli_forced=false
@@ -28,8 +28,8 @@ edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 				array+=("$result")
 		done
 		EDITOR_GUI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "EDITOR_GUI" "${EDITOR_GUI##*/}"
-		status $? "$SWARMRC" "EDITOR_GUI=${EDITOR_GUI##*/}"
+		cfg.set "$SWARM_USER_APPS" "EDITOR_GUI" "${EDITOR_GUI##*/}"
+		status $? "$SWARM_USER_APPS" "EDITOR_GUI=${EDITOR_GUI##*/}"
 	fi
 	if [[ -z "$EDITOR_CLI" ]]
 	then
@@ -37,8 +37,8 @@ edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 		array_raw=( $(<"${SWARM_DIR_LIST}/editor_cli"))
 		array=( $(for l in "${array_raw[@]}";do $WHICH "$l" 2>/dev/null ; done))
 		EDITOR_CLI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "EDITOR_CLI" "${EDITOR_CLI##*/}"
-		status $? "$SWARMRC" "EDITOR_CLI=${EDITOR_CLI##*/}"
+		cfg.set "$SWARM_USER_APPS" "EDITOR_CLI" "${EDITOR_CLI##*/}"
+		status $? "$SWARM_USER_APPS" "EDITOR_CLI=${EDITOR_CLI##*/}"
 	fi
 # Prepare : Get the proper editor
 	if ! ${isGUI:-false} || $cli_forced
@@ -82,8 +82,8 @@ filemgr() { # [ -c ] FILE1 FILE2 FILE3 ...
 				array+=("$result")
 		done
 		FILEMGR_GUI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "FILEMGR_GUI" "${FILEMGR_GUI##*/}"
-		status $? "$SWARMRC" "FILEMGR_GUI=${FILEMGR_GUI##*/}"
+		cfg.set "$SWARM_USER_APPS" "FILEMGR_GUI" "${FILEMGR_GUI##*/}"
+		status $? "$SWARM_USER_APPS" "FILEMGR_GUI=${FILEMGR_GUI##*/}"
 	fi
 	if [[ -z "$FILEMGR_CLI" ]]
 	then
@@ -91,8 +91,8 @@ filemgr() { # [ -c ] FILE1 FILE2 FILE3 ...
 		array_raw=( $(<"${SWARM_DIR_LIST}/filemgr_cli"))
 		array=( $(for l in "${array_raw[@]}";do $WHICH "$l" 2>/dev/null ; done))
 		FILEMGR_CLI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "FILEMGR_CLI" "${FILEMGR_CLI##*/}"
-		status $? "$SWARMRC" "FILEMGR_CLI=${FILEMGR_CLI##*/}"
+		cfg.set "$SWARM_USER_APPS" "FILEMGR_CLI" "${FILEMGR_CLI##*/}"
+		status $? "$SWARM_USER_APPS" "FILEMGR_CLI=${FILEMGR_CLI##*/}"
 	fi
 # Prepare : Get the proper editor
 	if ! ${isGUI:-false} || $cli_forced
@@ -137,8 +137,8 @@ web() { # [ -c ] FILE1 FILE2 FILE3 ...
 				array+=("$result")
 		done
 		WEB_GUI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "WEB_GUI" "${WEB_GUI##*/}"
-		status $? "$SWARMRC" "WEB_GUI=${WEB_GUI##*/}"
+		cfg.set "$SWARM_USER_APPS" "WEB_GUI" "${WEB_GUI##*/}"
+		status $? "$SWARM_USER_APPS" "WEB_GUI=${WEB_GUI##*/}"
 	fi
 	if [[ -z "$WEB_CLI" ]]
 	then
@@ -146,8 +146,8 @@ web() { # [ -c ] FILE1 FILE2 FILE3 ...
 		array_raw=( $(<"${SWARM_DIR_LIST}/web_cli"))
 		array=( $(for l in "${array_raw[@]}";do $WHICH "$l" 2>/dev/null ; done))
 		WEB_CLI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "WEB_CLI" "${WEB_CLI##*/}"
-		status $? "$SWARMRC" "WEB_CLI=${WEB_CLI##*/}"
+		cfg.set "$SWARM_USER_APPS" "WEB_CLI" "${WEB_CLI##*/}"
+		status $? "$SWARM_USER_APPS" "WEB_CLI=${WEB_CLI##*/}"
 	fi
 
 # Prepare : Get the proper editor
@@ -193,8 +193,8 @@ terminals() {  ## # [ -c ] FILE1 FILE2 FILE3 ...
 				array+=("$result")
 		done
 		TERMINAL_GUI=$(pick -a "${array[@]}")
-		cfg.set "$SWARMRC" "TERMINAL_GUI" "${TERMINAL_GUI##*/}"
-		status $? "$SWARMRC" "TERMINAL_GUI=${TERMINAL_GUI##*/}"
+		cfg.set "$SWARM_USER_APPS" "TERMINAL_GUI" "${TERMINAL_GUI##*/}"
+		status $? "$SWARM_USER_APPS" "TERMINAL_GUI=${TERMINAL_GUI##*/}"
 	fi
 # Prepare : Get the proper editor
 	if $cli_forced

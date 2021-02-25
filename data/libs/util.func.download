@@ -97,7 +97,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 #	Funcrtion
 #
 	#shellcheck disable=SC2120
-	curl_get_filesize() {
+	_curl_get_filesize() {
 	#
 	#
 		# shellcheck disable=SC2016
@@ -111,7 +111,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 
 		# shellcheck disable=SC2016
 		max_val=$( $ECHO "${max_ret:0:1}" "$multi" | $AWK '{print ($1*$2)}' )
-		echo "${max_val:-0}"
+		$ECHO "${max_val:-0}"
 	}
 #
 #	Action
@@ -163,7 +163,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 	# Prepare User output
 		str_left="$MSG_ACT_ING"
 		str_middle="$THIS ($tmp_size)"	#; len=${#str_middle}
-		MAXVAL=$(curl_get_filesize)
+		MAXVAL=$(_curl_get_filesize)
 	# While lPID found, assume its till downloading...
 		while ps $lPID > /dev/zero #|$GREP $CURLWGET
 		do	# shellcheck disable=SC2016
@@ -180,7 +180,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 			bar $opt_bar "$str_left ${str_middle}"
 			sleep 1
 			case ${CURLWGET,,} in
-			curl*)	MAXVAL=$(curl_get_filesize)
+			curl*)	MAXVAL=$(_curl_get_filesize)
 				;;
 			esac
 		done

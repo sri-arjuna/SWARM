@@ -624,7 +624,7 @@
 			;;
 		esac
 	# Functions
-		myRND() { #
+		_myRND() { #
 		#
 		#
 			VAR=$(( RANDOM % MAX ))
@@ -642,9 +642,9 @@
 		then	declare -A L
 			while [[ $c -lt $LIST_NUM ]]
 			do
-				n=$(myRND)
+				n=$(_myRND)
 				while $ECHO "${L[@]}" | $GREP -q "$n"
-				do	n=$(myRND)
+				do	n=$(_myRND)
 				done
 				L[$c]=$n
 				((c++))
@@ -666,7 +666,7 @@
 			done
 			$ECHO "${P[@]}"
 			unset P
-		else	myRND
+		else	_myRND
 		fi
 	}
 	wait() { # NUM{s,m,h} [MSG]

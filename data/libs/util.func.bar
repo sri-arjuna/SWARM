@@ -33,7 +33,7 @@ bar()  { # [options] [MESSAGE]
 #	Functions
 #
 	#shellcheck disable=SC2120
-	function bar.simple_status() {
+	_bar.simple_status() {
 	# Generates a single string to represent the actual task/case
 	#
 		tmp=""
@@ -41,7 +41,7 @@ bar()  { # [options] [MESSAGE]
 		$doBar && [ ! -z "$MAX" ] && tmp="BAR"
 		$ECHO "${tmp:-DASH}"
 	}
-	function bar.reset_tmp() { # ID
+	_bar.reset_tmp() { # ID
 	# Resets the counter according to passed ID
 	# Needs to be one, otherwise last item is too low
 		if "$hasID"
@@ -50,7 +50,7 @@ bar()  { # [options] [MESSAGE]
 		fi
 		export SWARM_PROGRESS_BAR_IDS
 	}
-	function bar.save_tmp() { # VAL
+	_bar.save_tmp() { # VAL
 	# Saves VAL in the temp file according to passed id
 	#
 		[ -z "$1" ] && return 1
@@ -61,7 +61,7 @@ bar()  { # [options] [MESSAGE]
 		export SWARM_PROGRESS_BAR_IDS
 	}
 	#shellcheck disable=SC2120
-	function bar.read_tmp() {
+	_bar.read_tmp() {
 	# Reads VAL in the temp file according to passed id
 	# Returns VAL
 		if "$hasID"
@@ -133,29 +133,27 @@ bar()  { # [options] [MESSAGE]
 #	Check for all required options
 #
 	MESSAGE="$1"
-	TYPE=$(bar.simple_status)
-	VAL="${VAL:-$(bar.read_tmp)}"
+	TYPE=$(_bar.simple_status)
+	VAL="${VAL:-$(_bar.read_tmp)}"
 #
 #	Something quick?
 #
-	$doReset && bar.reset_tmp && VAL="$(bar.read_tmp)"
-	[[ -z "$VAL" ]] && VAL=1 && bar.reset_tmp
+	$doReset && _bar.reset_tmp && VAL="$(_bar.read_tmp)"
+	[[ -z "$VAL" ]] && VAL=1 && _bar.reset_tmp
 #
 #	Prepare required tasks from options
 #
 	case "${TYPE^^}" in
 	DASH)
-		bar.save_tmp "$(( VAL + 1 ))"
+		_bar.save_tmp "$(( VAL + 1 ))"
 		;;
 	BAR)
 		if [ -z "$MAX" ] || [ -z "$VAL" ]
 		then	# Improper handling
-			# shellcheck disable=SC2128
-			swarm.help.usage "$FUNCNAME"
-			#tui-status 1 "$(eval_gettext 'Usage: $ME [-r] [-m \$MAV_VALUE]  [-bc \$CUR_VALUE] [-l]]  \"msg\"')"
-			#exit 1
+			swarm.help.usage "${FUNCNAME[@]}"
+			return 1
 		fi
-		bar.save_tmp "$(( VAL + 1 ))"
+		_bar.save_tmp "$(( VAL + 1 ))"
 	esac
 #
 #	Generate output string, and save values
@@ -276,7 +274,7 @@ bar()  { # [options] [MESSAGE]
 		then
 			[[ $VAL -ge 4 ]] && VAL=1
 		fi
-		bar.save_tmp $VAL
+		_bar.save_tmp $VAL
 		;;
 	BAR)	if $longBar
 		then	if [[ -z "$MESSAGE" ]]

@@ -7,8 +7,7 @@
 	swarm.eu.function.list() { # [FILE]
 	# Prints a list of properly declared functions
 	# see ./docs/{MANUAL,SYNTAX}.md for details
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tmp_oldpwd="${PWD:-$($PWD_EXEC)}"
 		local tmp_file="${1##*/}"
 		local tmp_dir=${1/$tmp_file}
@@ -17,26 +16,26 @@
 		if [[ -n "$tmp_file" ]] && [[ -f "$target" ]]
 		then	# There is a specific file passed to parse
 			#shellcheck disable=SC2164
-			cd "${tmp_dir:-$SWARM_DIR_LIBS}"
+			$CD "${tmp_dir:-$SWARM_DIR_LIBS}"
 			#shellcheck disable=SC2016
 			$GREP "() { #" "$1"| \
 				$GREP -v GREP | \
 				$AWK -v FS='() ' '{print $1}' | \
 				$SED s,'()',' ',g
 			#shellcheck disable=SC2164
-			cd "$tmp_oldpwd"
+			$CD "$tmp_oldpwd"
 		else	# Just parse all files in SWARM_DIR_LIBS ; default
-			raw_output() {
+			_raw_output() {
 				(
 					#shellcheck disable=SC2164
-					cd "$SWARM_DIR_LIBS"
-					$GREP init.*"() {" -- *glob* | $GREP -v GREP
-					$GREP cfg.*"() {" -- *glob* | $GREP -v GREP
+					$CD "$SWARM_DIR_LIBS"
+					$GREP init.*"() {" -- * | $GREP -v GREP
+					$GREP cfg.*"() {" -- * | $GREP -v GREP
 					# Yes, I could remove these functions here, but I'd like to keep my options
 					# for a possible 'internal' section for the help menu
-					$GREP swarm.*"() {" -- *glob* | $GREP -v GREP | $GREP -v '.os.' #| $GREP -v sanity | $GREP -v '\.eu\.'
+					$GREP swarm.*"() {" -- * | $GREP -v GREP | $GREP -v '.os.' #| $GREP -v sanity | $GREP -v '\.eu\.'
 					#shellcheck disable=SC2164
-					cd "$tmp_oldpwd"
+					$CD "$tmp_oldpwd"
 				) | while IFS=": " read -r _ funcname _
 				do
 					# The IFS takes care of the GREP filenames
@@ -45,8 +44,8 @@
 				done
 			}
 			# Show data
-			raw_output | sort -u
-			unset -f raw_output
+			_raw_output
+			unset -f _raw_output
 		fi
 	}
 	swarm.eu.function.show() { # MODE [FILE] FUNCTIONNAME		## MODE= --text || --code
@@ -130,15 +129,24 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
-		list="$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.enduser" | $GREP -ve 'swarm.' -ve 'roman' -ve 'getlist' -ve 'getspace' -ve 'myRND' | $SORT)"
+		list=$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.commands")
+		for F in "${SWARM_DIR_LIBS}/util.func."{bar,config,download,wrapper}
+		do
+			list+=" $(swarm.eu.function.list "$F")"
+		done
 		local item=""
+		local list_verified=""
+		for this in $($PRINTF '%s\n' "$list"| $SORT )
+		do
+			[[ "_" == "${this:0:1}" ]] || list_verified+=" $this"
+		done
 	# Display
 		while [[ ! "$item" == "$SWARM_MSG_WORD_BACK" ]]
 		do
 			title 	"$SWARM_MSG_HELPMENU_ROOT_TOPIC1"
 			printe 	"$SWARM_MSG_HELPMENU_BASIC_TEXT"
 			#shellcheck disable=SC2086
-			item=$(pick -m $list )
+			item=$(pick -m $list_verified )
 			# Retun if 'back' is selected
 			[[ "${item/ /}" == "${SWARM_MSG_WORD_BACK}" ]] && break #return 4
 			# Action !
@@ -188,9 +196,22 @@
 	# Variables
 		# Get full list of all functions
 		local list=""
-		list=$( swarm.eu.function.list | $GREP -ve "swarm.eu." -ve "swarm.sanity." -ve "init." -ve "swarm.theme." -ve "swarm.update." -ve "swarm.lang." -ve "swarm.help" -ve "swarm.cleanup" -ve "swarm.error" -ve "swarm.protect" -ve ".util." -ve ".print."  | $SORT)
-		local item=""
+		export list
+		for F in "${SWARM_DIR_LIBS}/util.func."{env,filesystem,strings}
+		do
+			list+=" $(swarm.eu.function.list "$F")"
+		done
+		local this=""
+		for this in $($PRINTF '%s\n' "$list" | $SORT -u)
+		do
+			[[ "_" == "${this:0:1}" ]] && continue
+			$ECHO "$this" | $GREP -q -ve "print" -ve "sanity" -ve "\.eu\." -ve "\.theme" -ve "\.lang\." \
+						-ve "\.udpate" -ve "\.error" -ve "\.cleanup" -ve "\.protect" \
+						-ve "cfg\." -ve "init\." -ve "lang\." -ve "help\." -ve "color\." || continue
+			$ECHO "$list_verified" | $GREP -q "$this" || list_verified+=" $this"
+		done
 	# Display
+		local item=""
 		while true
 		do
 			#clear
@@ -198,7 +219,7 @@
 			title 	"$SWARM_MSG_HELPMENU_ROOT_TOPIC3"
 			printe	"$SWARM_MSG_HELPMENU_ADVANCED_TEXT"
 			#shellcheck disable=SC2086
-			item=$(pick -m $list )
+			item=$(pick -m $list_verified )
 			case "$item" in
 			"$SWARM_MSG_WORD_BACK")
 				$PRINTF "$POS_END\n" >&2

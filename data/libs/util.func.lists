@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+swarm.list.files() { # DIR
+# Returns a list of every file contained in DIR
+#
+	local DIR=""
+	[[ -z "$1" ]] && { swarm.help.usage "${FUNCNAME[@]}" ; return 1 ; }
+	DIR="$1" ; shift
+	$CD "$DIR"
+	for f in $($LS -a1) # for f in "$d"/* "$d"/.[!.]*
+	do
+		case "$f" in
+		'.'|'..')
+			continue
+			;;
+		*)	[[ -f "$f" ]] && $PRINTF '%s\n' "$f"
+			;;
+		esac
+	done
+	$CD "$OLDPWD"
+}
+swarm.list.dirs() { # DIR
+# Returns a list of every FOLDER contained in DIR
+#
+	local DIR="" array=""
+	[[ -z "$1" ]] && { swarm.help.usage "${FUNCNAME[@]}" ; return 1 ; }
+	DIR="$1" ; shift
+	$CD "$DIR"
+	array=(*)
+	for d in "${array[@]}"
+	do
+		case "$d" in
+		'.'|'..')
+			continue
+			;;
+		*)	[[ -d "$d" ]] && $PRINTF "$d\n"
+			;;
+		esac
+	done
+	$CD "$OLDPWD"
+	return
+	for d in $($LS -a) # for f in "$d"/* "$d"/.[!.]*
+	do
+		case "$d" in
+		'.'|'..')
+			continue
+			;;
+		*)	[[ -d "$d" ]] && $PRINTF "$d\n"
+			;;
+		esac
+	done
+	$CD "$OLDPWD"
+
+	# -----------------
+	return
+	# ---------------
+
+	$CD "$DIR"
+	array=(*)
+	$CD "$OLDPWD"
+	$PRINTF '%s\n' "${array[@]}"
+}

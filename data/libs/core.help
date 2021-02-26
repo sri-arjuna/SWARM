@@ -457,10 +457,27 @@
 			exit $?
 		fi
 	}
-	swarm.eu.new.project() { #
+	swarm.eu.new.project() { # [NAME [EXEC]]
 	#
 	#
-		ECHO
+		local item=""
+		local prj_name="" prj_exec=""
+	# Simple check
+		[[ -n "$1" ]] && { prj_name="$1" ; shift ; }
+		[[ -n "$1" ]] && { prj_exec="$1" ; shift ; }
+	# Parsing
+		# No arguments, menu handling
+		title "$SWARM_MSG_WORD_PROJECT"
+		while [[ -z "$prj_name" ]]
+		do
+			prj_name=$(ask "$SWARM_MSG_NEW_PROJECT_NAME")
+		done
+		while [[ -z "$prj_exec" ]]
+		do
+			prj_exec=$(ask "$SWARM_MSG_NEW_PROJECT_EXEC")
+		done
+		echo "$SWARM_USER_DIR_SCRIPTS/$prj_name"
+		echo "$SWARM_USER_DIR_SCRIPTS/$prj_exec"
 	}
 #
 # Usage Handler

@@ -20,7 +20,7 @@
 			#shellcheck disable=SC2016
 			$GREP "() { #" "$1"| \
 				$GREP -v GREP | \
-				$AWK -v FS='() ' '{print $1}' | \
+				$AWK -v FS='\(\) ' '{print $1}' | \
 				$SED s,'()',' ',g
 			#shellcheck disable=SC2164
 			$CD "$tmp_oldpwd"
@@ -129,8 +129,8 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
-		list=$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.commands")
-		for F in "${SWARM_DIR_LIBS}/util.func."{bar,config,download,wrapper}
+		#list=$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.commands")
+		for F in "${SWARM_DIR_LIBS}/util.commands" "${SWARM_DIR_LIBS}/util.func."{bar,config,download,wrapper}
 		do
 			list+=" $(swarm.eu.function.list "$F")"
 		done

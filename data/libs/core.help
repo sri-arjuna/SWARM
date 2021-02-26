@@ -17,16 +17,11 @@
 		then	# There is a specific file passed to parse
 			#shellcheck disable=SC2164
 			$CD "${tmp_dir:-$SWARM_DIR_LIBS}"
-			#shellcheck disable=SC2016
 			$GREP "() { #" "$1"| \
 				while read nameF _
 				do
 					$PRINTF '%s\n' "${nameF/()*}"
 				done
-		# Old
-		#		$GREP -v GREP | \
-		#		$AWK -v FS='\(\) ' '{print $1}' | \
-		#		$SED s,'()',' ',g
 			#shellcheck disable=SC2164
 			$CD "$tmp_oldpwd"
 		else	# Just parse all files in SWARM_DIR_LIBS ; default
@@ -55,7 +50,7 @@
 	}
 	swarm.eu.function.show() { # MODE [FILE] FUNCTIONNAME		## MODE= --text || --code
 	# Prints either these 2 comment lines or the code
-	# Please see: ./docs/{MANUAL,SYNTAX}.md)
+	# Please see: ./docs/contribute/{MANUAL,SYNTAX}.md)
 		#shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
@@ -98,7 +93,7 @@
 					#shellcheck disable=SC2015
 					[[ -n "$curFILE" ]] && \
 						$GREP "$GREP_OPTS" "$curFILE"|| \
-						$GREP "$GREP_OPTS" -- *glob*
+						$GREP "$GREP_OPTS" -- *
 					#shellcheck disable=SC2164
 					cd "$tmp_oldpwd"
 					;;
@@ -153,7 +148,7 @@
 			#shellcheck disable=SC2086
 			item=$(pick -m $list_verified )
 			# Retun if 'back' is selected
-			[[ "${item/ /}" == "${SWARM_MSG_WORD_BACK}" ]] && break #return 4
+			[[ "${item/ /}" == "${SWARM_MSG_WORD_BACK}" ]] && break
 			# Action !
 			title	"$item"
 			swarm.eu.show.submenu "$item"
@@ -200,23 +195,24 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		# Get full list of all functions
-		local list=""
-		export list
+		local list="" this="" item=""
 		for F in "${SWARM_DIR_LIBS}/util.func."{env,filesystem,strings}
 		do
 			list+=" $(swarm.eu.function.list "$F")"
 		done
-		local this=""
+	# Sort out the unwanted ones
 		for this in $($PRINTF '%s\n' "$list" | $SORT -u)
 		do
+			# Hide subfunctions
 			[[ "_" == "${this:0:1}" ]] && continue
-			$ECHO "$this" | $GREP -q -ve "print" -ve "sanity" -ve "\.eu\." -ve "\.theme" -ve "\.lang\." \
+			# Hide 'internal' functions
+			$ECHO "$this" | $GREP -q -ve "print\." -ve "sanity" -ve "\.eu\." -ve "\.theme" -ve "\.lang\." \
 						-ve "\.udpate" -ve "\.error" -ve "\.cleanup" -ve "\.protect" \
 						-ve "cfg\." -ve "init\." -ve "lang\." -ve "help\." -ve "color\." || continue
+			# For some reason, I'm getting multiple entries otherwise...
 			$ECHO "$list_verified" | $GREP -q "$this" || list_verified+=" $this"
 		done
 	# Display
-		local item=""
 		while true
 		do
 			#clear
@@ -232,8 +228,6 @@
 				;;
 			*)
 				swarm.eu.show.submenu "$item"
-				#printe "$item" "${!item}" "$(swarm.help.usage ${!item})"
-				#press
 				;;
 			esac
 		done
@@ -389,17 +383,17 @@
 	swarm.eu.new.function() { #
 	# As of now.. prints a function template
 	#
-		cat<<-EO_SCREEN
-		funcname() { # [option] ARG
+		$CAT<<-EO_SCREEN
+		func.name() { # [option] ARG
 		#
 		#
-		 	swarm.protect "\$FUNCNAME (\${CALLER:-unkown})" "\${@}" && exit 1
+		 	swarm.protect "\$FUNCNAME (\${CALLER:-\$SWARM_MSG_WORD_UNKOWN})" "\${@}" && exit 1
 		# Variables
 		 	local RET=1
 		# Catch arguments
 		 	while :
 		 	do
-		 		case \$1 in
+		 		case "\$1" in
 		 		-h|-\?|--help)
 		 			builtin echo "\$SWARM_MSG_WORD_USAGE: \$FUNCNAME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
 		 			return 0
@@ -407,7 +401,7 @@
 		 		--)
 		 			# General purpose pipe support, might need adjustment!
 		 			while read line;do
-		 				\$FUNCNAME "\$line"
+		 				\${FUNCNAME[@]} "\$line"
 		 			done
 		 			return 0
 		 			;;
@@ -457,7 +451,7 @@
 			#	break
 			#	;;
 			esac
-			chmod +x "$SWARM_USER_DIR_SCRIPTS/$newname"
+			$CHMOD +x "$SWARM_USER_DIR_SCRIPTS/$newname"
 			yesno "$SWARM_MSG_NEW_SCRIPT_EDITNOW" && edit "$newname"
 			exit $?
 		fi
@@ -688,8 +682,7 @@
 	swarm.help.manpage() { # FUNCNAME
 	# Opens the manpage according to passed FUNCNAME
 	#
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tDir="$SWARM_DIR_LANG/${SWARM[LANG]}/man"
 		if [[ -f "$1" ]]
 		then	# Passed argument exists
@@ -715,7 +708,7 @@
 		while
 			printe "$SWARM_MSG_PHRASE_SELECT_FILE"
 			#shellcheck disable=SC2046
-			tFile=$(pick -m "RC" $($LS -1 "$SWARM_USER_DIR_CONF/"))
+			tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") )
 		do
 			# If the selected option is 'back' quit the Loop
 			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break

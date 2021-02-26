@@ -19,9 +19,14 @@
 			$CD "${tmp_dir:-$SWARM_DIR_LIBS}"
 			#shellcheck disable=SC2016
 			$GREP "() { #" "$1"| \
-				$GREP -v GREP | \
-				$AWK -v FS='\(\) ' '{print $1}' | \
-				$SED s,'()',' ',g
+				while read nameF _
+				do
+					$PRINTF '%s\n' "${nameF/()*}"
+				done
+		# Old
+		#		$GREP -v GREP | \
+		#		$AWK -v FS='\(\) ' '{print $1}' | \
+		#		$SED s,'()',' ',g
 			#shellcheck disable=SC2164
 			$CD "$tmp_oldpwd"
 		else	# Just parse all files in SWARM_DIR_LIBS ; default

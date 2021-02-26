@@ -1,7 +1,8 @@
 Checklist upon adding new functions:
 1. Add english usage string in ./data/lang/en_GB/usage.conf
-2. Put english manpage in ./data/lang/en_GB/man
-3. Verify 'function - usage' uses string from file
+2. Verify 'function - usage' uses string from file
+3. Put english manpage in ./data/lang/en_GB/man
+
 
 
 TODO MANPAGE:
@@ -16,6 +17,7 @@ Missing: Small Functions
 * swarm.os.install, WIP
 * asRoot
 * swarm.str.dirlist *dirtree
+* the list move
 
 
 1.0 Blockers
@@ -29,10 +31,9 @@ print{e,l}, header,title:	String splitting
 swarm.str.split			empty line???
 bar				alignment
 swarm.str.usb			linux works, BSD/arm not so sure
-wait				time display borked
 yesno ??			fix empty line in ssh session?
 printfile			leading spaces missing / possible performance ??
-printlist			rework due to shellcheck
+
 
 
 Post 1.0-XX build?

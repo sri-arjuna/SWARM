@@ -1,0 +1,23 @@
+#/usr/bin/env bash
+#
+# Project Internals
+#
+	script_name="${0##*/}"
+	script_root="${0/$script_name}"
+	script_version="0.1"
+	script_author=""
+#
+# Verify SWARM
+#
+	if [[ ! -d "$script_root/SWARM" ]]
+	then	echo "This project requires SWARM, which could not be found."
+		echo "Please download it to your project directory:"
+		git clone https://github.com/sri-arjuna/SWARM.git || exit 1
+	fi
+	cd "$script_root" || exit 1
+	source SWARM/runtime
+	cd "$OLDPWD"
+#
+# Action
+#
+ 	swarm "$swarm_root/menu" "${@}"

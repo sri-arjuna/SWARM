@@ -387,7 +387,7 @@
 		func.name() { # [option] ARG
 		#
 		#
-		 	swarm.protect "\$FUNCNAME (\${CALLER:-\$SWARM_MSG_WORD_UNKOWN})" "\${@}" && return 1
+		 	swarm.protect "\${FUNCNAME[@]}" "\${CALLER:-\$SWARM_MSG_WORD_UNKOWN}" "\${@}" && return 1
 		# Variables
 		 	local RET=1
 		# Catch arguments
@@ -395,7 +395,7 @@
 		 	do
 		 		case "\$1" in
 		 		-h|-\?|--help)
-		 			builtin echo "\$SWARM_MSG_WORD_USAGE: \$FUNCNAME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+		 			\$ECHO "\$SWARM_MSG_WORD_USAGE: \$FUNCNAME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
 		 			return 0
 		 			;;
 		 		--)

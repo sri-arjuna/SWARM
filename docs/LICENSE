@@ -1,20 +1,33 @@
-See file: ./GPLv2
-
-Or the online versoin:
 https://www.gnu.org/licenses/old-licenses/gpl-2.0
+See file: [GPLv2](./GPLv2)
+
+Allthough your scripts use SWARM, your scripts do not have to be GPLv2.
 
 
-You can still customize SWARM without breaking the GPLv2 license!
+Terms for Company use:
+----------------------
 
-Just as a reminder, SWARM is a framework to build/write your scripts upon,
-so writing a script project while using SWARM and distribunting them together for free is allowed.
+This said, you can use this framework for projects within your company.
+While doing so, you are not allowed to alter the code of SWARM unless you fix bugs and send a pull request.
 
-First and foremost, keep in mind that if you use SWARM, you probably will use 'swarm' for your project.
-The function 'swarm' does provide a way to add your own libraries to your project collected in your projects root directory.
-This is the recomended method for fine-tuning (your project).
+In fact, the only term I have if you want to use SWARM within a/your company is exactly this,
+that at least one person occasionaly spends 1-2 hours looking at the known issues and send possible bug fixes.
+Of course, if they stumble upon something they could improve in regards of performance, stability or security,
+that is very welcome too!
 
-If you should have a very special approach, you can write your own scripts using the internal function names and save them under:
-$SWARM_USER_DIR_{CONF,LIBS} (default: ~/.config/swarm/{conf,libs}
 
-This way, you do not touch the original source code, but still change/overwrite existing code.
-If you do this to bugfix, please send me a pull request on github!
+Statement:
+----------
+However, to 'repeat' the GPLv2 - I deny any responsiblity,
+for any possible damange, like - but not limited to - data loss,
+unusable system, growing grey hairs, or any variation that may occour.
+
+Using FOSS is risky if you are not willing to invest something back into it.
+See the Heartbleed incident, 1 person can not possible cover every security issue there is.
+And this is the precice reason why 'a company' must spend some resources to help fixing bugs
+and security issues in and for SWARM - if they want to use it.
+
+Keep in mind, from 0 to SWARM, I have invested about 5 years,
+where I spent almost every day 6-18 hours working on 'this'.
+(5 * 365 - 30 ('offdays')) * ~12 == 21'540 hours
+So I would say, 'giving a few hours back' is a fair trade.

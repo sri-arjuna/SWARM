@@ -387,7 +387,7 @@
 		func.name() { # [option] ARG
 		#
 		#
-		 	swarm.protect "\$FUNCNAME (\${CALLER:-\$SWARM_MSG_WORD_UNKOWN})" "\${@}" && exit 1
+		 	swarm.protect "\$FUNCNAME (\${CALLER:-\$SWARM_MSG_WORD_UNKOWN})" "\${@}" && return 1
 		# Variables
 		 	local RET=1
 		# Catch arguments

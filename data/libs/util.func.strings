@@ -1,4 +1,86 @@
 #!/usr/bin/env bash
+swarm.str.hash() { # [-v|--verbose] [-t|-type md5,sha1,sha224,sha256,sha384,sha512] STRING1 FILE2 ..
+# Prints the hash of any passed string or file
+# Use verbose mode if you have multiple items to hash, or have multiple hashes for any iven item.
+ 	swarm.protect "${FUNCNAME[@]}" "(${CALLER:-$SWARM_MSG_WORD_UNKOWN})" "${@}" && return 1
+# Variables
+ 	local RET=1 beVerbose=false types="" TOOLS="" missing=""
+# Catch arguments
+ 	while :; do
+ 		case "$1" in
+ 		-h|-\?|--help)
+                 	swarm.help.usage "${FUNCNAME[@]}"
+ 			return 0            	;;
+ 		--)
+ 			# General purpose pipe support, might need adjustment!
+ 			while read line;do
+ 				${FUNCNAME[@]} "$line"
+ 			done
+ 			return 0		;;
+ 		-t|--type)
+                        local tmp_list=""
+                        tmp_list=$( $ECHO "$2" | $SED s/','/'\n'/g )
+                        types+=" $tmp_list"
+                        # Just 1, the other is at the end of the loop
+                        shift                   ;;
+                -v|--verbose)
+                        beVerbose=true          ;;
+                *)	break 			;;
+ 		esac
+ 		shift
+ 	done
+# Collect the tools
+        # If no hash type is defined, use md5 as default
+        [[ -z "$types" ]] && types="md5"
+	for T in ${types};do
+		case $T in
+		ck*)	TOOLS+=" cksum"	        ;;
+                md5*)   TOOLS+=" md5sum"	;;
+		*224*)	TOOLS+=" sha224sum"	;;
+		*256*)	TOOLS+=" sha256sum"	;;
+		*384*)	TOOLS+=" sha384sum"	;;
+		*512*)	TOOLS+=" sha512sum"	;;
+		# This must be last or 512 will count too
+                *1*)	TOOLS+=" sha1sum"	;;
+		esac
+	done
+# Are the tools installed?
+# Use md5sum if no tools are provided
+        for t in ${TOOLS}
+        do
+                swarm.util.which "$t" 1>/dev/zero || missing+=" ${t/sum/}sum"
+        done
+        # Install missing ones
+        [[ -n "$missing" ]] && swarm.os.install -v "$missing"
+# Action & Display
+ 	if [ "-" = "$1" ] || [ "--" = "$1" ]
+	then	# Do pipe handling
+		while read stream
+		do 	$beVerbose && \
+                                title "$SWARM_MSG_WORD_HASHED \"$stream\"" || \
+                                $PRINTF '\n%s\n' "${stream}:"
+			for T in $TOOLS
+			do	str=$($ECHO "$stream" | "$T" | $AWK '{print $1}')
+				$beVerbose && \
+					printe  "$T:" "$str" || \
+					$PRINTF '%s\r\t\t%s\n' "$T" "$str"
+			done
+		done
+	else	# Passed arguments
+                for A in "${@}"
+		do	$beVerbose && \
+                                title "$SWARM_MSG_WORD_HASHED \"$A\"" || \
+                                $PRINTF '\n%s\n' "${A}:"
+			for T in $TOOLS
+			do	str=$($ECHO "$A" | $T | $AWK '{print $1}')
+				$beVerbose && \
+					printe  "$T:" "$str" || \
+					$PRINTF '%s\r\t\t%s\n' "$T" "$str"
+			done
+		done
+	fi
+
+}
 swarm.str.seconds2TIME() { # SECONDS
 # Returns the TIME as string
 # as much as applicable: hh:mm:ss

@@ -1,0 +1,32 @@
+#/usr/bin/env bash
+$CAT<<-EO_SCREEN
+#
+# Requirements
+#
+ 	REQ_CMD=(import other-cmd)
+ 	for req in "\${REQ_CMD[@]}"
+ 	do 	# Handle missing requirements
+ 		if ! \$WHICH "\$req" >/dev/null
+ 		then 	case "\$req" in
+ 			import)
+ 				case "\${BASED,,}" in
+ 				# 'Exceptions'
+ 				redhat)		tmp_pkg="ImageMagick"	;;
+ 				debian)		tmp_pkg="imagemagick"	;;
+ 				# Default handle,
+ 				*)		tmp_pkg="ImageMagick"	;;
+ 				;;
+ 			# Base example to copy-paste
+ 			*)
+ 				case "\${BASED,,}"
+ 				# Default handle
+ 				*)		tmp_pkg="\$req"	;;
+ 				esac
+ 				;;
+ 			esac
+ 			REQ_MISSING+=(" \$tmp_pkg")
+ 		fi
+ 	done
+ 	# Install missing packages
+ 	[[ -n "\$REQ_MISSING" ]] && swam.os.install "\${REQ_MISSING[@]}"
+EO_SCREEN

@@ -1,0 +1,31 @@
+#/usr/bin/env bash
+$CAT<<-EO_SCREEN
+#
+# Variables
+#
+	local doClear=\${doClear:-false} picked=""
+#
+# Menu
+#
+	# For each new loop:
+	# *) clear screen (optional)
+	# *) this will also trigger to show the blue header line
+	# *) show the title of the script
+	while	{ \$doClear && { clear ; header --default ; } ; }
+		title "\$script_name"
+	do
+		# If only one option is aviable, -a will pick that,
+		# -m shows a 'back' menu on index 0
+		picked=\$(pick -a -m \$(swarm.list.files "\$HOME"))
+		# Break the loop if we picked the (translated) work "back"
+		[[ "\$picked" == "\${SWARM_MSG_WORD_BACK}" ]] && break
+	#
+	# Work with it
+	#
+		case "\${picked}" in
+		*)	# Default handle
+			echo \$picked
+			;;
+		esac
+	done
+EO_SCREEN

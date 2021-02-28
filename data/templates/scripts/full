@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+$CAT<<-EO_SCREEN
+#!/usr/bin/env bash
 #--------------------------------
 # Your LICENSE information
 # Other descriptions
@@ -6,43 +8,48 @@
 #--------------------------------
 # This script requires SWARM (Shell Wrapper And Runtime Modifier)
 # If this script is not displayed properly,
-# make sure that SWARM is at ./SWARM relative to this file.
+# make sure that the directory SWARM is at ./SWARM relative to this file.
 #--------------------------------
-source SWARM/runtime
-# For more information, please see: ./SWARM/runtime help
 #
 # Script Information
 #
-	script_version=0.1
-	ME=${0##*/}
-	script_name=${ME/.sh}
-	script_license="GPLv2"	# This is only a suggestion
+	script_license="GPLv2"		# This is only a suggestion
+	script_version=0.1		# This variable is also used by 'header --default'
+	ME=\${0##*/}			# An easy way to refer to the filename
+	ME_DIR=\${0/\$ME}		# Or the dir of the script
+	script_name=\${ME/.sh}		# aka Pretty Name, dynamic approach
+#
+# Load SWARM
+#
+	# For more information, please see (execute): ./SWARM/runtime
+	{ cd "\$ME_DIR" ; source SWARM/runtime ; cd "\$OLDPWD" ; }
 #
 # Variables
 #
-	# Defines an integer variable '$i'
-	define -i i
+	define -i i=0				# Defines an integer variable '\$i'
+	define -a REQ_CMD="" REQ_MISSING="" 	# Defines 2 arrays
+	define -s tmp_pkg=""			# Defines a string
 #
 # Functions
 #
 	USAGE() {
 	# Prints basic usage string
 	# Please adjust as soon you know the options, if any.
-		$ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+		\$ECHO "\$SWARM_MSG_WORD_USAGE: \$ME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
 	}
 #
 # Catch arguments
 #
  	while :; do
- 		case "$1" in
- 		-h|-\?|--help)
+ 		case "\$1" in
+ 		""|-h|-\?|--help)
  			USAGE
  			exit 0
  			;;
  		--)
  			# General purpose pipe support, might need adjustment!
  			while read line;do
- 				$0 "$line"
+ 				\$0 "\$line"
  			done
  			exit 0
  			;;
@@ -52,8 +59,40 @@ source SWARM/runtime
  		esac
  		shift
  	done
+#
+# Requirements
+#
+	REQ_CMD=(import other-cmd)
+	for req in "\${REQ_CMD[@]}"
+	do 	# Handle missing requirements
+		if ! \$WHICH "\$req" >/dev/null
+		then 	case "\$req" in
+			import)
+				case "\${BASED,,}" in
+				# 'Exceptions'
+				redhat)		tmp_pkg="ImageMagick"	;;
+				debian)		tmp_pkg="imagemagick"	;;
+				# Default handle,
+				*)		tmp_pkg="ImageMagick"	;;
+				;;
+			# Base example to copy-paste
+			*)
+				case "\${BASED,,}"
+				# Default handle
+				*)		tmp_pkg="\$req"	;;
+				esac
+				;;
+			esac
+			REQ_MISSING+=(" \$tmp_pkg")
+		fi
+	done
+	# Install missing packages
+	[[ -n "\$REQ_MISSING" ]] && swam.os.install "\${REQ_MISSING[@]}"
+#
 # Action & Display
- 	header --default "${@}"
+#
+ 	header --default #"\${@}"
  	title "Something"
  	printe "information"
- 	exit $RET
+ 	exit \$RET
+EO_SCREEN

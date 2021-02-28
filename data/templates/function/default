@@ -1,0 +1,40 @@
+#/usr/bin/env bash
+$CAT<<-EO_SCREEN
+func.name() { # [option] ARG
+# Purpose and result
+# additional description
+ 	swarm.protect "\${FUNCNAME[@]}" "\${CALLER:-\$SWARM_MSG_WORD_UNKOWN}" "\${@}" && return 1
+#
+# Variables
+#
+ 	local RET=1
+#
+# Catch arguments
+#
+ 	while :; do
+ 		case "\$1" in
+ 		-h|-\?|--help)
+ 			\$ECHO "\$SWARM_MSG_WORD_USAGE: \$FUNCNAME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+ 			return 0
+ 			;;
+ 		--)
+ 			# General purpose pipe support, might need adjustment!
+ 			while read line;do
+ 				\${FUNCNAME[@]} "\$line"
+ 			done
+ 			return 0
+ 			;;
+ 		*)
+ 			break
+ 			;;
+ 		esac
+ 		shift
+ 	done
+#
+# Action & Display
+#
+ 	title "Something"
+ 	printe "information"
+ 	return \$RET
+}
+EO_SCREEN

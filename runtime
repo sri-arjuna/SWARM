@@ -509,9 +509,8 @@
 			;;
 			remove)
 				title "$SWARM_MSG_WORD_REMOVE: SWARM"
-				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC, $SWARM_USER_DIR_BASE)?" || exit 1
-				$RM_EXEC "$SWARMRC"
-				[[ -d "$SWARM_USER_DIR_BASE" ]] && $RM_EXEC -fr "$SWARM_USER_DIR_BASE"
+				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC)?" || exit 1
+				swarm.util.rm -v "$SWARMRC" "$SWARM_USER_DIR_BASE"
 			;;
 			commands|cmd)
 				header "SWARM ${SWARM[VERSION]} ${SWARM[BUILD]}" "$SWARM_MSG_WORD_COMMANDS" "$($DATE +'%F %R')"

@@ -309,8 +309,9 @@ swarm.util.rm() { # FILE1 DIR2
 		then	yesno "$SWARM_MSG_WORD_DELETE $obj: $item?" || continue
 		fi
 		msg="$SWARM_MSG_WORD_DELETED $obj $item"
-		$RM_EXEC $args "$item" && init.log "$msg"
+		$RM_EXEC $args "$item"
 		RET=$?
+		[[ $RET == 0 ]] && [[ -f "$SWARM_LOG" ]] && init.log "$msg"
 		$isVerbose && status "$RET" "$msg"
 	done
 }

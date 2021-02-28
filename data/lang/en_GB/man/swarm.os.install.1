@@ -1,0 +1,83 @@
+.TH status 1 "Copyleft 1995-202" "SWARM 1.0" "SWARM Manual"
+.SH NAME
+\fBswarm.os.install \fP- Package installer
+\fB
+.SH SYNOPSYS
+swarm.os.install [-v] PKG1 PKG2 ...
+.PP
+.SH DESCRIPTION
+Install packages using the local package manager to install a package to provide a required command for your script.
+.PP
+It is not a synonym for "install", but aims to become a handler for package managers, but only to install dependencies.
+.PP
+To do so, it is looking for the most known/spearch distros, and tries to figure out if it is based on another.
+.PP
+.SH OPTIONS
+.TP
+.B
+\fB-q\fP
+Install all at once, will fail if not all packages are available
+.TP
+.B
+\fB-y\fP
+Automatically accept the package manager questions
+.PP
+.SH Known Platforms / Distros 
+.PP
+	- arch
+.PP
+	- debian (*buntu, mint)
+.PP
+	- redhat (centos, fedora, sl)
+.PP
+Needs verification for: 
+.PP
+	- exherbo
+.PP
+	- gentoo
+.PP
+	- mac
+.PP
+	- opensusue
+.PP
+	- openbsd, freebsd
+.PP
+
+.SH Known Package Managers
+Currently it supports these known applications: 
+.PP
+	- yum/dnf
+.PP
+	- pcmanm
+.PP
+	- apt-get
+.PP
+Need verification for: 
+.PP
+	- brew
+.PP
+	- cave
+.PP
+	- emerge
+.PP
+	- port
+.PP
+	- pkg | pkgng
+.PP
+	- zypper
+.PP
+.SH EXAMPLE
+.PP
+no | swarm.os.install gimp
+.PP
+swarm.os.install \fB-y\fP gimp
+.SH SEE ALSO
+\fBbash\fP(1), \fByum\fP(1), \fBdnf\fP(1), \fBpcman\fP(1), \fBapt-get\fP(1), \fBcave\fP(1), brewer
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP
+.PP
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+.PP
+.SH LICENSE
+GNU Public License V2

@@ -79,7 +79,7 @@
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8.6
-	SWARM[BUILD]=61
+	SWARM[BUILD]=62
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"

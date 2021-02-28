@@ -1,13 +1,15 @@
 .TH SWARM-status 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
-\fBtui-status \fP- Status Messages
+\fBstatus \fP- Status Messages
 \fB
 .SH SYNOPSYS
-tui-status [ -r ] RET ["Message to user" ["Center string"]]
+status [ -r ] RET ["Message to user" ["Center string"]]
 
 .SH DESCRIPTION
-desc
+\fBstatus\fP is supposed to give a visual feedback on different exit codes.
+.B
+\fBstatus\fP will always return with the exit code that is passed to it.
 
 .SH OPTIONS
   -c		Clearns the current line before printing.
@@ -42,7 +44,7 @@ status \fB-r\fP 2 "Loading data\.\.\." ; sleep 1 ; status $? "Loaded data."
 \fBbash\fP(1)
 
 .SH BUGS
-Report bugs on: \fBhttp://github.com/sri-arjuna/swarm\fP
+Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP
 
 .SH AUTHOR
 Simon Arjuna Erat, Switzerland

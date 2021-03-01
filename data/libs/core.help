@@ -262,7 +262,7 @@
 
 		local tmp=""
 		#shellcheck disable=SC2046
-		tmp=$(pick $(swarm.theme.list))
+		tmp=$(pick $(swarm.list.theme))
 		status "$RET_SKIP" "$SWARM_MSG_WORD_SELECTED : $tmp"
 
 		title "Progress Bars"

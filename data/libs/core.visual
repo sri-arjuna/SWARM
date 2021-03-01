@@ -103,7 +103,7 @@
 		return $ret
 	}
 	#shellcheck disable=SC2120
-	swarm.theme.list() {
+	swarm.list.theme() {
 	# Lists all themes available
 	# Includes SWARM_USER_DIR_BASE/themes and SWARM_DIR_THEMES alike
 		# shellcheck disable=SC2128

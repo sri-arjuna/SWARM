@@ -97,3 +97,8 @@ swarm.list.hdd() { # [-u]
 		$LS -1 /dev/[sh]d[az]* || \
 		$LS -1 /dev/[sh]d[az]* | $GREP -v  $(for i in $(swarm.list.usb);do $ECHO "-e '$i'";done;)
 }
+swarm.list.network() { #
+# Print a list of network devices
+# On laptops this is usualy a 3 item listk incl io
+	ifconfig | $AWK  '/^[a-z]/ {print $1}' | $SED s/":"//
+}

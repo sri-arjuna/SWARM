@@ -726,24 +726,24 @@
 	#	Action - loop
 	#
 		seconds_total="${seconds_total//\/}"
-		while [ $seconds_total -ge 0 ]
+		while [[ $seconds_total -ge 0 ]]
 		do 	# Get total TIME string and subtract 1 second
-			TIME_string=$(swarm.str.seconds2TIME "$seconds_total")
-			((seconds_total--))
-
-			# Display to user
-			swarm.print.border
-			swarm.print.text  "${2:-$MSG}" " " "$TIME_string"
-
-			# Wait -- Lets give the system time to 'update' itself...
-			sleep 0.999
-
-			# Verbose / Countdown?
-			if ${beVerbose}
-			then	[[ $seconds_total -lt 0 ]] ||\
-					$PRINTF "\n"
+			TIME_string=$(swarm.str.seconds2time "$seconds_total")
+			if [[ $seconds_total -ne 0 ]]
+			then	((seconds_total--))
+				# Display to user
+				swarm.print.border -c
+				swarm.print.text "${2:-$MSG}" " " "$(swarm.str.seconds2time "$seconds_total")"
+				# Wait -- Lets give the system time to 'update' itself...
+				sleep 0.999
+			else
+				# Verbose / Countdown?
+				if ${beVerbose}
+				then	[[ $seconds_total -lt 0 ]] ||\
+						{ $PRINTF "\n" ; break ; }
+				fi
+				break
 			fi
-
 		done
 		$PRINTF "\n"
 		return 0

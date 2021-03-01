@@ -509,6 +509,7 @@
 			;;
 			remove)
 				title "$SWARM_MSG_WORD_REMOVE: SWARM"
+				printe "$SWARN_MSG_PHRASE_REMOVE_SWARM"
 				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC)?" || exit 1
 				swarm.util.rm -v "$SWARMRC" "$SWARM_USER_DIR_BASE"
 			;;

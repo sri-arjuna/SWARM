@@ -4,7 +4,7 @@
 \fBswarm.print.text\fP - Prints the text for default output
 
 .SH SYNOPSYS
-swarm.print.text [ -h -t ] [str1] [str2] [str3]
+swarm.print.text [ -h -t -c ] [str1] [str2] [str3]
 
 .SH DESCRIPTION
 This function is one of the core visuals and is supposed for internal use only.
@@ -16,12 +16,15 @@ It is used by every other function that has any kind of themed output.
   		Prints blue border and uses white background for the line.
 
   -h		\fBHeader\fP
-  		Prints border all of the fline line blue,
+  		Prints border and all of the line blue
+  		
+  -c		\fBclear\fP
+  		Clears the current line so no 'leftovers' from previous display are shown
 
 .SH EXAMPLE
 swarm.print.border -h
 .RE
-swarm.print.border -t
+swarm.print.border -t -c
 .RE
 swarm.print.border
 

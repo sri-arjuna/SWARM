@@ -221,7 +221,7 @@
 		$PRINTF "\033[4m${@}\033[0m"
 	}
 	# shellcheck disable=SC2120
-	swarm.print.border() { # [-h -t]
+	swarm.print.border() { # [-h -t -c]
 	# Prints basic border for all lines, this should only be executed if COLUMNS > 25
 	# The calling function has to handle the NEWLINE required by 'printe' (-E)
 		# Makes no sense to print visuals on such short lines
@@ -231,6 +231,7 @@
 		case "${1/-}" in
 		h)	MODE="header"	;;
 		t)	MODE="title"	;;
+		c)	$PRINTF "\e[2K"	;;
 		*)	MODE="basic"	;;
 		esac
 	# Make sure values are udpated

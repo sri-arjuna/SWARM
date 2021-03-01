@@ -1,0 +1,63 @@
+#/usr/bin/env bash
+$CAT<<EO_SCREEN
+.\" Manpage template for PROJECT
+.TH <NAME_OF_ITEM> 1 "Copyleft 2021" "PROJECT 1.0" "PROJECT Manual"
+
+.SH NAME
+\fB<NAME_OF_ITEM> (version)\fP - Comment TODO
+
+.SH SYNOPSIS
+\fB<NAME_OF_ITEM>\fP [\fB-h\fP|\fB--help\fP] [\fB--version\fP] 
+      [\fB-mnqS\fP] [\fB-p\fP DIR_OF_MENU_ROOT]
+      [\fB-c\fP /path/to/file.conf] [\fB-s\fP /path/to/files/to/include]
+      [\fB-D\fP LABEL_DIR] [\fB-F\fP LABEL_FILES]
+      [ARG UM ENTS]
+.TP
+.fam T
+Explaining the SYNOPSIS
+.SH DESCRIPTION
+General description of <NAME_OF_ITEM>
+.PP
+Keep in mind, to mark command options bold: \fB--long-option\fP
+.PP
+Files should be marked with an \fIunderline\fP
+.PP
+.SH OPTIONS
+.TP
+\fB-h\fP|\fB--help\fP
+Shows help and exit with 99
+.TP
+\fB--version\fP
+Shows version infoand exit with 0
+.TP
+\fB-m\fP MSG
+Prints "MSG" before asking for a password
+
+.SH ENVIRONMENT
+.TP
+.TP
+UID
+Reads UID to determine wether the user is root or not.
+.TP
+USER
+If user is empty, it takes LOGINNAME to display the user name for sudo.
+
+.SH EXAMPLE
+<NAME_OF_ITEM> argument
+.PP
+<NAME_OF_ITEM> other example
+
+.SH SEE ALSO
+\fBsu\fP(1), \fBsudo\fP(1)
+
+.SH BUGS
+.TP
+Report bugs to: https://github.com/$USEWR/PROJECT/issues
+.TP
+PROJECT - Homepage: https://github.com/$USER/PROJECT/
+.TP
+General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This script <NAME_OF_ITEM> was written by $USER_NAME for PROJECT version ${PROJECT[VERSION]}
+EO_SCREEN

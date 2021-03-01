@@ -59,3 +59,16 @@ swarm.list.dirs() { # DIR
 	$CD "$OLDPWD"
 	$PRINTF '%s\n' "${array[@]}"
 }
+swarm.list.hid() { #
+# Returns a list of Human Interface Devices that are connected
+# Usualy this refers to mouse and keyboard (not laptop keyboards though)
+	local content verified="" work=""
+	content=( $(cd "/dev/input/by-id/" ; $LS -1) )
+	for item in "${content[@]}"
+	do
+		work=${item/usb-}
+		work=${work/-*}
+		$ECHO "${verified[*]}" | $GREP -q "$work" || verified+=("$work")
+	done
+	$PRINTF '%s\n' "${verified[@]}"
+}

@@ -79,3 +79,14 @@ swarm.list.video() { #
 	$LS -1 | $GREP -i [vV]ideo
 	cd "$OLDPWD"
 }
+swarm.list.usb() { #
+# Returns a list of USB storage devices
+# Often includes empty SD readers : usbIgnore is NOT applied here!
+	local content="" verified="" item=""
+	#$LS "$devDisk" | $GREP usb | "$GREP" -v part
+	content=( $($LS -l /dev/disk/by-id | $AWK '/usb/ {print $9" "$11}' | $GREP -v part) )
+	for item in "${content[@]}";do
+		$ECHO "${verified[@]}" | $GREP -q "$item" || verified+=("${item/\.\.\/\.\.\/}")
+	done
+	$PRINTF '%s\n' "${verified[@]}" | $GREP -v usb
+}

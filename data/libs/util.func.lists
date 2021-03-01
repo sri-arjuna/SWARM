@@ -72,3 +72,10 @@ swarm.list.hid() { #
 	done
 	$PRINTF '%s\n' "${verified[@]}"
 }
+swarm.list.video() { #
+# Returns a list of video devices
+# Usualy things like webcams
+	cd /dev
+	$LS -1 | $GREP -i [vV]ideo
+	cd "$OLDPWD"
+}

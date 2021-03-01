@@ -90,3 +90,10 @@ swarm.list.usb() { #
 	done
 	$PRINTF '%s\n' "${verified[@]}" | $GREP -v usb
 }
+swarm.list.hdd() { # [-u]
+# Shows a list of local storage,
+# Only if -u is passed, it will include usb storage
+	[[ "-u" == "$1" ]] && \
+		$LS -1 /dev/[sh]d[az]* || \
+		$LS -1 /dev/[sh]d[az]* | $GREP -v  $(for i in $(swarm.list.usb);do $ECHO "-e '$i'";done;)
+}

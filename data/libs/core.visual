@@ -137,7 +137,7 @@
 # Visual outputs - core essentials
 #
 	#shellcheck disable=SC2120
-	swarm.color.list() { #
+	swarm.list.color() { #
 	# Simply lists the color names that can be used in SWARM
 	# Reads from the colors.conf file of SWARM if the variables are not found in memory.
 		# shellcheck disable=SC2128

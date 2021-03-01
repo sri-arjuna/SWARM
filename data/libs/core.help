@@ -543,7 +543,7 @@
 		"swarm.color.fg")
 			out="$SWARM_MSG_COLOR_FG_USAGE"
 			;;
-		"swarm.color.list")
+		"swarm.list.color")
 			out="$SWARM_MSG_COLOR_LIST_USAGE"
 			;;
 		"swarm.help.usage")

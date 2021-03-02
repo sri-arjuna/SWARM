@@ -1,0 +1,44 @@
+.\" Manpage template for SWARM
+.TH log 1 "Copyleft 1995-2021" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBlog\fP - A simple helper for custom log files
+
+.SH SYNOPSIS
+\fBlog\fP [\fB-h\fP|\fB--help\fP] [\fB-f\fP FILE] [\fB-r\fP REASON] "MESSAGE"
+
+.SH DESCRIPTION
+General description of log
+.PP
+Keep in mind, to mark command options bold: \fB--long-option\fP
+.PP
+Files should be marked with an \fIunderline\fP
+.PP
+.SH OPTIONS
+.TP
+\fB-h\fP|\fB--help\fP
+Shows help and exit with 99
+.TP
+\fB-r\fP REASON
+Default value for REASON is \fI$script_name\fP or \fI$0\fP if empty. This can be used to identify log levels.
+.TP
+\fB-f\fP FILE
+If not passed, it expects \fI$script_log\fP to be set. Will fail with 1 if neither is availabe.
+
+
+.SH EXAMPLE
+log "first start"
+.PP
+log -f "./here.log" -r "Error Testing" "Checkin different options..."
+
+
+.SH BUGS
+.TP
+Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+.TP
+SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+.TP
+General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This script log was written by Simon Arjuna Erat, Switzerland for SWARM version 0.8.7

@@ -772,3 +772,61 @@
 			fi
 		done
 	}
+	log() { # [-?|-h|--help] [-f FILE=$script_log ] [-r "REASON=$script_name" ] "MESSAGE"
+	# Purpose and result
+	# additional description
+	 	swarm.protect "${FUNCNAME[@]}" "${CALLER:-$SWARM_MSG_WORD_UNKOWN}" "${@}" && return 1
+	#
+	# Variables
+	#
+	 	local RET thisFile DT REASON
+		RET=1
+		theLog="${script_log}"
+		DT="$($DATE_TODAY)"
+	#
+	# Catch arguments
+	#
+	 	while :; do
+	 		case "$1" in
+	 		-h|-\?|--help)
+	 			#swarm.help.usage "source swarm.eu.new.function main"
+	                        $ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+	 			return 0
+	 			;;
+	 		-f)	# Use this file
+	 			theLog="${2}"
+				shift
+	 			;;
+	 		-r)	REASON="$2"
+				shift
+				;;
+			*)	# No more options
+	 			break
+	 			;;
+	 		esac
+	 		shift
+	 	done
+		[[ -z "$theLog" ]] && { swarm.help.usage "${FUNCNAME[@]}" ; return 1 ; }
+		[[ -z "$1" ]] && { swarm.help.usage "${FUNCNAME[@]}" ; return 1 ; }
+	#
+	# Functions
+	#
+		_add.line() {
+			if ! ${TAIL:-tail} -n 1 "$theLog" | ${GREP:-\grep} -q " -------------------"
+			then	${ECHO:-echo_} " -------------------" >> "$theLog"
+			fi
+		}
+		_check.date() {
+			${GREP:-grep} -q "$DT" "$theLog" && return 1
+			[[ -f "$theLog" ]] && _add.line
+			${ECHO:-echo_} "$DT" >> "$theLog"
+		}
+		_log.it() { # MSG
+			${PRINTF:-printf} '$($DATE +'%T.%N') : ${REASON:-${script_name:-${0##*/}}} : %s\n' "$1"
+		}
+	#
+	# Action
+	#
+		_check.date
+		_log.it "$1"
+	}

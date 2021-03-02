@@ -662,6 +662,9 @@
 		"swarm.str.hash")
 			out="$SWARM_MSG_STR_HASH_USAGE"
 			;;
+		"log")
+			out="$SWARM_MSG_LOG_USAGE"
+			;;
 		"")
 			out="$"
 			;;

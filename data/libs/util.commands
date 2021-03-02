@@ -206,10 +206,11 @@
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local Y="${SWARM_MSG_WORD_YES:0:1}"
 		local N="${SWARM_MSG_WORD_NO:0:1}"
+		local failsafe=0
 		# Check if 'yesno' is empty, if so, fill with fallback values
 		case "$1" in
 		"--help"|"-h")
-			swarm.help.screen "${SWARM_MSG_HELP_YESNO}"
+			swarm.help.usage "${FUNCNAME[@]}"
 			return 99
 			;;
 		esac
@@ -217,7 +218,7 @@
 			SWARM_MSG_WORD_YES="+" && \
 			SWARM_MSG_WORD_NO="-"
 
-		swarm.print.border -e
+		swarm.print.border
 		# Print the text
 		local yn="${SWARM_MSG_WORD_YES:0:1}${SWARM_MSG_WORD_NO:0:1}"
 		local str1=""
@@ -230,7 +231,7 @@
 		do
 			$PRINTF "$str1"
 			$PRINTF "$str2"
-			read -r -n 1 answer
+			$READ -r -n 1 answer
 
 			case "$answer" in
 			"+"|"${Y,,}")
@@ -240,6 +241,7 @@
 				RET=1
 				;;
 			esac
+			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 		# Leave line
 		$PRINTF "$posEND\n"
@@ -402,7 +404,7 @@
 		#
 		# Variables
 		#
-			local AUTO=false
+			local AUTO=false failsafe=0
 			local ROWS=""
 			ROWS="3"
 			local as_menu=false
@@ -482,6 +484,7 @@
 			[[ $NUM -gt $pick_count ]] && continue
 		# Exit the loop
 			invalid=false
+			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 
 		# Output
@@ -543,10 +546,8 @@
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
-		local hideText=""
-		local notEmpty=false
-		local buffer=""
-		local STR=""
+		local hideText="" buffer="" STR=""
+		local notEmpty=false failsafe=0
 	# Catch options
 		for opt in "${@}"
 		do
@@ -570,6 +571,7 @@
 		then
 			while [[ -z "$buffer" ]]
 			do
+				((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 				swarm.print.border >&2
 				$PRINTF "$STR " >&2
 				$READ $hideText buffer

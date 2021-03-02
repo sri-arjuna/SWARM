@@ -363,20 +363,22 @@
 	# Shows a basic menu wrapper for new stuff
 	#
 		header --default "$SWARM_MSG_WORD_MENU : $1"
-		title "${SWARM_MSG_WORD_SELECT}: $SWARM_MSG_WORD_ACTION"
-		local F="" S="" P=""
+		local F="" S="" P="" failsafe=0
 		F="$SWARM_MSG_WORD_FUNCTION"
 		S="$SWARM_MSG_WORD_SCRIPT"
 		P="${SWARM_MSG_WORD_PROJECT}"
-		while item=$(pick -m "$F" "$S" "$P")
+		while 	title "${SWARM_MSG_WORD_SELECT}: $SWARM_MSG_WORD_ACTION"
+			item=$(pick -m "$F" "$S" "$P")
 		do
+			[[ "$item" == "${SWARM_MSG_WORD_BACK}" ]] && break
 			[[ "$F" == "$item" ]] && action=function
-			[[ "$S" == "$item" ]] && action=script
+			[[ "$S" == "$item" ]] && action=scripts
 			[[ "$P" == "$item" ]] && action=project
 			[[ -z "$action" ]] && break
 			swarm.eu.new.$action
 			item=""
 			action=""
+			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 	}
 	#shellcheck disable=SC2120
@@ -393,53 +395,63 @@
 		else
 			while true
 			do
-				item=$(pick "${content[@]}")
+				title "$SWARM_MSG_WORD_SELECT: $SWARM_MSG_WORD_FUNCTION"
+				item=$(pick -a -m "${content[@]}")
 				[[ "$item" == "${SWARM_MSG_WORD_BACK}" ]] && break
 				if [[ -f "$workdir/$item" ]]
 				then
 					source "$workdir/$item"
 				fi
-				((failsafe++)) ; [[ 10000 -gt $failsafe ]] && break
+				((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 			done
 		fi
 	}
-	swarm.eu.new.script() { # [-s -l -f] [NAME]
+	swarm.eu.new.scripts() { # [TEMPLATENAME] [TARGETNAME]
 	# Without arguments this will show a selection menu for the available scripts
 	# When NAME is passed from cli, it will create a new script in $SWARM_USER_DIR_SCRIPTS (eg: ~/bin)
-		local item
-		local newname
-		if [[ -z "$1" ]]
-		then	# No arguments, menu handling
-			title "$SWARM_MSG_WORD_SCRIPT"
-			printe "$SWARM_MSG_NEW_SCRIPT_SELECTION"
-			#shellcheck disable=SC2164
-			item=$(pick -m "$( cd "$SWARM_DIR_TEMPLATES/scripts/";$LS)")
-			[[ "$item" == "${SWARM_MSG_WORD_BACK}" ]] && return
-			newname=$(ask "$SWARM_MSG_PHRASE_NEWNAME")
-			swarm.util.cp  "$SWARM_DIR_TEMPLATES/scripts/$item" "$SWARM_USER_DIR_SCRIPTS/$newname"
-			chmod +x "$SWARM_USER_DIR_SCRIPTS/$newname"
-			return $?
-		else
-			# variable prepare
-			newname="${2:-${1:-$(swarm.str.genfilename newscript.sh)}}"
-			case $1 in
-			-l|lib)
-				swarm.util.cp  "$SWARM_DIR_TEMPLATES/scripts/lib" "$SWARM_USER_DIR_SCRIPTS/${newname}"
-				;;
-			-s|small)
-				swarm.util.cp  "$SWARM_DIR_TEMPLATES/scripts/small" "$SWARM_USER_DIR_SCRIPTS/${newname}"
-				;;
-			-f|full|*)
-				swarm.util.cp  "$SWARM_DIR_TEMPLATES/scripts/full" "$SWARM_USER_DIR_SCRIPTS/${newname}"
-				;;
-			#*)
-			#	break
-			#	;;
-			esac
-			$CHMOD +x "$SWARM_USER_DIR_SCRIPTS/$newname"
-			yesno "$SWARM_MSG_NEW_SCRIPT_EDITNOW" && edit "$newname"
-			exit $?
+
+		local workdir="" content="" item="" failsafe=0 count=0 newname=""
+		workdir="$SWARM_DIR_TEMPLATES/${FUNCNAME##*.}"
+	#	set -x
+		content=( $(swarm.list.files "$workdir") )
+	#	set +x
+		count="${#content[*]}"
+	# Arguments
+		if [[ -n "$1" ]]
+		then	[[ -f "$workdir/$1" ]] && { item="$1" ; shift ; }
+			[[ -n "$1" ]] && { newname="$1" ; shift ; }
 		fi
+	# Save one or multiple files?
+		if [[ -z "$item" ]]
+		then 	# Its empty, so maybe multiple
+			while true
+			do
+				title "$SWARM_MSG_WORD_SELECT: $SWARM_MSG_WORD_SCRIPT"
+				item=$(pick -a -m "${content[@]}")
+				[[ "$item" == "${SWARM_MSG_WORD_BACK}" ]] && return
+				[[ -f "$workdir/$item" ]]
+				status $? "$SWARM_MSG_WORD_SELECTED:" "$item"
+				if [[ -f "$workdir/$item" ]]
+				then
+					newname=""
+					while [[ -z "$newname" ]];do
+						newname=$(ask "$SWARM_MSG_PHRASE_NEWNAME")
+						((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
+					done
+					source "$workdir/$item" > "$SWARM_USER_DIR_SCRIPTS/$newname"
+				fi
+				((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
+			done
+		else	# It's just one, exit after that
+			while [[ -z "$newname" ]];do
+				newname=$(ask "$SWARM_MSG_PHRASE_NEWNAME")
+				((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
+			done
+			source "$workdir/$item"  > "$SWARM_USER_DIR_SCRIPTS/$newname"
+		fi
+		$CHMOD +x "$SWARM_USER_DIR_SCRIPTS/$newname"
+		yesno "$SWARM_MSG_NEW_SCRIPT_EDITNOW" && edit "$newname"
+		return 0
 	}
 	swarm.eu.new.project() { # [NAME [EXEC]]
 	#
@@ -455,10 +467,12 @@
 		while [[ -z "$prj_name" ]]
 		do
 			prj_name=$(ask "$SWARM_MSG_NEW_PROJECT_NAME")
+			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 		while [[ -z "$prj_exec" ]]
 		do
 			prj_exec=$(ask "$SWARM_MSG_NEW_PROJECT_EXEC")
+			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 		echo "$SWARM_USER_DIR_SCRIPTS/$prj_name"
 		echo "$SWARM_USER_DIR_SCRIPTS/$prj_exec"

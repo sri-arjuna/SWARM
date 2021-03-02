@@ -417,11 +417,11 @@ swarm.str.genfilename() { # FILENAME.EXT [NEXT_EXT]
 	# Currently only known special case: tar
 	local NAME_INIT="${this/\.tar/}.$ext"
 	NAME_INIT="${NAME_INIT/\.\./\.}"
-	if [ -f "${NAME_INIT}" ]
+	if [[ -f "${NAME_INIT}" ]]
 	then	C=0		# Counter
 		local NAME_CHECK="${this/\.tar}.$C.$ext"
 		NAME_CHECK="${NAME_CHECK/\.\./\.}"
-		while [ -f "${NAME_CHECK}" ]
+		while [[ -f "${NAME_CHECK}" ]]
 		do	((C++))
 			NAME_CHECK="${this/\.tar}.$C.$ext"
 			NAME_CHECK="${NAME_CHECK/\.\./\.}"

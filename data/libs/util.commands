@@ -789,8 +789,7 @@
 	 	while :; do
 	 		case "$1" in
 	 		-h|-\?|--help)
-	 			#swarm.help.usage "source swarm.eu.new.function main"
-	                        $ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+	 			swarm.help.usage "${FUNCNAME[0]}"
 	 			return 0
 	 			;;
 	 		-f)	# Use this file
@@ -829,4 +828,33 @@
 	#
 		_check.date
 		_log.it "$1"
+	}
+	asRoot() { # "COMMAND" | "/path/to/file"
+	# Executes passed command as root.
+	# Returns with 1 if command has failed
+		# Check wether we shall and/or can use sudo - or not
+		if [[ -z "$useSudo" ]]
+		then	[[ -n "$SUDO" ]] && \
+				useSudo=${useSudo:-true} || \
+				useSudo=${useSudo:-false}
+			# Save for later
+			cfg.set -v "$SWARM_USER_CONF" "useSudo" "$useSudo"
+		fi
+	# Variables
+		local RET
+		RET=1
+	# Call it properly
+		if $useSudo
+		then	# Easy
+			$SUDO "${@}"
+			RET=$?
+		else	# Hard
+			if [[ -n "$SU" ]]
+			then	$SU -c "${@}"
+				RET=$?
+			else	status 1 "$SWARM_MSG_SU_NFOUND"
+				return $?
+			fi
+		fi
+		status $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
 	}

@@ -665,8 +665,8 @@
 		"log")
 			out="$SWARM_MSG_LOG_USAGE"
 			;;
-		"")
-			out="$"
+		"asRoot")
+			out="$SWARM_MSG_ASROOT_USAGE"
 			;;
 		"")
 			out="$"
@@ -692,9 +692,13 @@
 		elif [[ -f "$tDir/${1}.1" ]]
 		then	# default handling
 			tManpage="$tDir/${1}.1"
-		else	# Default error
+		elif [[ -z "$1" ]]
+		then	# Default error
 			#shellcheck disable=SC2128
 			swarm.help.usage "$FUNCNAME"
+			return 1
+		else
+			swarm.help.usage "$1"
 			return 1
 		fi
 		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"

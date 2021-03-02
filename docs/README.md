@@ -34,7 +34,7 @@ Target Audience:
 * System Administrators
 * Anyone interested in scripting
 
-Basicly everyone one has or wants to write comfortable scripts for themself, the community and/or for (their) end users.
+Basicly everyone one who wants or has to write comfortable scripts for themself, the community and/or for (their) end users.
 
 
 

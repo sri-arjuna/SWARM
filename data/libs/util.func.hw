@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+swarm.hw.info.cpu() { #
+# Prints the CPU name, family, cores and mhz
+#
+	LC_ALL=C
+	$GREP "model name" /proc/cpuinfo | $SED s,'model name\t: ','', | $SORT -u
+}
+_swarm.hw.info.list_input() {
+#
+#
+$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g # | \
+	#while $READ -r line;do
+	#	proc_data_inputdev_items+=("$line")
+	#done
+	return
+	# Retrieve for faster processing & less hw stress
+		#[[ -z "$proc_data_inputdev_raw" ]] && \
+		#	{
+		#		declare proc_data_inputdev_raw
+		#		proc_data_inputdev_raw=$(<"/proc/bus/input/devices")
+		#		export proc_data_inputdev_raw
+		#	}
+	# Prepare for faster processing
+		[[ -z "$proc_data_inputdev_items" ]] && \
+			{
+				declare -a proc_data_inputdev_items
+				$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g | \
+					while $READ -r line;do
+						proc_data_inputdev_items+=("$line")
+					done
+				export "${proc_data_inputdev_items[@]}"
+			}
+	for item in "${proc_data_inputdev_items[@]}"
+	do
+		$ECHO "$item"
+	done
+}
+swarm.hw.info.keyboard() {
+# Prints connected keyboards
+# 1 per line
+	LC_ALL=C _swarm.hw.info.list_input | $GREP -i -e key -e touchpad | $SORT -u
+}
+swarm.hw.info.mouse() {
+# Prints connected mice
+# 1 per line
+	LC_ALL=C _swarm.hw.info.list_input | $GREP -i -e mouse -e track | $SORT -u
+}
+swarm.hw.info.video() {
+# Prints connected video
+# 1 per line
+	LC_ALL=C _swarm.hw.info.list_input | $GREP -i -e video -e bus -e hdmi -ve sound | $SORT -u
+}
+swarm.hw.info.video.path() {
+	$GREP -A10 "$(swarm.hw.info.video|$GREP -i video )" "/proc/bus/input/devices" | $AWK -F "Sysfs=" '/Sysfs=/ {print $2}'
+}
+swarm.hw.info.mic() {
+# Prints connected microphones
+# 1 per line
+	LC_ALL=C _swarm.hw.info.list_input | $GREP -i -e mic -e voice | $SORT -u
+}
+swarm.hw.info.headphones() {
+# Prints connected headphones
+# 1 per line
+	LC_ALL=C _swarm.hw.info.list_input | $GREP -i -e headph | $SORT -u
+}

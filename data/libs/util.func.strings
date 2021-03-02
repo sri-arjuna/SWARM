@@ -169,15 +169,6 @@ swarm.str.filesize() { # [ -k -m ] FILE
 		esac
 	fi
 }
-swarm.str.dirlist() { # PATH
-# Print a list of all subdirs
-# Ignores .git
-	local tmp=""
-	$CD "$1" || return 1
-	# shellcheck disable=SC2162,SC2030
-	$FIND -type d -print | while read line;do tmp="$PWD/$line" ; $ECHO "${tmp/\/\.\//\/}" ;done 2>/dev/null | $GREP -v '.git'
-	$CD "$OLDPWD"
-}
 swarm.str.dirsize() { # [ -k -m ] DIR
 # Prints "SIZE TYPE in DIR"
 # -k for kilobytes ; -m for megabytes
@@ -196,13 +187,13 @@ swarm.str.dirsize() { # [ -k -m ] DIR
 		while $READ -r line
 		do
 			# shellcheck disable=SC2031
-			"${FUNCNAME[@]}" "$VAR" "$line"
+			${FUNCNAME} ${VAR} "$line"
 		done
-	else
-		case "$MODE" in
+	elif [[ -f "$1" ]] || [[ -d "$1" ]]
+	then	case "$MODE" in
 		"bytes")
 			# shellcheck disable=SC2016
-			${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="$SWARM_MSG_DIR_SIZE_IN_BYTES" '{sum=sum+$5} END {print sum " " Text " \t" DIR }'
+			${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="$SWARM_MSG_DIR_SIZE_IN_BYTES" '{sum=sum+$5} END {print sum " " Text " \r\t\t\t" DIR }'
 			;;
 		"kilo")
 			# shellcheck disable=SC2016
@@ -213,6 +204,7 @@ swarm.str.dirsize() { # [ -k -m ] DIR
 			${LS:-\ls} -l "$1" | $AWK -v DIR="$1" -v Text="${SWARM_MSG_DIR_SIZE_IN_MB}"  '{sum=sum+$5} END {print sum/1024/1024 " " Text " \t" DIR }'
 			;;
 		esac
+        else    echo "Could not parse: $1"
 	fi
 }
 swarm.str.bool2str() { # [options] $?

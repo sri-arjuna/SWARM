@@ -479,7 +479,7 @@
 			# Size
 				$ECHO "$LINER"
 				# shellcheck disable=SC2016
-				swarm.str.dirlist . | swarm.str.dirsize -- | \
+				swarm.list.dirtree . | swarm.str.dirsize -- | \
 					${AWK:-awk} \
 						-v FOLDER="$SWARM_MSG_STATS_FOLDERS" \
 						-v KB="$SWARM_MSG_WORD_KB" \

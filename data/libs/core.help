@@ -620,7 +620,7 @@
 		"swarm.str.genfilename")
 			out="$SWARM_MSG_STR_GENFILENAME_USAGE"
 			;;
-		"swarm.str.dirlist")
+		"swarm.list.dirtree")
 			out="$SWARM_MSG_STR_DIRLIST_USAGE"
 			;;
 		"swarm.str.dirsize")

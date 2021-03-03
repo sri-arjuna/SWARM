@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2021.03.02	 	     #
-# Build:	63			     #
+# Changed:	2021.03.03	 	     #
+# Build:	64			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -79,7 +79,7 @@
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8.7
-	SWARM[BUILD]=63
+	SWARM[BUILD]=64
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -108,20 +108,16 @@
 	TERM="${TERM:-GNU-Linux}"
 	if [[ "" == "${TERM/GNU-Linux}" ]] || [[ "dumb" == "${TERM}" ]]
 	then	TERM="xterm"
-			# This is required to work within a SSH env
-			export TERM
-			# Skip selection if COLUMNS are preset
-			if [[ -z "$COLUMNS" ]]
-			then	echo "How many COLUMNS (width) does your terminal have?"
-				select COLUMNS in 60 70 80 90 100 110 120 150 200 239;do break;done
-				export COLUMNS
-			fi
-			# Skip selection if LINES are preset
-		#	if [[ -z "$LINES" ]]
-		#	then	echo "How many LINES (height) does your terminal have?"
-		#		select LINES in 12 24 36 48 60;do break;done
-		#		export LINES
-		#	fi
+		# This is required to work within a SSH env
+		export TERM
+		# Skip selection if COLUMNS are preset
+		if [[ -z "$COLUMNS" ]]
+		then	echo "How many COLUMNS (width) does your terminal have?"
+			select COLUMNS in 60 70 80 90 100 110 120 150 200 239;do break;done
+			export COLUMNS
+		fi
+		isSSH=true
+	else	isSSH=false
 	fi
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
@@ -525,28 +521,20 @@
 					exit 0
 				fi
 				;;
-			hwinfo)
-			#	set -x
-				pre='swarm\.hw\.info\.'
-				list=$(	declare | $GREP 'swarm.hw.info' | $AWK '/\(\)/ {print $1}' | $GREP -v ^"_" )
+			sysinfo)
+				pre='swarm\.sysinfo\.'
+				list=$(	declare | $GREP "$pre" | $AWK '/\(\)/ {print $1}' | $GREP -v ^"_" )
 				cur="" last="x"
 				for ls in $list
 				do
-					#cur=${cur##*\.} # Last part of it
-
-					#set -x
 					cur="${ls/$pre/}"
 					cur=${cur/\.*}
-
 					if [[ ! "$cur" == "$last" ]]
-					then	set +x
-						title "${cur}"
+					then	title "${cur}"
 						last="$cur"
 					fi
-					#set +x
 					printe "$ls:" "$(echo $($ls))"
 				done
-			#	set +x
 				;;
 			esac
 		fi

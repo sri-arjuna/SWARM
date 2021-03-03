@@ -33,7 +33,7 @@
 					$GREP cfg.*"() {" -- * | $GREP -v GREP
 					# Yes, I could remove these functions here, but I'd like to keep my options
 					# for a possible 'internal' section for the help menu
-					$GREP swarm.*"() {" -- * | $GREP -v GREP | $GREP -v '.os.' #| $GREP -v sanity | $GREP -v '\.eu\.'
+					$GREP swarm.*"() {" -- * | $GREP -v GREP
 					#shellcheck disable=SC2164
 					$CD "$tmp_oldpwd"
 				) | while IFS=": " read -r _ funcname _
@@ -536,13 +536,13 @@
 		"press")
 			out="$SWARM_MSG_PRESS_USAGE"
 			;;
-		"DISTRO" | "swarm.os.distro" )
+		"DISTRO" | "swarm.sysinfo.os.distro" )
 			out="$SWARM_MSG_DISTRO_USAGE"
 			;;
-		"DESKTOP" | "swarm.os.desktop")
+		"DESKTOP" | "swarm.sysinfo.os.desktop")
 			out="$SWARM_MSG_DESKTOP_USAGE"
 			;;
-		"BASED" | "swarm.os.based")
+		"BASED" | "swarm.sysinfo.os.based")
 			out="$SWARM_MSG_BASED_USAGE"
 			;;
 		"swarm.util.tar" | "TAR")

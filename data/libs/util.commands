@@ -26,7 +26,7 @@
 			shift
 			# shellcheck disable=SC2068
 			swarm.print.text -h \
-				"${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.os.distro|$SED s,'"','',g))" \
+				"${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.sysinfo.os.distro|$SED s,'"','',g))" \
 				" " \
 				"$($PRINTF '%s ' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
 			;;

@@ -37,6 +37,7 @@
 		export lenClrFont=${#clrFRONT}
 		export lenClrBack=${#clrBACK}
 		export identRight=$(( lenRight + ${#clrCL}  ))
+		#export identRight=$(( lenRight + 4 ))
 
 		# Pre-Calculate positions
 		export numHALF=$(( COLUMNS / 2 ))
@@ -98,10 +99,8 @@
 				local this_theme="default-red" || \
 				local this_theme="default-blue"
 			source "$SWARM_DIR_THEMES/$this_theme"
+			status $? "$SWARM_MSG_INIT_THEME"
 			init.log.msg "$SWARM_MSG_INIT_THEME : $1 / $this_theme"
-	#	else	# Did find & load the file, now save for future
-	#		title HERE
-	#		echo cfg.set "$SWARMRC" "SWARM_THEME" "$this_theme"
 		fi
 		# Export the values now
 		export SWARM_THEME_DATA

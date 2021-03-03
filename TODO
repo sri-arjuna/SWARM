@@ -5,6 +5,9 @@ Checklist upon adding new functions:
 
 
 
+Todo
+core.conf SWARM_MSG_SU_NFOUND check name & occourences.. phrase?!?!
+
 TODO MANPAGE:
 -------------
 * swarm.util.cp

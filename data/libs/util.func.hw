@@ -39,22 +39,22 @@ swarm.sysinfo.cpu.sockets() {
 swarm.sysinfo.cpu.cores() {
 # Prints the amount of cores per cpu
 #
-	LC_ALL=C lscpu | $AWK -F ":" '/^Core/ {print $4}'
+	LC_ALL=C lscpu | $AWK -F ":" '/^Core/ {print $2}'
 }
 swarm.sysinfo.cpu.threads() {
 # Prints the amount of threads per core
 #
-	LC_ALL=C lscpu | $AWK -F ":" '/^Thread/ {print $4}'
+	LC_ALL=C lscpu | $AWK -F ":" '/^Thread/ {print $2}'
 }
 swarm.sysinfo.cpu.mhz() {
 # Prints either the 'fix' mhz
 # or the range of valid values.
-	LC_ALL=C lscpu | $AWK -F ":" '/[Mm]hz/ {print $3" "$3}'
+	LC_ALL=C lscpu | $AWK -F ":" '/[Mm][hH]z/ {print $1" "$2}' | $SED s,"CPU ","",g
 }
 swarm.sysinfo.cpu.vendor() {
 # Prints either the 'fix' mhz
 # or the range of valid values.
-	LC_ALL=C lscpu | $AWK -F ":" '/^Vendor/ {print $3}'
+	LC_ALL=C lscpu | $AWK -F ":" '/^Vendor/ {print $2}'
 }
 swarm.sysinfo.cpu.mips() { #
 #
@@ -64,32 +64,8 @@ swarm.sysinfo.cpu.mips() { #
 _swarm.sysinfo.list_input() {
 #
 #
-$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g # | \
-	#while $READ -r line;do
-	#	proc_data_inputdev_items+=("$line")
-	#done
+	$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g # | \
 	return
-	# Retrieve for faster processing & less hw stress
-		#[[ -z "$proc_data_inputdev_raw" ]] && \
-		#	{
-		#		declare proc_data_inputdev_raw
-		#		proc_data_inputdev_raw=$(<"/proc/bus/input/devices")
-		#		export proc_data_inputdev_raw
-		#	}
-	# Prepare for faster processing
-		[[ -z "$proc_data_inputdev_items" ]] && \
-			{
-				declare -a proc_data_inputdev_items
-				$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g | \
-					while $READ -r line;do
-						proc_data_inputdev_items+=("$line")
-					done
-				export "${proc_data_inputdev_items[@]}"
-			}
-	for item in "${proc_data_inputdev_items[@]}"
-	do
-		$ECHO "$item"
-	done
 }
 swarm.sysinfo.keyboard() {
 # Prints connected keyboards

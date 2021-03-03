@@ -1,9 +1,65 @@
 #!/usr/bin/env bash
+#
+# 	Treeview reference
+#
+# swarm.hw.info.*
+#	.screen*	(name)
+#		.available
+#		.hz
+#		.res
+# 	.net		(name of active device, ex: wlp3s0)
+#		.available
+#		.ipx	(eXtern)
+#		.ip
+#		.ip6
+#	.usb
+#		.devices
+#		.names
+#	.cpu		(Nam
+#		.core
+#		.threads
+#		.hz
+#	.ram
+#		.free
+#		.used
+#		.total
+#	.chassis
+#
+#
 swarm.hw.info.cpu() { #
 # Prints the CPU name, family, cores and mhz
 #
-	LC_ALL=C
-	$GREP "model name" /proc/cpuinfo | $SED s,'model name\t: ','', | $SORT -u
+	LC_ALL=C $AWK -F':' '/^model name/ {print $2}' /proc/cpuinfo | uniq | $SED -e 's/^[ \t]*//'
+}
+swarm.hw.info.cpu.sockets() {
+# Prints the amount of cpu sockets on the platine
+#
+	LC_ALL=C lscpu | $AWK -F ":" '/^Socket/ {print $2}'
+}
+swarm.hw.info.cpu.cores() {
+# Prints the amount of cores per cpu
+#
+	LC_ALL=C lscpu | $AWK -F ":" '/^Core/ {print $4}'
+}
+swarm.hw.info.cpu.threads() {
+# Prints the amount of threads per core
+#
+	LC_ALL=C lscpu | $AWK -F ":" '/^Thread/ {print $4}'
+}
+swarm.hw.info.cpu.mhz() {
+# Prints either the 'fix' mhz
+# or the range of valid values.
+	LC_ALL=C lscpu | $AWK -F ":" '/[Mm]hz/ {print $3" "$3}'
+}
+swarm.hw.info.cpu.vendor() {
+# Prints either the 'fix' mhz
+# or the range of valid values.
+	LC_ALL=C lscpu | $AWK -F ":" '/^Vendor/ {print $3}'
+}
+swarm.hw.info.cpu.mips() { #
+#
+#
+	LC_ALL=C lscpu | $AWK -F ":" '/^BogoMIPS/ {print $2}'
 }
 _swarm.hw.info.list_input() {
 #
@@ -62,4 +118,103 @@ swarm.hw.info.headphones() {
 # Prints connected headphones
 # 1 per line
 	LC_ALL=C _swarm.hw.info.list_input | $GREP -i -e headph | $SORT -u
+}
+swarm.hw.info.screen() {
+# Prints connected screens/monitor/display
+# 1 per line
+	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
+	# the space makes the difference!
+	LC_ALL=C xrandr | $AWK '/ connected/ {print $1}'
+}
+swarm.hw.info.screen.available() {
+# Prints connected screens/monitor/display
+# 1 per line
+	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
+	# the space makes the difference! (dis(-)connected)
+	LC_ALL=C xrandr | $AWK '/connected/ {print $1}'
+}
+swarm.hw.info.screen.res() {
+# Prints the screens resolution
+#
+	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
+	LC_ALL=C xrandr | $AWK '/\*/ {print $1}'
+}
+swarm.hw.info.net() {
+# Prints the name of the active internet device
+# 1 per line
+	swarm.util.which ip >/dev/zero || return 1
+	LC_ALL=C ip addr | $GREP -v "NO-CARRIER" | $AWK -F ":" '/BROADCAST/ {print $2}'
+}
+swarm.hw.info.net.available() {
+# Prints available network device names
+#
+	$LS -1 /sys/class/net
+	#swarm.util.which ip >/dev/zero || return 1
+	#LC_ALL=C ip addr | $AWK -F ":" '/^[1-9]/ {print $2}'
+}
+swarm.hw.info.net.ip() {
+# Prints the IPv4 adress
+#
+	swarm.util.which ip >/dev/zero || return 1
+	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet6" | $AWK '{print $2}'
+}
+swarm.hw.info.net.gateway() {
+# Prints the IPv4 gateway
+#
+	swarm.util.which ip >/dev/zero || return 1
+	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet6" | $AWK '{print $4}'
+}
+swarm.hw.info.net.ip6() {
+# Prints the IPv6 adress
+#
+	swarm.util.which ip >/dev/zero || return 1
+	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet " | $AWK '{print $2}'
+}
+swarm.hw.info.net.external_ip() { # [-v]
+# Prints the external IPv4 adress
+#
+	local failsafe=0 data beVerbose=false
+	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
+	hostname -i && return 0
+	#swarm.util.which ip >/dev/zero || return 1
+	(ping -W 1 -c 1 "${HOSTNAME:-$(hostname)}" | $AWK '/\([0-9]/ {print $3}' | { $READ external_ip ; $ECHO "$external_ip"  > "$SWARM_TMP.exip";}  & )
+
+	while $PS -a | $GREP -q ping #| $GREP -v $GREP
+	do
+		$beVerbose && bar -c "${SWARM_MSG_WORD_RETRIEVING^} ${SWARM_MSG_WORD_DATA}... ($failsafe)" >&2
+		sleep 0.4
+		((failsafe++)) ; [[ $failsafe -gt 200 ]] && return 1
+	done
+	data=$(<"$SWARM_TMP.exip")
+	data="${data:1}"
+	$beVerbose && \
+		{ status -c 4 "${data:0:-1}" >&2 ; status -c 4 "${data:0:-1}" ; echo >/dev/zero ; } || \
+		echo "${data:0:-1}"
+}
+swarm.hw.info.device.vendor() {
+# Prints the chassis vendor
+#
+	$CAT /sys/class/dmi/id/chassis_vendor
+}
+swarm.hw.info.device.name() {
+# Prints the product name / description
+#
+	$CAT /sys/class/dmi/id/product_name
+}
+swarm.os.type() {
+# Prints the wether the system is VM or physical
+#
+	vserver=$(lscpu | $GREP Hypervisor | $WC -l) || return 1
+	if [ $vserver -gt 0 ]
+	then 	$ECHO "VM"
+	else 	$ECHO "Physical"
+	fi
+}
+
+
+swarm.hw.info.() {
+# Prints the IPv6 adress
+#
+	swarm.util.which ip >/dev/zero || return 1
+	LC_ALL=C
 }

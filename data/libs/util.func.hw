@@ -122,7 +122,11 @@ swarm.sysinfo.headphones() {
 swarm.sysinfo.screen() {
 # Prints connected screens/monitor/display
 # 1 per line
-	$isSSH && { $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+	if ! $isGUI
+	then 	#{ $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+		$PRINTF '%s @ XDG_VTNR #%s' "$TERM" "$XDG_VTNR"
+		return 0
+	fi
 	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
 	# the space makes the difference!
@@ -131,7 +135,7 @@ swarm.sysinfo.screen() {
 swarm.sysinfo.screen.available() {
 # Prints connected screens/monitor/display
 # 1 per line
-	$isSSH && { $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+	! $isGUI && { $ECHO "$SWARM_MSG_PHRASE_TERMINAL" ; return 1 ; }
 	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
 	# the space makes the difference! (dis(-)connected)
@@ -140,7 +144,11 @@ swarm.sysinfo.screen.available() {
 swarm.sysinfo.screen.res() {
 # Prints the screens resolution
 #
-	$isSSH && { $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+	if ! $isGUI
+	then 	#{ $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+		$PRINTF '%sx%s' "$COLUMNS" "$LINES"
+		return 0
+	fi
 	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
 	LC_ALL=C xrandr | $AWK '/\*/ {print $1}'

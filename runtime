@@ -513,10 +513,6 @@
 				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC)?" || exit 1
 				swarm.util.rm -v "$SWARMRC" "$SWARM_USER_DIR_BASE"
 			;;
-		#	commands|cmd)
-		#		header "SWARM ${SWARM[VERSION]} ${SWARM[BUILD]}" "$SWARM_MSG_WORD_COMMANDS" "$($DATE +'%F %R')"
-		#		$AWK -F '() { #' '/() { #/ {print $1" "$2}' "$SWARM_DIR_LIBS/util.commands" | printfile --
-		#	;;
 			theme)
 				swarm.clear
 				if [[ -n "$2" ]]
@@ -531,15 +527,24 @@
 				;;
 			hwinfo)
 			#	set -x
-				pre='swarm\.hw\.info'
-				list=$(	$AWK -F '() {' '/swarm.hw.info/ {print $1 }' "$SWARM_DIR_LIBS/util.func.hw" | $GREP -v ^"_" )
-
+				pre='swarm\.hw\.info\.'
+				list=$(	declare | $GREP 'swarm.hw.info' | $AWK '/\(\)/ {print $1}' | $GREP -v ^"_" )
+				cur="" last="x"
 				for ls in $list
 				do
-					#t="${ls/\(\)}"
-					title "${ls/$pre\.}"
-					#for si in
-					#echo "${!$pre.$ls.*}"
+					#cur=${cur##*\.} # Last part of it
+
+					#set -x
+					cur="${ls/$pre/}"
+					cur=${cur/\.*}
+
+					if [[ ! "$cur" == "$last" ]]
+					then	set +x
+						title "${cur}"
+						last="$cur"
+					fi
+					#set +x
+					printe "$ls:" "$(echo $($ls))"
 				done
 			#	set +x
 				;;

@@ -105,6 +105,7 @@
 	# clearing the ENV by the use of swarm.cleanup
 	PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
+	[[ "dumb" == "$TERM" ]] && isSSH=true || isSSH=false
 	TERM="${TERM:-GNU-Linux}"
 	if [[ "" == "${TERM/GNU-Linux}" ]] || [[ "dumb" == "${TERM}" ]]
 	then	TERM="xterm"
@@ -116,8 +117,6 @@
 			select COLUMNS in 60 70 80 90 100 110 120 150 200 239;do break;done
 			export COLUMNS
 		fi
-		isSSH=true
-	else	isSSH=false
 	fi
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)

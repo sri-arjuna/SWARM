@@ -100,7 +100,7 @@ swarm.sysinfo.screen() {
 # 1 per line
 	if ! $isGUI
 	then 	#{ $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
-		$PRINTF '%s @ XDG_VTNR #%s' "$TERM" "$XDG_VTNR"
+		$PRINTF '%s\n' "$TERM"
 		return 0
 	fi
 	# Check if the app is needed
@@ -111,7 +111,12 @@ swarm.sysinfo.screen() {
 swarm.sysinfo.screen.available() {
 # Prints connected screens/monitor/display
 # 1 per line
-	! $isGUI && { $ECHO "$SWARM_MSG_PHRASE_TERMINAL" ; return 1 ; }
+	if ! $isGUI
+	then	$isSSH && \
+			$ECHO "$SWARM_MSG_PHRASE_SSHSESSION" || \
+			$ECHO "$SWARM_MSG_PHRASE_TERMINAL"
+		return 1
+	fi
 	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
 	# the space makes the difference! (dis(-)connected)

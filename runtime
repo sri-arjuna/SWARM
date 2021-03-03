@@ -105,7 +105,7 @@
 	# clearing the ENV by the use of swarm.cleanup
 	PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
-	[[ "dumb" == "$TERM" ]] && isSSH=true || isSSH=false
+	[[ -n "$SSH_CLIENT" ]] && isSSH=true || isSSH=false
 	TERM="${TERM:-GNU-Linux}"
 	if [[ "" == "${TERM/GNU-Linux}" ]] || [[ "dumb" == "${TERM}" ]]
 	then	TERM="xterm"

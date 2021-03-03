@@ -57,14 +57,14 @@
 #
 # Theme's
 #
-	swarm.theme.update() { # THEME_NAME
+	swarm.update.theme() { # THEME_NAME
 	# This loads the provided THEME_NAME
 	#
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# This an assigned array containg the theme related data
 		# Lets make sure each theme gets loaded into clear memory
-		unset "${SWARM_THEME_DATA[@]}"	# Use terminal / console / vtr default settings as base
+		unset SWARM_THEME_DATA[@]	# Use terminal / console / vtr default settings as base
 		# These are it's assingments
 		#swarm_list_theme_options="border-left border-right color-font color-back read select"
 		# Lets start fresh
@@ -94,8 +94,14 @@
 		then	# The theme could not be Found
 			# Lets fallback to default
 			# shellcheck disable=SC1090
+			${isRoot:-false} && \
+				local this_theme="default-red" || \
+				local this_theme="default-blue"
 			source "$SWARM_DIR_THEMES/$this_theme"
 			init.log.msg "$SWARM_MSG_INIT_THEME : $1 / $this_theme"
+	#	else	# Did find & load the file, now save for future
+	#		title HERE
+	#		echo cfg.set "$SWARMRC" "SWARM_THEME" "$this_theme"
 		fi
 		# Export the values now
 		export SWARM_THEME_DATA
@@ -131,11 +137,16 @@
 	# This is only a wrapper for the initial loading.
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		swarm.theme.update "${SWARM_THEME}"
+		swarm.update.theme "${SWARM_THEME:-default-red}"
 	}
 #
 # Visual outputs - core essentials
 #
+	swarm.clear() { #
+	# Clears the printed line from all previous output
+	#
+		$PRINTF "\e[2K"
+	}
 	#shellcheck disable=SC2120
 	swarm.list.color() { #
 	# Simply lists the color names that can be used in SWARM

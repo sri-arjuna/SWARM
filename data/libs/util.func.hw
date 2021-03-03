@@ -122,34 +122,28 @@ swarm.sysinfo.headphones() {
 swarm.sysinfo.screen() {
 # Prints connected screens/monitor/display
 # 1 per line
+	$isSSH && { $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
 	# the space makes the difference!
-	if ! LC_ALL=C xrandr | $AWK '/ connected/ {print $1}' 2>/dev/zero
-	then	$isSSH \
-	 		$ECHO "$SWARM_MSG_PHRASE_SSHSESSION" || \
-			$ECHO "$SWARM_MSG_WORD_UNKOWN"
-	fi
+	LC_ALL=C xrandr | $AWK '/ connected/ {print $1}'
 }
 swarm.sysinfo.screen.available() {
 # Prints connected screens/monitor/display
 # 1 per line
+	$isSSH && { $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
 	# the space makes the difference! (dis(-)connected)
-	if ! LC_ALL=C xrandr | $AWK '/connected/ {print $1}' 2>/dev/zero
-	then	$isSSH \
-	 		$ECHO "$SWARM_MSG_PHRASE_SSHSESSION" || \
-			$ECHO "$SWARM_MSG_WORD_UNKOWN"
-	fi
+	LC_ALL=C xrandr | $AWK '/connected/ {print $1}'
 }
 swarm.sysinfo.screen.res() {
 # Prints the screens resolution
 #
+	$isSSH && { $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
+	# Check if the app is needed
 	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
-	if ! LC_ALL=C xrandr | $AWK '/\*/ {print $1}' 2>/dev/zero
-	then	$isSSH \
-	 		$ECHO "$SWARM_MSG_PHRASE_SSHSESSION" || \
-			$ECHO "$SWARM_MSG_WORD_UNKOWN"
-	fi
+	LC_ALL=C xrandr | $AWK '/\*/ {print $1}'
 }
 swarm.sysinfo.net() {
 # Prints the name of the active internet device

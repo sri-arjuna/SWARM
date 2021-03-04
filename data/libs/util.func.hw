@@ -172,7 +172,7 @@ swarm.sysinfo.net.external_ip() { # [-v]
 	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
 	if dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
 	then 	return 0
-else	echo trying $CURLWGET ; set -x
+else	echo -e "trying $CURLWGET\n\n" ; set -x
 	case "$CURLWGET" in
 		curl)	curl icanhazip.com ; ret=$?		;;
 		wget)	wget -qO - icanhazip.com ; ret=$?	;;

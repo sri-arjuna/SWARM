@@ -168,14 +168,16 @@ swarm.sysinfo.net.ip6() {
 swarm.sysinfo.net.external_ip() { # [-v]
 # Prints the external IPv4 adress
 #
-	local failsafe=0 data beVerbose=false
+	local failsafe=0 data beVerbose=false ret=1
 	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
 	if dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
 	then 	return 0
-	else	case "$CURLWGET" in
+else	echo trying $CURLWGET ; set -x
+	case "$CURLWGET" in
 		curl)	curl icanhazip.com ; ret=$?		;;
 		wget)	wget -qO - icanhazip.com ; ret=$?	;;
 		esac
+		set +x
 		[[ 0 -eq $ret ]] && return 0
 	fi
 

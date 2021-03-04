@@ -175,8 +175,9 @@ swarm.sysinfo.net.external_ip() { # [-v]
 		return 0
 	else	#echo -e "trying $CURLWGET\n\n" ; set -x
 		case "${CURLWGET:-curl}" in
-		curl)	echo curl icanhazip.com ; ret=$?		;;
-		wget)	echo wget -qO - icanhazip.com ; ret=$?	;;
+		*curl)	$CURLWGET curl icanhazip.com 2>/dev/zero ; ret=$?		;;
+		*wget)	$CURLWGET -qO - icanhazip.com ; ret=$?	;;
+		*)	echo "no curl/wget found: $CURLWGET" ; return 1;;
 		esac
 		#set +x
 		[[ 0 -eq $ret ]] && return 0

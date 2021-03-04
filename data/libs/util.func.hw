@@ -173,31 +173,22 @@ swarm.sysinfo.net.external_ip() { # [-v]
 	if swarm.util.which dig &>/dev/zero
 	then	dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
 		return 0
-	else	#echo -e "trying $CURLWGET\n\n" ; set -x
-		case "${CURLWGET:-curl}" in
-		*curl)	$CURLWGET curl icanhazip.com 2>/dev/zero ; ret=$?		;;
+	else	case "${CURLWGET:-curl}" in
+		*curl)	$CURLWGET icanhazip.com 2>/dev/zero ; ret=$?		;;
 		*wget)	$CURLWGET -qO - icanhazip.com ; ret=$?	;;
-		*)	echo "no curl/wget found: $CURLWGET" ; return 1;;
+		*)	$ECHO "$SWARM_MSG_INIT_CURLWGET_NFOUND: $CURLWGET" ; return 1;;
 		esac
-		#set +x
 		[[ 0 -eq $ret ]] && return 0
 	fi
-
 	hostname -i && return 0
-	#swarm.util.which ip >/dev/zero || return 1
-	(ping -W 1 -c 1 "${HOSTNAME:-$(hostname)}" | $AWK '/\([0-9]/ {print $3}' | { $READ external_ip ; $ECHO "$external_ip"  > "$SWARM_TMP.exip";}  & )
-
-	while $PS -a | $GREP -q ping #| $GREP -v $GREP
-	do
-		$beVerbose && bar -c "${SWARM_MSG_WORD_RETRIEVING^} ${SWARM_MSG_WORD_DATA}... ($failsafe)" >&2
-		sleep 0.4
-		((failsafe++)) ; [[ $failsafe -gt 200 ]] && return 1
-	done
-	data=$(<"$SWARM_TMP.exip")
-	data="${data:1}"
-	$beVerbose && \
-		{ status -c 4 "${data:0:-1}" >&2 ; status -c 4 "${data:0:-1}" ; echo >/dev/zero ; } || \
-		echo "${data:0:-1}"
+	return 1
+}
+swarm.sysinfo.net.hostname() {
+# Prints the hostname
+#
+	[[ -f "/etc/hostname" ]] && \
+		$CAT "/etc/hostname" || \
+		hostname
 }
 swarm.sysinfo.device.vendor() {
 # Prints the chassis vendor
@@ -218,7 +209,17 @@ swarm.sysinfo.device.type() {
 	else 	$ECHO "Physical"
 	fi
 }
+swarm.sysinfo.ssh() {
+# Prints the hostname
+#
+	list=$($ECHO ${!SSH_*})
 
+	#printe "isSSH" "$(echo $isSSH)"
+	for l in  $list #isSSH
+	do
+		printe "${l}" "${!l}"
+	done
+}
 
 _swarm.sysinfo.() {
 # Prints the IPv6 adress

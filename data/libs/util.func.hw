@@ -170,6 +170,7 @@ swarm.sysinfo.net.external_ip() { # [-v]
 #
 	local failsafe=0 data beVerbose=false
 	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
+	dig +short myip.opendns.com @resolver1.opendns.com && return 0
 	hostname -i && return 0
 	#swarm.util.which ip >/dev/zero || return 1
 	(ping -W 1 -c 1 "${HOSTNAME:-$(hostname)}" | $AWK '/\([0-9]/ {print $3}' | { $READ external_ip ; $ECHO "$external_ip"  > "$SWARM_TMP.exip";}  & )

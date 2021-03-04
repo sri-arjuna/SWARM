@@ -173,10 +173,10 @@ swarm.sysinfo.net.external_ip() { # [-v]
 	if dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
 	then 	return 0
 	else	case "$CURLWGET" in
-		curl)	cmd="icanhazip.com" 		;;
-		wget)	cmd="-qO - icanhazip.com"	;;
+		curl)	curl icanhazip.com ; ret=$?		;;
+		wget)	wget -qO - icanhazip.com ; ret=$?	;;
 		esac
-		$CURLWGET $cmd && return 0
+		[[ 0 -eq $ret ]] && return 0
 	fi
 
 	hostname -i && return 0

@@ -170,14 +170,15 @@ swarm.sysinfo.net.external_ip() { # [-v]
 #
 	local failsafe=0 data beVerbose=false ret=1
 	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
-	if dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
-	then 	return 0
-else	echo -e "trying $CURLWGET\n\n" ; set -x
-	case "$CURLWGET" in
+	if swarm.util.which dig &>/dev/zero
+	then	dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
+		return 0
+	else	#echo -e "trying $CURLWGET\n\n" ; set -x
+		case "${CURLWGET:-curl}" in
 		curl)	curl icanhazip.com ; ret=$?		;;
 		wget)	wget -qO - icanhazip.com ; ret=$?	;;
 		esac
-		set +x
+		#set +x
 		[[ 0 -eq $ret ]] && return 0
 	fi
 

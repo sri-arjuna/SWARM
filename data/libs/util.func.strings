@@ -530,7 +530,7 @@ swarm.str.humanreadable() { # [-p NUM] [-B] [--reverse] BYTES
 			;;
 		--)	while read line
 			do
-				$FUNCNAME ${reverse:-${mode/--to=iec}} $opts "$line"
+				$FUNCNAME ${reverse:-${mode/\-\-to=iec}} $opts "$line"
 			done
 			return
 			;;

@@ -232,25 +232,19 @@ swarm.sysinfo.ram.total() { #
 # Prints the hostname
 #
 	local input_k size
-	input_k=$($AWK '/MemTotal/ {print $2*1024}' /proc/meminfo)
-	#size="$SWARM_MSG_WORD_KB"
-	#swarm.str.humanreadable --reverse \
-	$ECHO "$input_k"
+	input_k=$($AWK '/MemTotal/ {print $2}' /proc/meminfo)
+	$ECHO $(( input_k * 1024 ))
 }
 swarm.sysinfo.ram.free() { #
 # Prints the hostname
 #
 	local input_k size
-	input_k=$($AWK '/MemAvailable/ {print $2*1024}' /proc/meminfo)
-	#size="$SWARM_MSG_WORD_KB"
-	#swarm.str.humanreadable --reverse \
-	$ECHO "$input_k"
+	input_k=$($AWK '/MemAvailable/ {print $2}' /proc/meminfo)
+	$ECHO $(( input_k * 1024 ))
 }
 swarm.sysinfo.ram.used() { #
 # Prints the hostname
 #
-	local input_k size
-	#input_k=$($AWK '/MemTotal/ {print $2}' /proc/meminfo)
 	$ECHO "$(swarm.sysinfo.ram.total)" "$(swarm.sysinfo.ram.free)" | $AWK '{print ($1 - $2) }'
 }
 _swarm.sysinfo.() {

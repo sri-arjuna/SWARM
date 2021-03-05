@@ -113,8 +113,9 @@ swarm.sysinfo.screen.list() {
 # 1 per line
 	if ! $isGUI
 	then	$isSSH && \
-			$ECHO "$SWARM_MSG_PHRASE_SSHSESSION" || \
+			$ECHO "$SSH_TTY" || \
 			$ECHO "$SWARM_MSG_PHRASE_TERMINAL"
+		#SWARM_MSG_PHRASE_SSHSESSION
 		return 1
 	fi
 	# Check if the app is needed
@@ -210,16 +211,38 @@ swarm.sysinfo.device.type() {
 	fi
 }
 swarm.sysinfo.ssh() {
-# Prints the hostname
+# Prints true or false, depending if 'this' is a SSH session
 #
-	list=$($ECHO ${!SSH_*})
-	for l in $list #isSSH
-	do
-		printe "${l}" "${!l}" >&1
-	done
+	local ret
+	$ECHO ${isSSH}
+	$isSSH && ret=0 || ret=1
+	return $ret
+}
+swarm.sysinfo.ssh.client() {
+# Prints the ip of the SSH client
+	if swarm.sysinfo.ssh >/dev/zero
+	then	$ECHO $SSH_CLIENT
+	else	return 1
+	fi
+}
+swarm.sysinfo.ssh.connection() {
+# Prints information about the SSH connection
+#
+	if swarm.sysinfo.ssh >/dev/zero
+	then	$ECHO $SSH_CONNECTION
+	else	return 1
+	fi
+}
+swarm.sysinfo.ssh.tty() {
+# Prints which TTY is used for SSH
+#
+	if swarm.sysinfo.ssh >/dev/zero
+	then	$ECHO $SSH_TTY
+	else	return 1
+	fi
 }
 swarm.sysinfo.ram() {
-# Prints the hostname
+# Prints an overview of ram values
 #
 	local total free used
 	total="$(swarm.sysinfo.ram.total| swarm.str.humanreadable --)"
@@ -229,23 +252,33 @@ swarm.sysinfo.ram() {
 	$ECHO "$used/$total : $free"
 }
 swarm.sysinfo.ram.total() { #
-# Prints the hostname
+# Prints how much ram is installed
 #
 	local input_k size
 	input_k=$($AWK '/MemTotal/ {print $2}' /proc/meminfo)
 	$ECHO $(( input_k * 1024 ))
 }
 swarm.sysinfo.ram.free() { #
-# Prints the hostname
+# Prints the free ram
 #
 	local input_k size
 	input_k=$($AWK '/MemAvailable/ {print $2}' /proc/meminfo)
 	$ECHO $(( input_k * 1024 ))
 }
 swarm.sysinfo.ram.used() { #
-# Prints the hostname
+# Prints how much ram is used
 #
 	$ECHO "$(swarm.sysinfo.ram.total)" "$(swarm.sysinfo.ram.free)" | $AWK '{print ($1 - $2) }'
+}
+swarm.sysinfo.user.local() { #
+# Shows local users (that have a home directory)
+#
+	$LS "$HOME/.."
+}
+swarm.sysinfo.user.loged() {
+# Shows users that are currently loged in
+#
+	users
 }
 _swarm.sysinfo.() {
 # Prints the IPv6 adress

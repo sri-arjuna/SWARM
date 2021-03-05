@@ -174,8 +174,8 @@ swarm.sysinfo.net.external_ip() { # [-v]
 	then	dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/zero
 		return 0
 	else	case "${CURLWGET:-curl}" in
-		*curl)	$CURLWGET icanhazip.com 2>/dev/zero ; ret=$?		;;
-		*wget)	$CURLWGET -qO - icanhazip.com ; ret=$?	;;
+		*curl)	$CURLWGET ifconfig.me/ip 2>/dev/zero ; ret=$?		;;
+		*wget)	$CURLWGET -qO - ifconfig.me/ip ; ret=$?	;;
 		*)	$ECHO "$SWARM_MSG_INIT_CURLWGET_NFOUND: $CURLWGET" ; return 1;;
 		esac
 		[[ 0 -eq $ret ]] && return 0

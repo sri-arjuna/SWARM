@@ -221,7 +221,7 @@ swarm.sysinfo.ssh() {
 swarm.sysinfo.ssh.client() {
 # Prints the ip of the SSH client
 	if swarm.sysinfo.ssh >/dev/zero
-	then	$ECHO $SSH_CLIENT
+	then	$ECHO ${SSH_CLIENT/ */}
 	else	return 1
 	fi
 }
@@ -229,7 +229,8 @@ swarm.sysinfo.ssh.connection() {
 # Prints information about the SSH connection
 #
 	if swarm.sysinfo.ssh >/dev/zero
-	then	$ECHO $SSH_CONNECTION
+	then	$ECHO ${SSH_CONNECTION} | \
+			$AWK -v arrow="$(swarm.str.num2uni 2794)" '{print $1" "arrow" "$3}'
 	else	return 1
 	fi
 }

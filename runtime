@@ -524,6 +524,8 @@
 				pre='swarm\.sysinfo\.'
 				list=$(	declare | $GREP "$pre" | $AWK '/\(\)/ {print $1}' | $GREP -v ^"_" )
 				cur="" last="x"
+			# Output
+				header --default "$SWARM_MSG_WORD_SYSTEM $SWARM_MSG_WORD_INFORMATION"
 				for ls in $list
 				do
 					cur="${ls/$pre/}"

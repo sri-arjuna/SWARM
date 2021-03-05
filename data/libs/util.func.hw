@@ -4,11 +4,11 @@
 #
 # swarm.sysinfo.*
 #	.screen*	(name)
-#		.available
+#		.list
 #		.hz
 #		.res
 # 	.net		(name of active device, ex: wlp3s0)
-#		.available
+#		.list
 #		.ipx	(eXtern)
 #		.ip
 #		.ip6
@@ -75,7 +75,7 @@ swarm.sysinfo.keyboard() {
 swarm.sysinfo.mouse() {
 # Prints connected mice
 # 1 per line
-	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mouse -e track | $SORT -u
+	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mouse -e track | $SORT -u | $SED s,"Dell Dell","Dell",
 }
 swarm.sysinfo.video() {
 # Prints connected video
@@ -108,7 +108,7 @@ swarm.sysinfo.screen() {
 	# the space makes the difference!
 	LC_ALL=C xrandr | $AWK '/ connected/ {print $1}'
 }
-swarm.sysinfo.screen.available() {
+swarm.sysinfo.screen.list() {
 # Prints connected screens/monitor/display
 # 1 per line
 	if ! $isGUI
@@ -140,7 +140,7 @@ swarm.sysinfo.net() {
 	swarm.util.which ip >/dev/zero || return 1
 	LC_ALL=C ip addr | $GREP -v "NO-CARRIER" | $AWK -F ":" '/BROADCAST/ {print $2}'
 }
-swarm.sysinfo.net.available() {
+swarm.sysinfo.net.list() {
 # Prints available network device names
 #
 	$LS -1 /sys/class/net
@@ -203,7 +203,7 @@ swarm.sysinfo.device.name() {
 swarm.sysinfo.device.type() {
 # Prints the wether the system is VM or physical
 #
-	vserver=$(lscpu | $GREP Hypervisor | $WC -l) || return 1
+	vserver=$(LC_ALL=C lscpu | $GREP Hypervisor | $WC -l) || return 1
 	if [ $vserver -gt 0 ]
 	then 	$ECHO "VM"
 	else 	$ECHO "Physical"
@@ -213,14 +213,44 @@ swarm.sysinfo.ssh() {
 # Prints the hostname
 #
 	list=$($ECHO ${!SSH_*})
-
-	#printe "isSSH" "$(echo $isSSH)"
-	for l in  $list #isSSH
+	for l in $list #isSSH
 	do
-		printe "${l}" "${!l}"
+		printe "${l}" "${!l}" >&1
 	done
 }
-
+swarm.sysinfo.ram() {
+# Prints the hostname
+#
+	local total free used
+	total="$(swarm.sysinfo.ram.total| swarm.str.humanreadable --)"
+	used=$(swarm.sysinfo.ram.used | swarm.str.humanreadable --)
+	free=$(swarm.sysinfo.ram.free | swarm.str.humanreadable --)
+	#$PRINTF '%s/%s : %s\n' "$(swarm.sysinfo.ram.used|swarm.str.humanreadable --)" "$(swarm.sysinfo.ram.total|swarm.str.humanreadable --)" "$(swarm.sysinfo.ram.free|swarm.str.humanreadable --)"
+	$ECHO "$used/$total : $free"
+}
+swarm.sysinfo.ram.total() { #
+# Prints the hostname
+#
+	local input_k size
+	input_k=$($AWK '/MemTotal/ {print $2*1024}' /proc/meminfo)
+	#size="$SWARM_MSG_WORD_KB"
+	swarm.str.humanreadable --reverse "$input_k"
+}
+swarm.sysinfo.ram.free() { #
+# Prints the hostname
+#
+	local input_k size
+	input_k=$($AWK '/MemAvailable/ {print $2*1024}' /proc/meminfo)
+	#size="$SWARM_MSG_WORD_KB"
+	swarm.str.humanreadable --reverse "$input_k"
+}
+swarm.sysinfo.ram.used() { #
+# Prints the hostname
+#
+	local input_k size
+	#input_k=$($AWK '/MemTotal/ {print $2}' /proc/meminfo)
+	$ECHO "$(swarm.sysinfo.ram.total)" "$(swarm.sysinfo.ram.free)" | $AWK '{print ($1 - $2) }'
+}
 _swarm.sysinfo.() {
 # Prints the IPv6 adress
 #

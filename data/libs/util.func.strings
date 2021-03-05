@@ -510,3 +510,36 @@ swarm.str.usb() { #
 	tDev=$($READLINK -f "$devDisk/$targetUsb")
 	$ECHO "$tDev" >&1
 }
+swarm.str.humanreadable() { # [-p NUM] [-B] [--reverse] BYTES
+# Prints a human readable nunmebr with appended mb/gb
+# Expects BYTES as input
+	local mode opts reverse
+	mode="--to=iec"
+	while :;do
+		case "$1" in
+	#	"")	return 1
+	#		;;
+		-B)	opts+=" --suffix=B "
+			;;
+		-p)	opts+=" --padding=$2 "
+			shift
+			;;
+		--reverse)
+			mode="--from=iec"
+			reverse="$1"
+			;;
+		--)	while read line
+			do
+				$FUNCNAME ${reverse:-${mode/--to=iec}} $opts "$line"
+			done
+			return
+			;;
+		*)	break
+			;;
+		esac
+		shift
+	done
+	# Lets put a casual fallback detection here..
+	# Hope this works
+	numfmt $mode $opts "$1" 2>/dev/zero || numfmt ${mode/to/from} $mode $opts "$1"
+}

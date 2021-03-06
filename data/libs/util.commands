@@ -829,7 +829,7 @@
 		_check.date
 		_log.it "$1"
 	}
-	asRoot() { # "COMMAND" | "/path/to/file"
+	asRoot() { # [-r FILE_FOR_RETCODE] "COMMAND" | "/path/to/file"
 	# Executes passed command as root.
 	# Returns with 1 if command has failed
 		# Check wether we shall and/or can use sudo - or not
@@ -841,8 +841,11 @@
 			cfg.set -v "$SWARM_USER_CONF" "useSudo" "$useSudo"
 		fi
 	# Variables
-		local RET
+		local RETFILE RET
 		RET=1
+	# Check arguments, exit on missing
+		[[ "$1" == "-r" ]] && { RETFILE="$2" ; shift 2 ; }
+		[[ -z "$1" ]] && { swarm.show.usage "${FUNCNAME[1]}" ;return 1 ; }
 	# Call it properly
 		if $useSudo
 		then	# Easy
@@ -856,5 +859,8 @@
 				return $?
 			fi
 		fi
+	# Save value if requested
+		[[ -n "$RETFILE" ]] && $ECHO "$RET" > "$RETFILE"
+	# Show and exit with RET code
 		status $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
 	}

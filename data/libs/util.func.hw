@@ -85,6 +85,9 @@ swarm.sysinfo.video() {
 swarm.sysinfo.video.path() {
 	$GREP -A10 "$(swarm.sysinfo.video|$GREP -i video )" "/proc/bus/input/devices" | $GREP -i -v sound | $AWK -F "Sysfs=" '/Sysfs=/ {print $2}'
 }
+swarm.sysinfo.video.list() {
+	$LS .1 /dev/vid* 2>/dev/zero
+}
 swarm.sysinfo.mic() {
 # Prints connected microphones
 # 1 per line
@@ -104,7 +107,7 @@ swarm.sysinfo.screen() {
 		return 0
 	fi
 	# Check if the app is needed
-	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
+	swarm.util.which xrandr &>/dev/zero || swarm.os.install xrandr
 	# the space makes the difference!
 	LC_ALL=C xrandr | $AWK '/ connected/ {print $1}'
 }
@@ -119,7 +122,7 @@ swarm.sysinfo.screen.list() {
 		return 1
 	fi
 	# Check if the app is needed
-	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
+	swarm.util.which xrandr &>/dev/zero || swarm.os.install xrandr
 	# the space makes the difference! (dis(-)connected)
 	LC_ALL=C xrandr | $AWK '/connected/ {print $1}'
 }
@@ -132,7 +135,7 @@ swarm.sysinfo.screen.res() {
 		return 0
 	fi
 	# Check if the app is needed
-	swarm.util.which xrandr >/dev/zero || swarm.os.install xrandr
+	swarm.util.which xrandr &>/dev/zero || swarm.os.install xrandr
 	LC_ALL=C xrandr | $AWK '/\*/ {print $1}'
 }
 swarm.sysinfo.net() {

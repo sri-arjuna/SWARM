@@ -223,6 +223,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			$CP_EXEC $optargs "$src" "$cp_target"
 			#$PRINTF "$POS_END\n"
 			status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
+			init.log "$CP $(swarm.str.bool2str -s $?) $src"
 			((COUNT++))
 		done
 	else	# Show all in one line;
@@ -231,6 +232,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 		$CP $optargs "${ARGS[@]}" "$cp_target"
 		#$PRINTF "$POS_END\n"
 		status $? "$SWARM_MSG_WORD_COPIED $MAX $SWARM_MSG_WORD_FILES"
+		init.log "$CP $(swarm.str.bool2str -s $?) FILES::${ARGS[*]}  TARGET::$cp_target"
 	fi
 }
 swarm.util.cd() { # DIR
@@ -240,8 +242,7 @@ swarm.util.cd() { # DIR
 	then	# Expecting exactly 1 argument, anything else is wrong usage:
 		swarm.help.usage "${FUNCNAME[@]}"
 		return 1
-	fi
-	if [[ -d "$1" ]]
+	elif [[ -d "$1" ]]
 	then	cd "$1" || return 1
 		return 0
 	else	# Dir does not exist, what is wrong?
@@ -251,8 +252,8 @@ swarm.util.cd() { # DIR
 			printe "$SWARM_MSG_WORD_PASSED:" "$1"
 			printe "$SWARN_MSG_WORD_EXPECTED:" "$1"
 			if yesno "$SWARM_MSG_WORD_CREATE: $1"
-			then 	if $MKDIR "$1"
-				then	$CD "$1"
+			then 	if swarm.util.mkdir "$1"
+				then	swarm.util.cd "$1"
 				else 	status $? "$SWARM_MSG_PHRASE_COULDNOTCREATE:" "$1"
 					return 1
 				fi
@@ -264,8 +265,9 @@ swarm.util.cd() { # DIR
 			printe "$SWARM_MSG_WORD_CURRENT $SWARM_MSG_WORD_DIR:" "$PWD"
 			printe "$SWARN_MSG_WORD_EXPECTED:" "$PWD/$1"
 			if yesno "$SWARM_MSG_WORD_CREATE: $PWD/$1"
-			then 	if $MKDIR "$PWD/$1"
-				then	$CD "$1"
+			then 	yesno "Are you sure, because 'isDir' should not be used to create directories! ALPHA-COMMENT // TODO" || return 1
+				if swarm.util.mkdir "$PWD/$1"
+				then	swarm.util.cd "$1"
 				else 	status $? "$SWARM_MSG_PHRASE_COULDNOTCREATE:" "$PWD/$1"
 					return 1
 				fi

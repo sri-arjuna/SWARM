@@ -1,0 +1,47 @@
+.\" Manpage template for SWARM
+.TH swarm.util.rm 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.util.rm\fP - Remove files and directories
+
+.SH SYNOPSIS
+\fBswarm.util.rm\fP [-v] FILE1 FILE2 DIR2 ...
+
+.SH ENVIRONMENT
+.TP
+\fB$RM\fP
+You can use this variable as a shorthand for \fBswarm.util.rm\fP if you prefer.
+.TP
+\fB$RM_EXEC\fP
+If you write scripts that are supposed to run on multiple plattforms, it is recomended that you use this over the 'plain command' rm if you do not want to use \fBswarm.util.rm\fP, as this variable will refer to the found file on the local machine.
+
+.SH DESCRIPTION
+\fBswarm.util.rm\fP will attempt to delete 'everything' you pass to it.
+.PP
+It will remove files without asking and without any information, unless \fB-v\fP is passed.
+However, if you pass a directory, it will ask the user if they really want to remove that directory and all its content.
+.PP
+Whatever is attempted to be removed, will be written to \fI$SWARM_LOG\fP.
+
+.SH OPTIONS
+.TP
+\fB-v\fP
+Will enable verbose mode.
+.PP
+This will enable a simple status message per passed item.
+
+.SH EXAMPLE
+.PP
+    no | swarm.util.rm -v /
+
+.PP
+    if swarm.util.rm other example
+    then ...
+
+.SH BUGS
+     Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+     SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+     General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage and the function swarm.util.cd was written by Simon Arjuna Erat (sea) for SWARM version 1.0

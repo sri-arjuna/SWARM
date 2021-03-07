@@ -1,0 +1,48 @@
+.\" Manpage template for SWARM
+.TH swarm.util.mkdir 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.util.mkdir\fP - Change Directory, the save way
+
+.SH SYNOPSIS
+.TP
+\fBswarm.util.mkdir\fP DIRECTORY
+
+.SH ENVIRONMENT
+.TP
+\fB$MKDIR\fP
+You can use this variable as a shorthand for \fBswarm.util.mkdir\fP if you prefer.
+.TP
+\fB$MKDIR_EXEC\fP
+If you write scripts that are supposed to run on multiple plattforms, it is recomended that you use this over the 'plain command' mkdir if you do not want to use \fBswarm.util.mkdir\fP, as this variable will refer to the found file on the local machine.
+
+.SH DESCRIPTION
+\fBswarm.util.mkdir\fP will attempt to change to passed DIRECTORY
+.PP
+It will check wether passed DIRECTORY exists or not. If it does it will change and exit successfully.
+If it does not exist, it will ask the user if it should create it.
+.PP
+Whatever is created, will be logged to \fI$SWARM_LOG\fP.
+
+.SH OPTIONS
+.TP
+\fB-v\fP
+Will enable verbose mode.
+.PP
+This will enable a simple status message per passed item.
+
+.SH EXAMPLE
+.PP
+    swarm.util.mkdir -v /tmp/first/second/third/or/more/sub/dirs /tmp/and/more
+
+.PP
+    if ! swarm.util.mkdir "${OUTPUT_DIR:-/tmp/{one,two}/}"
+    then ....
+
+.SH BUGS
+     Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+     SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+     General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage and the function swarm.util.mkdir was written by Simon Arjuna Erat (sea) for SWARM version 1.0

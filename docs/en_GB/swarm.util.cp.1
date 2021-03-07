@@ -2,16 +2,29 @@
 .TH swarm.util.cp 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
 
 .SH NAME
-\fBswarm.util.cp\fP - Copy, TUI-Style
+\fBswarm.util.cp\fP - Copy, SWARM-style
 
 .SH SYNOPSYS
 swarm.util.cp [-d -f -l -q] SOURCE1 [..] TARGET
 
+.SH ENVIRONMENT
+.TP
+\fB$CP\fP
+You can use this variable as a shorthand for \fBswarm.util.cp\fP if you prefer.
+.TP
+\fB$CP_EXEC\fP
+If you write scripts that are supposed to run on multiple plattforms, it is recomended that you use this over the 'plain command' cp if you do not want to use \fBswarm.util.cp\fP, as this variable will refer to the found file on the local machine or - where available - to the builtin variant.
+
 .SH OPTIONS
-In addition to the default options of "cp"
-  --dash		Switch to (animated) dash-mode
-  --line		Print all items on one line.
-  --long		Show long names (full passed target path)
+.TP
+\fB--dash\fP
+Switch to (animated) dash-mode
+.TP
+\fB--line\fP
+Print all items on one line.
+.TP
+\fB--long\fP
+Show long names (full passed target path)
 
 .SH EXAMPLE
 swarm.util.cp * /path/to/destination[/file]
@@ -21,7 +34,7 @@ swarm.util.cp \fB--long\fP * /path/to/destination[/file]
 swarm.util.cp \fB--dash\fP \fB--line\fP * /path/to/destination[/file]
 
 .SH SEE ALSO
-\fBbash\fP(1), \fBcp\fP(1), \fBbar\fP(1)
+\fBbar\fP(1)
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP

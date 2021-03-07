@@ -685,7 +685,7 @@
 	# Opens the manpage according to passed FUNCNAME
 	#
 		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
-		local tDir="$SWARM_DIR_LANG/${SWARM[LANG]}/man"
+		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
 		if [[ -f "$1" ]]
 		then	# Passed argument exists
 			tManpage="$1"
@@ -697,9 +697,14 @@
 			#shellcheck disable=SC2128
 			swarm.help.usage "$FUNCNAME"
 			return 1
-		else
-			swarm.help.usage "$1"
-			return 1
+		else	# Lets use fallback language : english
+			tdir="$SWARM_DIR_ROOT/docs/en_GB"
+			if [[ -f "$tdir/${1}.1" ]]
+			then	tManpage="$tDir/${1}.1"
+			else
+				swarm.help.usage "$1"
+				return 1
+			fi
 		fi
 		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
 	}
@@ -709,9 +714,9 @@
 	swarm.eu.show.config() { #
 	# Shows the configuration menu for SWARM
 	#
-		title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
-
+		header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "$($DATE_TODAY) / $($DATE_TIME)"
 		while
+			title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
 			printe "$SWARM_MSG_PHRASE_SELECT_FILE"
 			#shellcheck disable=SC2046
 			tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") )

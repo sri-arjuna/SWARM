@@ -714,19 +714,43 @@
 	swarm.eu.show.config() { #
 	# Shows the configuration menu for SWARM
 	#
-		header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "$($DATE_TODAY) / $($DATE_TIME)"
 		while
+			clear
+			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "$($DATE_TODAY) / $($DATE_TIME)"
 			title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
 			printe "$SWARM_MSG_PHRASE_SELECT_FILE"
 			#shellcheck disable=SC2046
-			tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") )
+			[[ -z "$1" ]] && \
+				tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") ) || \
+				tFile="$1"
 		do
 			# If the selected option is 'back' quit the Loop
 			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break
 
 			# Everything else should be a valid option (if not, pick is buggy)
-			case "$tFile" in
-			RC)	cfg.edit "$SWARMRC"
+			case "${tFile,,}" in
+			rc)	cfg.edit "$SWARMRC"
+				;;
+			*"settings"*)
+				# Copy the original again if it no longer exists
+				if [[ ! -f "$SWARM_USER_CONF" ]]
+				then	# The file does not exist, lets make sure the path does
+					swarm.util.mkdir "$SWARM_USER_DIR_CONF"
+					swarm.util.cp "$SWARM_DIR_CONF/settings.conf" "$SWARM_USER_CONF"
+				fi
+				# Edit the file
+				cfg.edit -T "${SWARM_MSG_WORD_SETTINGS}" \
+					--conf-header "test" \
+					--option "useSudo" \
+						--values "true false" \
+						--default true \
+					--option "DD_BS" \
+					 	--values "1M 4M 8M 16M 32M 128M 256M" \
+						--default "4M" \
+					--option "TAR_EXT" \
+						--values "tar.bz2 tar.gz tar.xz" \
+						--default "tar.gz" \
+					"$SWARM_USER_CONF"
 				;;
 			*)	cfg.edit "$SWARM_USER_DIR_CONF/$tFile"
 				;;

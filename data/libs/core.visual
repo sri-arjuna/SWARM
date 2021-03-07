@@ -75,10 +75,9 @@
 		${isRoot:-false} && \
 			local this_theme="${1:-default-red}" || \
 			local this_theme="${1:-default-blue}"
-		#export SWARM_THEME="$this_theme"
 		# Always use the user themes first
 		# in case someone wants to pseudo-overwrite the default themes
-		for there in "$SWARM_DIR_THEMES" "$SWARM_USER_DIR_BASE/themes"
+		for there in "$SWARM_USER_DIR_BASE/themes" "$SWARM_DIR_THEMES"
 		do
 			# check in each dir
 			if [[ -d "$there" ]]

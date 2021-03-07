@@ -1,0 +1,144 @@
+.\" Manpage template for SWARM
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBSWARM (1.0)\fP - Main Manpage (TODO - WIP )
+
+.SH DESCRIPTION
+SWARM is a framework for scripts to give them an interface like feeling,
+some 'bling bling' to output the data, convenience for the endusers
+and coding helpers for scripters.
+
+It has a new approach to the console, as it allows to print your output
+to be either left, center or right aligned, and even print different colored exit status'.
+
+Furthermore it takes the scripters burdon of figuring out what application
+a $USER uses/has installed by providing wrappers for tasks like:
+
+     * download (curl/wget)
+     * edit (atom, emacs, notepad++/qq, vim, nano, ... )
+     * filemgr (pcmanfm, thunar, ... )
+     * ftp (ftp, sftp, lftp)
+     * install (dnf/yum, pacman, pkg, emerge, ... )
+     * web (firefox, opera, chromium, lynx, ... )
+     * terminal (lxterminal, konsole, ... )
+
+Of course to keep the interface intact, I had to come up with some wrappers for basic shell commands as well.
+Some of them have multiple uses now.
+.TP
+READ
+read is now used for \fByesno\fP and \fBask\fP.
+\fByesno\fP returns the boolvalue of the answer (yn). yes=true=0, no=false=1
+.TP
+SELECT
+\fBpick\fP offers the similar use case for the enduser like \fBselect\fP and should be used instead.
+
+
+.SH SYNOPSIS
+.TP
+\fBsource \fISWARM/runtime\fP
+This is how you should invoke SWARM from your script/s.
+.PP
+Keep in mind SWARM is a framework, thus it needs to be sourced by your script.
+As I wanted to keep it simple to use everything of SWARM, I figured a single file to access SWARM in 2 different ways is the most convenient way to go. As a result, we have a very cleaned up project base directory.
+.PP
+If you are new to scripting or just as lazy as I am, you can always use the \fI./runtime\fP \fBnew script full\fP command to get started.
+.TP
+      \fI./runtime\fP \fBhelp\fP [FUNCNAME]
+      	Lets you browse through a basic help menu or display the manpage of passed FUNCNAME
+.TP
+      \fI./runtime\fP \fBdemo\fP
+      	Shows some sample output and prints the source code of that demo function
+.TP
+      \fI./runtime\fP \fBconfig\fP
+      	Opens a menu to configure SWARM
+.TP
+      \fI./runtime\fP \fBnew\fP [ARGUMENT]
+
+Where ARGUMENT is one of:
+      \fBscript\fP [full,mini,lib] [NAME]
+      \fBfunc/tion\fP [default,menu,req]
+      \fBman/page\fP [default,swarm] [NAME]
+      \fBprj|project\fP [NAME]
+.TP
+      \fI./runtime\fP \fBwords\fP
+      	Prints a list of words that are translate/able
+.TP
+      \fI./runtime\fP \fBphrases\fP
+      	Prints a list of phrases that are translate/able
+.TP
+      \fI./runtime\fP \fBstats\fP
+      	Prints some stats of the project
+.TP
+      \fI./runtime\fP \fBsysinfo\fP
+      	Parses all swarm.sysinfo.* functions and prints their section, function name and return values.
+.TP
+      \fI./runtime\fP \fBtar\fP
+      	Creates a source tarball of ./SWARM in ~
+.TP
+      \fI./runtime\fP \fBtarball\fP
+      	Creates a source tarball of ./SWARM in ~ incl. the git repository
+
+
+.SH ENVIRONMENT : USER DIRECTORIES
+.TP
+\fB$SWARM_USER_DIR_BASE\fP
+On most systems, this will refer to $HOME/.config/swarm.
+This is the base for all files that might get created by SWARM and allow for user customization.
+.TP
+\fB$SWARM_USER_DIR_CONF\fP
+This will refer to the subdirectory of of \fB$SWARM_USER_DIR_BASE/conf\fP.
+All files within this directory will be read when \fISWARM/runtime\fP is sourced.
+It will not go into subdirectories.
+User scripts are supposed to assign their conf file like:
+.PP
+	CONF="$SWARM_USER_DIR_CONF/${script_name}.conf"
+.TP
+\fB$SWARM_USER_DIR_LIBS\fP
+This refers to \fB$SWARM_USER_DIR_BASE/libs\fP.
+If you want to have certain functions you wrote to be avilable for all your SWARM scripts, this is where you place them.
+.TP
+\fB$SWARM_LOG_DIR\fP
+This refers to \fB${SWARM_USER_DIR_BASE}/log\fP
+If your script requires a logfile, you can use this example:
+.PP
+
+	LOG="$SWARM_USER_DIR_LOG/${script_name}.log"
+.TP
+\fB$SWARM_TMP_DIR\fP
+This refers to \fB${SWARM_USER_DIR_BASE}/tmp\fP
+
+
+.SH ENVIRONMENT : USER FILES
+.TP
+\fB$SWARM_LOG\fP
+The logfile for all SWAM internal commands/functions can be found at \fI$HOME/.config/swarm/log/swarm-all-internals.log\fP.
+As long you use SWARM functions for basic filesystem operations (swarm.util.{cd,cp,rm,mv,mkdir,rmdir}, it can be found in this logfile already.
+So you can focus on logging script specific tasks in your own log file.
+.TP
+\fB$SWARM_TMP
+
+.TP
+\fI$SWARM_USER_CONF\fP
+This file is used to save how SWARM works internaly. This refers to \fI$HOME/.config/swarm/conf/settings.conf\fP, unless you have changed it otherwise in \fI$SWARMRC\fP.
+.TP
+\fI$SWARMRC\fP
+This file stores the most important path and command variables as well as some basic user information to be used for templates.
+
+
+.SH EXAMPLE
+.runtime theme mono
+.PP
+./runtime sysinfo
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBcommand_codes\fP(1),  \fBask\fP(1),  \fBpick\fP(1),  \fByesno\fP(1),  \fBasRoot\fP(1),  \fBheader\fP(1),  \fBtitle\fP(1),  \fBprinte\fP(1)
+
+.SH BUGS
+.PP
+ Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+ SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+ General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage SWARM was written by Simon Arjuna Erat (sea) for SWARM version 1.0

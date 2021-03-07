@@ -714,6 +714,8 @@
 	swarm.eu.show.config() { #
 	# Shows the configuration menu for SWARM
 	#
+		local tFile
+		tFile=""
 		while
 			clear
 			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "$($DATE_TODAY) / $($DATE_TIME)"
@@ -722,7 +724,7 @@
 			#shellcheck disable=SC2046
 			[[ -z "$1" ]] && \
 				tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") ) || \
-				tFile="$1"
+				tFile="${tFile:-$1}"
 		do
 			# If the selected option is 'back' quit the Loop
 			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break
@@ -730,6 +732,7 @@
 			# Everything else should be a valid option (if not, pick is buggy)
 			case "${tFile,,}" in
 			rc)	cfg.edit "$SWARMRC"
+				[[ -n "$1" ]] && return
 				;;
 			*"settings"*)
 				# Copy the original again if it no longer exists
@@ -751,8 +754,12 @@
 						--values "tar.bz2 tar.gz tar.xz" \
 						--default "tar.gz" \
 					"$SWARM_USER_CONF"
+				[[ -n "$1" ]] && return
 				;;
-			*)	cfg.edit "$SWARM_USER_DIR_CONF/$tFile"
+			*)	[[ -f "$SWARM_USER_DIR_CONF/$tFile" ]] && \
+						cfg.edit "$SWARM_USER_DIR_CONF/$tFile" || \
+						status 1 "$SWARM_MSG_PHRASE_FILENOTFOUND: $tFile"
+				[[ -n "$1" ]] && return
 				;;
 			esac
 		done

@@ -1,0 +1,56 @@
+.\" Manpage template for SWARM
+.TH asRoot 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBasRoot\fP - Executes passed commands as root user
+
+.SH SYNOPSIS
+\fBasRoot\fP [\fB-r\fP \fIFILE_RETURN_VALUE\fP] COMMAND OPTIONS ARGUMENTS
+
+.SH DESCRIPTION
+Executes passed COMMAND with its OPTIONS and ARGUMENTS as root user.
+.PP
+The Enduser can use 'useSudo=\fBtrue\fP|\fBfalse\fP' in \fI$SWARM_USER_DIR_CONF/settings.conf\fP
+.PP
+.SH OPTIONS
+.TP
+\fB-r\fP 	\fIFILE_RETURN_VALUE\fP
+Saves the return value of passed COMMAND in \fIFILE_RETURN_VALUE\fP.
+.TP
+\fB-m\fP 	MSG
+Prints "MSG" before asking for a password (su/sudo)
+
+.SH ENVIRONMENT
+.TP
+$isRoot
+Is a variable which wraps swarm.util.isRoot and returns a boolean depending on wether UID is 0 or not.
+.TP
+USER
+If user is empty, it takes LOGINNAME to display the user name for sudo.
+
+.SH FILES
+.TP
+\fI$SWARM_USER_DIR_CONF/settings.conf\fP
+This file is used to save how SWARM works internaly. This refers to \fI$HOME/.config/swarm/conf/settings.conf\fP, unless you have changed it otherwise in \fI$SWARMRC\fP.
+.TP
+\fI$SWARMRC\fP
+This file stores the most imprtant path and command variables as well as some basic user information to be used for templates.
+
+.SH EXAMPLE
+asRoot argument
+.PP
+asRoot other example
+
+.SH SEE ALSO
+\fBsu\fP(1), \fBsudo\fP(1)
+
+.SH BUGS
+.TP
+Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+.TP
+SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+.TP
+General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This script asRoot was written by sea for SWARM version 0.8.7

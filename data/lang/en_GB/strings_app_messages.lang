@@ -1,0 +1,59 @@
+#/usr/bin/env bash
+#
+# SWARM Apps
+#
+	SWARM_MSG_EDITOR_GUI="Please select your favorite text editor for GUI"
+	SWARM_MSG_EDITOR_CLI="Please select your favorite text editor for CLI"
+	SWARM_MSG_FILEMGR_GUI="Please select your favorite file manager for GUI"
+	SWARM_MSG_FILEMGR_CLI="Please select your favorite file manager for CLI"
+	SWARM_MSG_WEB_GUI="Please select your favorite web browser for GUI"
+	SWARM_MSG_WEB_CLI="Please select your favorite web browser for CLI"
+	SWARM_MSG_TERMINAL_GUI="Please select your favorite terminal application"
+	SWARM_MSG_TERMINAL_DEFAULT_OPT='Using default option \"$opt\", please report your terminal ($TERMINAL) and its command execution option.'
+	SWARM_MSG_TERMINAL_NO_TERMINAL="Terminal applications cannot be executed on $TTY"
+	SWARM_MSG_DOWNLOAD_SELECT="Which one to install?"
+	SWARM_MSG_DOWNLOAD_INIT="Starting new download"
+	SWARM_MSG_DOWNLOAD_ENTER="Enter URL to download"
+	SWARM_MSG_INSTALL_NO_MGR="No package manager could be found."
+	SWARM_MSG_INSTALL_REPORT="Please raise an issue on https://github.com/sri-arjuna/SWARM/issues
+or send an email with the subject 'swarm.os.install app mgr' to 'erat.simon {at} gmail dot com'.
+Content should be the output of 'uname -a' and the command name of the package manager you have installed."
+#
+# SWARM Press
+#
+	SWARM_MSG_PRESS_ENTER="Press [ENTER] to continue"
+#
+# SWARM new
+#
+	SWARM_MSG_NEW_SCRIPT_SELECTION="Please select your new script:"
+	SWARM_MSG_NEW_SCRIPT_CREATED="New script has been created."
+	SWARM_MSG_NEW_SCRIPT_EDITNOW="Do you want to edit it now?"
+	SWARM_MSG_NEW_PROJECT_NAME="Please enter the name of the project:"
+	SWARM_MSG_NEW_PROJECT_EXEC="What is the name of the executed script:"
+#
+# SWARM Wait
+#
+	SWARM_MSG_WAIT_TIME_LEFT="Time left:"
+	SWARM_MSG_WAIT_FAIL="Please use either (s)econds, (m)inutes, or (h)ours"
+#
+# SWARM str.usb
+#
+	SWARM_MSG_USB_CONNECT="Please connect an USB device..."
+	SWARM_MSG_USB_ONLY_AVAIL="The only device available is:"
+	SWARM_MSG_USB_CARD_LISTED="Is this a card reader that is always listed?"
+	SWARM_MSG_USB_CARD_IGNORE="Ignore this device in future calls?"
+	SWARM_MSG_USB_ASK_AGAIN="Do you want to be asked to select this device every time?"
+	SWARM_MSG_USB_ASK_DESC="No, might result in that device being auto-selected!"
+#
+# SWARM tar
+#
+	SWARM_MSG_TAR_ENTER_PATH="Enter (absolute) path to tar:"
+#
+# SWARM config (cfg.*)
+#
+	SWARM_MSG_CFG_EDIT_TITLE="Configuration Editor"
+	SWARM_MSG_CFG_EDIT_SELECT_VAR="Select a variable to change or go back"
+	# VALUE_NEW: Leave the variables escaped, so the string can be 'eval' upon use
+	SWARM_MSG_CFG_EDIT_VALUE_NEW='What is the new value'
+	SWARM_MSG_CFG_EDIT_NO_OPTIONS="No options passed as --options OPTNAME"
+	SWARM_MSG_CFG_EDIT_MUST_PROVIDE="Must provide a FILE to \$FUNCNAME"

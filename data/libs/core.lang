@@ -28,27 +28,25 @@
 
 		if [[ -d "$SWARM_DIR_LANG/$lang_wish" ]]
 		then	# Desired language exists
-				# Load all language files
-				# shellcheck disable=SC1090
-				source "$SWARM_DIR_LANG/$lang_wish"/*
+			# Load all language files
+			# shellcheck disable=SC1090
+			source "$SWARM_DIR_LANG/$lang_wish"/*
 		else	# Passed language or auto detection didnt work
-				# Check for 'similar ones'
-				lang_options=$($ECHO "$(swarm.lang.list)" | $GREP "$lang_short")
-				if [[ -z $lang_options ]]
-				then	# No no options found
-						if [[ $(swarm.lang.count) -gt 1 ]]
-						then	# More than language has been found
-								select lang_wish in $(swarm.lang.list);do break;done
-								SWARM[LANG]=$lang_wish
-						else	# Only english is available
-								SWARM[LANG]=en_GB
-						fi
-						# Load the selected language files
-						# shellcheck disable=SC1090
-						source "$SWARM_DIR_LANG/${SWARM[LANG]}/core.conf"
-						# shellcheck disable=SC1090
-						source "$SWARM_DIR_LANG/${SWARM[LANG]}/usage.conf"
+			# Check for 'similar ones'
+			lang_options=$($ECHO "$(swarm.lang.list)" | $GREP "$lang_short")
+			if [[ -z $lang_options ]]
+			then	# No no options found
+				if [[ $(swarm.lang.count) -gt 1 ]]
+				then	# More than language has been found
+					select lang_wish in $(swarm.lang.list);do break;done
+					SWARM[LANG]=$lang_wish
+				else	# Only english is available
+					SWARM[LANG]=en_GB
 				fi
+				# Load the selected language files
+				# shellcheck disable=SC1090
+				source "$SWARM_DIR_LANG/${SWARM[LANG]}"/*.lang
+			fi
 		fi
 		# Export all messages
 		# shellcheck disable=SC2163

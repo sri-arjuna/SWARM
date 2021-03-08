@@ -229,7 +229,7 @@
 # This is the default language, another one will only be attempted to load,
 # if it is not starting with en_*  --> See line 260'ish
 #
-	for lang_file in "$SWARM_DIR_LANG/en_GB"/{core,usage}.conf
+	for lang_file in "$SWARM_DIR_LANG/en_GB"/*.lang
 	do
 		# shellcheck disable=SC1090
 		source "$lang_file"

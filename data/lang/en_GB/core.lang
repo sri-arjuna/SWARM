@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# SWARM Language File
+# ------------------------------
+# If you want to support your language feel free to translate into a new file.
+#
+# But first and foremost, lets have a list of important words:
+# Some of these words will be modified so less strings need to be translated
+# ------------------------------
+# Declarations
+# * The variables ending with "<ACTION>ING" are during the action.
+# * The variables ending with "<ACTION>ED" are after the action is done/failed.
+# ------------------------------
+
+#
+# SWARM INIT PROCEDURE
+#
+	SWARM_MSG_INIT_FILE_MISSING="Seems this file could not be loaded:"
+	SWARM_MSG_INIT_FILE_FOUND="Successfully loaded file:"
+	SWARM_MSG_INIT_INJECTION="Aborting, injection detected!"
+	SWARM_MSG_INIT_HOME_NOT_FOUND="Could not find HOME dir variable, fallback to current dir $(\pwd) as HOME and for ./swarmrc"
+	SWARM_MSG_INIT_SWARMRC_PROV_NOT_FOUND="The provided path to the SWARMRC was not found: $SWARMRC"
+	SWARM_MSG_INIT_UNSANE_USERCONFIG="Aborting, userconfig not sane! (default: \$HOME/.swarmrc + \$HOME/.config/swarm)"
+	SWARM_MSG_INIT_RO_SYSTEM="SWARMRC is set but could not be written. Assuming Read-Only System."
+	SWARM_MSG_INIT_RO_NODIR="Cant create directory on RO-Systems."
+	SWARM_MSG_INIT_CANT_READ_EXISINTG_SWARMRC="SWARMRC ($SWARMRC) exists, but could not be read!"
+	SWARM_MSG_INIT_THEME="Fallback to default theme, as the provided theme could not be found/loaded."
+	SWARM_MSG_INIT_PID_GEOMETRY="Updating geometrics for SWARM PID"
+	SWARM_MSG_INIT_LOG_FAIL="Could not create logfile path and/or file."
+	SWARM_MSG_INIT_NO_ID="Could not determine a user id (UID)"
+	SWARM_MSG_INIT_SANITY_UNKOWN_CASE="Failed or unkown handle:"
+	SWARM_MSG_INIT_CURLWGET_NFOUND="Neiter 'curl' nor 'wget' could be found, 'download' will not work until you install either one."
+	SWARM_MSG_INIT_MORELESS_NFOUND="Neiter 'more' nor 'less' could be found, falling back to:"
+	SWARM_MSG_INIT_SWARM_CLEARED_MEMORY="Cleared SWARM from memory."
+
+#
+# SWARM Runtime Welcome
+#
+	SWARM_MSG_WELCOME_TITLE="Welcome to a short introduction"
+	SWARM_MSG_WELCOME_INFOLINE1="SWARM is not supposed to be called directly like this."
+	SWARM_MSG_WELCOME_INFOLINE2="Instead it is to be sourced by your script to get access to it's functions."
+	SWARM_MSG_WELCOME_INFOLINE3="For best experience, I recomend to place SWARM as follows:"
+SWARM_MSG_WELCOME_CONTENT="When calling SWARM like you just did, you should provide arguments.
+
+They are:
+
+$0 config
+To configure SWARM, either as user or as root.
+$0 help
+Lets you browse through all provided functions.
+$0 help FUNCNAME
+Prints the manpage of the according FUNCNAME.
+$0 new KEYWORD
+If KEYWORD is neither 'function' nor 'script' with optional arguments beeing 'default', 'mini' or 'full', it will take KEYWORD as a filename to create.
+$0 words OR phrases
+Prints variables that if SWARM was translated to that language, will change too.
+$0 demo
+Useses several commands of SWARM and prints its source code.
+$0 commands OR cmd
+Provdes a basic list of commands to start with."
+#
+# SWARM Runtime Help Menu
+#
+	SWARM_MSG_HELPMENU_ROOT_TEXT1="Please select a topic you want information about:"
+#
+# SWARM Runtime Help Menu
+#
+	SWARM_MSG_HELPMENU_BASIC_TEXT="Please select one of these basic functions:"
+	SWARM_MSG_HELPMENU_VARS_TEXT="Please select a variable name for more information:"
+	SWARM_MSG_HELPMENU_ADVANCED_TEXT="Please select one of these advanced functions:"
+	SWARM_MSG_HELPMENU_BASIC_SUBMENU_TEXT="Please select the information style:"
+
+#
+# --- SWARMRC Script Text ---
+#
+	SWARM_MSG_RC_HEADER="# Configuration file generated for SWARM (${SWARM[VERSION]} / Build: ${SWARM[BUILD]})"
+	SWARM_MSG_RC_HEADING="# Leave empty to use SWARM that was provided with the script. HIGHLY RECOMENDED!
+# If it contains a directory leading to SWARM, this version will be used, always!
+# This might lead to version conflicts if you use scripts by different authors."
+	SWARM_MSG_RC_SETTINGS="# These 2 are dynamicly set, but you can change them if desired
+	# This is usefull if you want to access your custom functions from the root user account
+	# This is for Single-User systems, it is NOT recomended to be used for multi-user systems!"
+	SWARM_MSG_RC_DIRECTORIES="	# Including SWARM_INSTALLED_DIR,
+	# these are the only exceptions to the SWARM_DIR_* rule"
+	SWARM_MSG_RC_COREUTILS="# If you should encounter any loading issues of SWARM
+# adjust the paths to the core utils here.
+# -> If you have to preset the variable before source SWARM,
+# -> please report so on GITHUB!
+# SunOS/Solaris users might need to adjust AWK.
+# Otherwise it is not recomended to change anything here,
+# unless absolutly required."
+	SWARM_MSG_RC_TITLE_USERINFO="User Information"
+	SWARM_MSG_RC_TITLE_COREUTILS="Core Utils"
+	SWARM_MSG_RC_APPS_CLI="Apps CLI"
+	SWARM_MSG_RC_APPS_GUI="Apps GUI"
+	SWARM_MSG_RC_SUOSUDO="SU and SUDO must be empty if the command was not found."
+#
+# --- SWARMRC Stats Text ---
+#
+	SWARM_MSG_STATS_TITLE="Project stats for"
+	SWARM_MSG_STATS_FILES="Spread across \$FILES files, there are:"
+	SWARM_MSG_STATS_LINES="Lines total"
+	SWARM_MSG_STATS_COMMENTS="Commented lines"
+	SWARM_MSG_STATS_BLANK="Blank lines"
+	SWARM_MSG_STATS_AVERAGE="Avrg lines p. file"
+	SWARM_MSG_STATS_FOLDERS="folders with a total of"

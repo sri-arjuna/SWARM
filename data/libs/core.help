@@ -716,16 +716,18 @@
 	#
 		local tFile
 		tFile=""
-		while
+		while true
+		do
 			clear
 			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "$($DATE_TODAY) / $($DATE_TIME)"
-			title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
-			printe "$SWARM_MSG_PHRASE_SELECT_FILE"
-			#shellcheck disable=SC2046
-			[[ -z "$1" ]] && \
-				tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") ) || \
-				tFile="${tFile:-$1}"
-		do
+			if [[ -z "$1" ]]
+			then
+				title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
+				printe "$SWARM_MSG_PHRASE_SELECT_FILE"
+				#shellcheck disable=SC2046
+				tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") )
+			else	tFile="${tFile:-$1}"
+			fi
 			# If the selected option is 'back' quit the Loop
 			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break
 

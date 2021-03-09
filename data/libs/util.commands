@@ -59,9 +59,8 @@
 	# For piping, it expects 3 lines, each representing 1 variable
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		#set -x
 		local MODE="none" doCenter=false
-		# Get args
+	# Get args
 		case "$1" in
 		"-1"|"-2"|--center)
 			if [[ "$1" == "--center" ]]
@@ -74,9 +73,9 @@
 		*)	MODE="normal"
 			;;
 		esac
-		# Get arg number if not forced yet
+	# Get arg number if not forced yet
 		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
-		# Get pipe?
+	# Get pipe?
 		case "$1" in
 		"--"|"-")
 			shift
@@ -112,10 +111,10 @@
 			esac
 			;;
 		esac
-		#set +x
+	# Now handle input
 		case "$MODE" in
 			"0")
-				swarm.print.border -e
+				swarm.print.border
 				swarm.print.text -e "" "" ""
 				;;
 			"1"|"center")
@@ -125,24 +124,22 @@
 					swarm.print.text -e "$1" "" ""
 				;;
 			"2")
-				swarm.print.border -e
+				swarm.print.border
 				swarm.print.text -e "$1" "" "$2"
 				;;
 			"3")
-				swarm.print.border -e
+				swarm.print.border
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		#$PRINTF "$posEND\n"
 	}
 	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		#set -x
 		local MODE="none"
-		# Get args
+	# Get args
 		case "$1" in
 		"-1"|"-2")	MODE="${1/-}"
 				shift
@@ -150,9 +147,9 @@
 		*)		MODE="normal"
 				;;
 		esac
-		# Get arg number if not forced yet
+	# Get arg number if not forced yet
 		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
-		# Get pipe?
+	# Get pipe?
 		case "$1" in
 		"--"|"-")
 			case "$MODE" in
@@ -185,7 +182,7 @@
 			esac
 			;;
 		esac
-		#set +x
+	# Handle input
 		case "$MODE" in
 			"0")
 				swarm.print.border -e
@@ -296,13 +293,26 @@
 						$READ line2
 						two_scnd="$line2"
 
-					swarm.print.text -e "${two_first}" "" ""
+					swarm.print.text -e "${two_first}" "" "" >&1
 					swarm.print.border >&2
 					swarm.print.text -s "$two_scnd" "${3}" "" >&1
 					done
-			else	echo blub
+			else	declare three_first three_scnd
+				#echo "arbeite mit ${#2} : $2"
+				$ECHO "$3" | swarm.str.split -- | \
+					while $READ line
+					do
+						three_first="$line"
+						$READ line2
+						three_scnd="$line2"
+
+					swarm.print.text -e "" "$three_first" "" >&1
+					swarm.print.border >&2
+					swarm.print.text -s "$2" "${three_scnd}" "" >&1
+					done
 			fi
-		else	swarm.print.text  "$2" "$3" "" >&1
+		else	# DINGELINGELING.. Aaaand eeeeverything is good!
+			swarm.print.text  "$2" "$3" "" >&1
 		fi
 
 		# Adjust fixer according to X or TTY, used to be required by TUI

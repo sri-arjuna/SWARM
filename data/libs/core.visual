@@ -326,8 +326,18 @@
 		local L="${ARGS[0]}"
 		local M="${ARGS[1]}"
 		local R="${ARGS[2]}"
-		#echo " THIS  ${#ARGS[*]}   THIS --> ${ARGS[*]}"
-		#for a in "${ARGS[@]}"; do echo "N- $BASH_SOURCE - NN $a";done
+	# Make the 2nd argument to the right
+	# if only two are given
+	#	if [[ 2 -eq ${#@} ]]
+	#	then	case "$MODE" in
+	#		basic|header)
+	#			if [[ -z "$R" ]] && [[ -n "$M" ]]
+	#			then	R="$M"
+	#				M=""
+	#			fi
+	#			;;
+	#		esac
+	#	fi
 	# These are suposed to 'remove' the escaped chars from beeing counted
 		local evalLeft=""
 		local evalMiddle=""
@@ -360,7 +370,7 @@
 				2)	breaker=2	;;
 				3)	breaker=3	;;
 				esac
-				if true; then
+				if false; then
 				# Wish this would work, but all this shows are empty lines
 					local L_one="" L_two=""
 					local M_one="" M_two=""
@@ -422,17 +432,19 @@
 					# shellcheck disable=SC2015
 					[[ ${#M} -ge $(( COLUMNS - lenBorder )) ]] && \
 						swarm.str.split "$M" | printl -2 -- || \
-						printl "$M"
+						printl "" "$M" ""
 				fi
 				if [[ -n "$R" ]]
 				then
 					# shellcheck disable=SC2015
-					[[ ${#R} -ge $(( COLUMNS - lenBorder )) ]] && \
-						swarm.str.split "$R" | while read -r line
-									do
-										printe "" "" "$line"
-									done || \
-									printe "$R"
+					if [[ ${#R} -ge $(( COLUMNS - lenBorder )) ]]
+					then	swarm.str.split "$R" | \
+						while read -r line
+						do
+							printe "" "" "$line"
+						done
+					else	printe "" "" "$R"
+					fi
 				fi
 				;;
 			"title")

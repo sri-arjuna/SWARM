@@ -281,11 +281,29 @@
 		[[ -z "$1" ]] && \
 			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
 			return 99
-		local RET="$1"
+		local RET="$1" len_allowed=15
 		local value="" ; value=$(swarm.str.status "$RET")
-
+		len_allowed=$(( COLUMNS - ${#BORDER_LEFT} - ${#BORDER_RIGHT} ))
 		swarm.print.border >&2
-		swarm.print.text  "$2" "$3" "" >&1
+		if [[ $(( ${#2} + ${#3} + 8 )) -gt $len_allowed ]]
+		then	if [[ ${#2} -gt ${#3} ]]
+			then	declare two_first two_scnd
+				#echo "arbeite mit ${#2} : $2"
+				$ECHO "$2" | swarm.str.split -- | \
+					while $READ line
+					do
+						two_first="$line"
+						$READ line2
+						two_scnd="$line2"
+
+					swarm.print.text -e "${two_first}" "" ""
+					swarm.print.border >&2
+					swarm.print.text -s "$two_scnd" "${3}" "" >&1
+					done
+			else	echo blub
+			fi
+		else	swarm.print.text  "$2" "$3" "" >&1
+		fi
 
 		# Adjust fixer according to X or TTY, used to be required by TUI
 		#[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
@@ -506,10 +524,12 @@
 	press() { # [-c -l -r] [STR]
 	# Requires the user to press [Enter/Return] before script continues
 	# c=center ,l=left , r=right
-		# Vars
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+	# Vars
 		local mode=""
 		local doReturn=false
-		# Catch arguments
+	# Catch arguments
 		for opt in "${@}"
 		do	if [[ "-" == "${opt:0:1}" ]]
 			then	case "${opt:1}" in
@@ -529,25 +549,26 @@
 			fi
 		done
 	# Display
+		swarm.print.border
 		case "$mode" in
 		"center")
-			printl "" "${1:-$SWARM_MSG_PRESS_ENTER}" ""
+			swarm.print.text --center "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		"left")
-			printl "${1:-$SWARM_MSG_PRESS_ENTER}"
+			swarm.print.text "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		"right")
-			printl "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+			swarm.print.text "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
-		*)
-			printl "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+		*)	# Default / fallback mode
+			swarm.print.text "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		esac
 	# Action :p
 		#$doReturn && \
 		#	$PRINTF "$(swarm.print.goto 0)" && \
 		#	(var=$(builtin read -u buffer n0 2>/dev/null)) & || \
-			read -r
+			$READ -r
 	}
 	ask() { # "A question?"
 	# Reads a user's input

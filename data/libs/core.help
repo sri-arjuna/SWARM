@@ -488,6 +488,21 @@
 		local out=""
 	# Parse argument
 		case "$1" in
+		"all")
+			local list ; list=$(cfg.list "$SWARM_DIR_LANG/${SWARM[LANG]}/strings_usage.lang")
+			local result ; result=""
+			local count ; count=0
+			title "$SWARM_MSG_WORD_USAGE"
+			for item in $list;do
+				result="${!item}"
+				printe "$item" "${result/${SWARM_MSG_WORD_USAGE}:}"
+				if [[ $count -le $(( ${LINES:-24} - 5)) ]]
+				then	((count++))
+				else	count=0
+					press 3>/dev/zero
+				fi
+			done
+			;;
 		"cfg.list")
 			out="$SWARM_MSG_CFG_LIST_USAGE"
 			;;
@@ -668,10 +683,13 @@
 		"asRoot")
 			out="$SWARM_MSG_ASROOT_USAGE"
 			;;
+		"swarm.str.split")
+			out="$SWARM_MSG_ASROOT_USAGE"
+			;;
 		"")
 			out="$"
 			;;
-		*)	out="TODO: $1"
+		*)	out="TODO: Usage $1"
 			;;
 		esac
 	# Output

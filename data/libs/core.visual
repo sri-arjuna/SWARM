@@ -292,7 +292,7 @@
 		# Had to disable because I sent bold text through this for title... hmm.. disable?
 		local fix_header_r=0
 		local MODE=basic
-		local doReturn=false
+		local doReturn=false doStart=false
 
 		while [[ "-" = "${1:0:1}" ]]
 		do
@@ -303,6 +303,8 @@
 				fix_header_r=0
 				shift	;;
 			e) 	doReturn=true
+				shift	;;
+			s) 	doStart=true
 				shift	;;
 			-center)
 				doCenter=true
@@ -435,11 +437,9 @@
 				;;
 			"title")
 				swarm.str.split "$1" | title --
-				return 0
 				;;
 			"header")
 				swarm.str.split "$1" | header --
-				return 0
 				;;
 			*)	echo ganz falsch hier...
 				return 1
@@ -503,14 +503,28 @@
 			;;
 		esac
 		#$PRINTF "\r" #${posEND}"
+		$doStart && $PRINTF "\r"
 		$doReturn && $PRINTF "\n"
 	}
 	swarm.str.split() { # "STRING"
 	# Splittes passed string in half at the nearest word
 	# and prints each part as a new line
-		[[ -z "$1" ]] && return 1
-		#local tmp_count=$(( ( $($ECHO "${1}" | $WC -c)  ) / 2 ))
-		local tmp_count=$(( ${#1} / 3 *2 ))
+		#[[ -z "$1" ]] && return 1
+		case "$1" in
+		"-"|"--")
+			shift
+			while $READ line;do
+				$FUNCNAME "$line"
+			done
+			return 0
+			;;
+		"")
+			swarm.help.usage "$FUNCNAME"
+			return 1
+			;;
+		esac
+		local str="" ; str="${*}"
+		local tmp_count=$(( ${#str} / 3 * 2 ))
 		$ECHO "$1" | $FOLD -sw "$tmp_count"
 	}
 	swarm.str.status() { # ERRNUM

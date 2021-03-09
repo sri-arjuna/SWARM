@@ -52,13 +52,15 @@
 	if [[ -z ${BASH_VERSINFO[@]} ]] || [[ ${BASH_VERSINFO[0]} -lt 4  ]]
 	then	# Print error of no BASH variables where found
 		# Or if BASH version is too low
-		printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+		printf '%s\n' "Requires BASH 4.3 or higher"
+		return || exit
 	else	# Bash version seems is 4 or higher
 		if [[ 4 -eq ${BASH_VERSINFO[0]} ]]
 		then 	# Major matches
 			if [[ ${BASH_VERSINFO[1]} -lt 3  ]]
 			then	# Minor does not
-				printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+				printf '%s\n' "Requires BASH 4.3 or higher"
+				return || exit
 			fi
 		fi
 	fi
@@ -71,12 +73,11 @@
 	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
-	export isSWARMfirstTime=true
+	isSWARMfirstTime=true
 	# hasCOLUMNS is for internal use only
 	[[ -n "$COLUMNS" ]] && \
 		hasCOLUMNS=true || \
 		hasCOLUMNS=false
-	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8.8
 	SWARM[BUILD]=66
@@ -89,7 +90,7 @@
 	SWARM[ROOTDIR]=""
 	# Language must be pre-set up until the basic language file was loaded
 	SWARM[LANG]="en_GB"
-	export SWARM_CODE=$$
+	SWARM_CODE=$$
 #
 # Set first time default
 #
@@ -99,7 +100,7 @@
 	configure_PATH="$BINDIR:$SBINDIR"
 	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
 	# Exporting an empty variable, but if it is, it will be filled with the current path.
-	export PATH_OLD="${PATH_OLD:-$PATH}"
+	PATH_OLD="${PATH_OLD:-$PATH}"
 	# Use current PATH or if empty, default POSIX path, and append additional cross over paths
 	# Might result in double entries if this file is source multiple times without properly
 	# clearing the ENV by the use of swarm.cleanup
@@ -111,6 +112,7 @@
 	then	TERM="xterm"
 		# This is required to work within a SSH env
 		export TERM
+		isSSH=true
 		# Skip selection if COLUMNS are preset
 		if [[ -z "$COLUMNS" ]]
 		then	echo "How many COLUMNS (width) does your terminal have?"
@@ -215,15 +217,15 @@
 	# Some might wonder why I did not use BASH_SOURCE[0]
 	# -> Because if it was sourced with a relative reference,
 	# I would not get an abslute path
-	export SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
-	export SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
-	export SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
-	export SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
-	export SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
-	export SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
-	export SWARM_DIR_LIST="${SWARM_DIR_DATA}/lists"
-	export SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
-	export SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
+	SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
+	SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
+	SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
+	SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
+	SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
+	SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
+	SWARM_DIR_LIST="${SWARM_DIR_DATA}/lists"
+	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
+	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 #
 # Load english strings for overall coverage for error messages.
 # This is the default language, another one will only be attempted to load,
@@ -424,9 +426,10 @@
 				do
 					((C++))
 					((T++))
-					[[ $C -eq 11 ]] && \
-						C=1 && \
-						title
+					if [[ $C -eq $(( ${LINES:-24} - 5 )) ]]
+					then	C=0
+						press #title
+					fi
 					printe "$T" "$this_word" "${!this_word}"
 				done
 				;;
@@ -538,5 +541,7 @@
 	fi
 #
 # Exit script or beginn user scripts
+# If you want 'sucessfull' exit cone on sourceing this file,
+# you got to have it this way. 
 #
-${DEBUG:-false} && set +x
+! ${DEBUG:-false} || set +x

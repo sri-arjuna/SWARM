@@ -350,7 +350,9 @@
 		then	# First Time // No arguments
 			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
 			title "$SWARM_MSG_WORD_LICENSE"
+		#	set -x
 			printe --center "$SWARM_MSG_PHRASE_WARRANTY1"
+		#	set +x
 			printe --center "$SWARM_MSG_PHRASE_WARRANTY2"
 			printe --center "$SWARM_MSG_PHRASE_WARRANTY3"
 			title	"$SWARM_MSG_WELCOME_TITLE"

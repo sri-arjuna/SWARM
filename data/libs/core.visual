@@ -364,21 +364,28 @@
 					local M_one="" M_two=""
 					local R_one="" R_two=""
 
-					[[ ${#L} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
-						swarm.str.split "$L" | \
-						while ${READ} -r L_one ;do ${READ} -r L_two;break;done || \
-						L_one="$L"
+					if $doCenter
+					then
+						[[ ${#L} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+							swarm.str.split "$L" | \
+							while ${READ} -r L_one ;do ${READ} -r L_two;break;done || \
+							L_one="$L"
+					else
+						[[ ${#L} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+							swarm.str.split "$L" | \
+							while ${READ} -r L_one ;do ${READ} -r L_two;break;done || \
+							L_one="$L"
 
-					[[ ${#M} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
-						swarm.str.split "$M" | \
-						while ${READ} -r M_one ;do ${READ} -r M_two;break;done || \
-						M_one="$M"
+						[[ ${#M} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+							swarm.str.split "$M" | \
+							while ${READ} -r M_one ;do ${READ} -r M_two;break;done || \
+							M_one="$M"
 
-					[[ ${#R} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
-						swarm.str.split "$R" | \
-						while ${READ} -r R_one ;do ${READ} -r R_two;break;done || \
-						R_one="$R"
-
+						[[ ${#R} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+							swarm.str.split "$R" | \
+							while ${READ} -r R_one ;do ${READ} -r R_two;break;done || \
+							R_one="$R"
+					fi
 					# This should be enough,
 					# as from here on further sub-splitting will be done
 					# shellcheck disable=SC2031
@@ -389,7 +396,7 @@
 					swarm.print.border
 					# shellcheck disable=SC2031
 					$doCenter && \
-						swarm.print.text  "$L_two" || \
+						swarm.print.text --center "$L_two" || \
 						swarm.print.text  "$L_two" "$M_two" "$R_two"
 					# We're done here, lets get out
 					#return 0
@@ -397,10 +404,16 @@
 				## works, but not nice.. empty line???
 				if [[ -n "$L" ]]
 				then
-					# shellcheck disable=SC2015
-					[[ ${#L} -ge $(( COLUMNS - lenBorder )) ]] && \
-						swarm.str.split "$L" | printl -1 -- || \
-						printl "$L"
+					if $doCenter
+					then	# shellcheck disable=SC2015
+						[[ ${#L} -ge $(( COLUMNS - lenBorder )) ]] && \
+							swarm.str.split "$L" | printe --center -- || \
+							printl "$L"
+					else	# shellcheck disable=SC2015
+						[[ ${#L} -ge $(( COLUMNS - lenBorder )) ]] && \
+							swarm.str.split "$L" | printl -1 -- || \
+							printl "$L"
+					fi
 				fi
 				if [[ -n "$M" ]]
 				then
@@ -422,9 +435,11 @@
 				;;
 			"title")
 				swarm.str.split "$1" | title --
+				return 0
 				;;
 			"header")
 				swarm.str.split "$1" | header --
+				return 0
 				;;
 			*)	echo ganz falsch hier...
 				return 1
@@ -443,6 +458,10 @@
 			then
 				local posMIDDLE="\33[$(( numHALF - $(( ${#1} / 2 ))   ))G"
 				$PRINTF "${posMIDDLE}${c_front}${c_back}${c_invert}$1${c_reset}"
+			elif $doCenter
+			then
+				local posMIDDLE="\33[$(( numHALF - $(( ${#1} / 2 ))   ))G"
+				$PRINTF "${posMIDDLE}$1${c_reset}"
 			else
 				$PRINTF "${posLEFT}$1"
 			fi
@@ -491,7 +510,7 @@
 	# and prints each part as a new line
 		[[ -z "$1" ]] && return 1
 		#local tmp_count=$(( ( $($ECHO "${1}" | $WC -c)  ) / 2 ))
-		local tmp_count=$(( ${#1} / 2 ))
+		local tmp_count=$(( ${#1} / 3 *2 ))
 		$ECHO "$1" | $FOLD -sw "$tmp_count"
 	}
 	swarm.str.status() { # ERRNUM

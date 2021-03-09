@@ -232,16 +232,13 @@
 	for lang_file in "$SWARM_DIR_LANG/en_GB"/*.lang
 	do
 		# shellcheck disable=SC1090
-		source "$lang_file"
+		source "$lang_file" 2>/dev/zero	# Sadly, some strings cause issues as they rely on functions that are not yet loaded
 		$PRINTF "."
 	done
 #
 # Load SWARM settings, core and sanity functions
 #
-	declare tmp_swarm_loading="" \
-			tmp_len=0 \
-			tmp_empty=""
-
+	declare tmp_swarm_loading="" 	tmp_len=0	tmp_empty=""
 	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env
 	do
 		# shellcheck disable=SC1090
@@ -255,8 +252,7 @@
 
 	for this in "${SWARM_DIR_LIBS}"/*
 	do
-		# Skip if core.utils or core.sanity
-		#( [[ "$this" == "$SWARM_DIR_LIBS/core.utils" ]] || [[ "$this" == "$SWARM_DIR_LIBS/core.sanity" ]] ) && continue
+		# Skip if core.env
 		[[ "$this" == "$SWARM_DIR_LIBS/core.env" ]] && continue
 		# Special handling for slow-mode
 		if ${doSlowLoading:-false}
@@ -285,8 +281,6 @@
 				 ${doLogExt:-false} &&  \
 					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this"
 			fi
-		#else
-		#	[[ "*" == "$this" ]] || $PRINTF '%s\n' "$SWARM_MSG_INIT_FILE_MISSING $this"
 		fi
 	done
 	unset tmp_swarm_loading \
@@ -337,10 +331,9 @@
 # As well as for all helpfiles and manpages
 # that the user may call/ask by ./runtime help
 #
-	# Only update language if LC_ALL is empty
-	[[ -z "$LC_ALL" ]] && \
-		swarm.update.lang && \
-		swarm.update.lang.status
+	# Update language strings
+	swarm.update.lang
+	swarm.update.lang.status
 #
 # Starting SWARM visuals now
 #

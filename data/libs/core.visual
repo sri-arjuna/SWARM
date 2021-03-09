@@ -561,7 +561,7 @@
 		SPLIT2=""
 	# Action
 		two_liner=$($ECHO "$1" | $FOLD -sw "$tmp_count")
-		$ECHO "$two_liner"
+		$ECHO "$two_liner" &>1
 	# Env
 		SPLIT1=$($ECHO "$two_liner" | head -n1)
 		SPLIT2=$($ECHO "$two_liner" | tail -n1)

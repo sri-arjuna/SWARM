@@ -294,7 +294,8 @@
 		local MODE=basic
 		local doReturn=false
 
-		[[ "-" = "${1:0:1}" ]] && \
+		while [[ "-" = "${1:0:1}" ]]
+		do
 			case ${1/-} in
 			t)	MODE=title
 				shift	;;
@@ -303,8 +304,12 @@
 				shift	;;
 			e) 	doReturn=true
 				shift	;;
+			-center)
+				doCenter=true
+				shift	;;
+			*)	break	;;
 			esac
-
+		done
 
 		# Check if it is too short, if so, print fallback mode and return
 		[[ ${COLUMNS} -lt 25 ]] && \
@@ -335,63 +340,79 @@
 		local lenEvalLeft=${#L}
 		local lenEvalMiddle=${#M}
 		local lenEvalRight=${#R}
-
-		# Before we attempt to print anything, lets check about the length
+	# Before we attempt to print anything, lets check about the length
+		local lenBorder=$(( lenRight + lenLeft + 2 ))
 		local len_strings_total=$(( lenEvalLeft + lenEvalMiddle + lenEvalRight ))
-		local len_max_length=$(( COLUMNS - $(( lenRight + lenLeft )) - 2 ))
-
-		if [[ ${len_strings_total:-0} -ge $len_max_length ]]
+		local len_max_length=$(( COLUMNS - lenBorder ))
+	# Now check wether we need to split or not
+		if [[ ${len_strings_total:-0} -gt $len_max_length ]]
 		then	# Needs splitting
+			#echo "
+			#$len_strings_total >> $len_max_length
+			#"
 			case "$MODE" in
 			"basic")
-				if false; then
+				local breaker=1
+				case "${#@}" in
+				0|1)	breaker=1	;;
+				2)	breaker=2	;;
+				3)	breaker=3	;;
+				esac
+				if true; then
 				# Wish this would work, but all this shows are empty lines
 					local L_one="" L_two=""
 					local M_one="" M_two=""
 					local R_one="" R_two=""
 
-					[[ ${#L} -ge $(( (COLUMNS - 6)/3 )) ]] && \
-						swarm.str.split "$L" | while ${READ} -r L_one ;do ${READ} -r L_two;break;done || \
+					[[ ${#L} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+						swarm.str.split "$L" | \
+						while ${READ} -r L_one ;do ${READ} -r L_two;break;done || \
 						L_one="$L"
 
-					[[ ${#M} -ge $(( (COLUMNS - 6)/3 )) ]] && \
-						swarm.str.split "$M" | while ${READ} -r M_one ;do ${READ} -r M_two;break;done || \
+					[[ ${#M} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+						swarm.str.split "$M" | \
+						while ${READ} -r M_one ;do ${READ} -r M_two;break;done || \
 						M_one="$M"
 
-					[[ ${#R} -ge $(( (COLUMNS - 6)/3 )) ]] && \
-						swarm.str.split "$R" | while ${READ} -r R_one ;do ${READ} -r R_two;break;done || \
+					[[ ${#R} -gt $(( (COLUMNS - lenBorder)/breaker )) ]] && \
+						swarm.str.split "$R" | \
+						while ${READ} -r R_one ;do ${READ} -r R_two;break;done || \
 						R_one="$R"
 
 					# This should be enough,
 					# as from here on further sub-splitting will be done
 					# shellcheck disable=SC2031
-					swarm.print.text "$L_one" "$M_one" "$R_one"
+					$doCenter && \
+						swarm.print.text --center "$L_one" || \
+						swarm.print.text "$L_one" "$M_one" "$R_one"
 					# shellcheck disable=SC2119
 					swarm.print.border
 					# shellcheck disable=SC2031
-					swarm.print.text  "$L_two" "$M_two" "$R_two"
+					$doCenter && \
+						swarm.print.text  "$L_two" || \
+						swarm.print.text  "$L_two" "$M_two" "$R_two"
 					# We're done here, lets get out
-				#	return 0
+					#return 0
 				fi
 				## works, but not nice.. empty line???
 				if [[ -n "$L" ]]
 				then
 					# shellcheck disable=SC2015
-					[[ ${#L} -ge $(( COLUMNS - 6 )) ]] && \
+					[[ ${#L} -ge $(( COLUMNS - lenBorder )) ]] && \
 						swarm.str.split "$L" | printl -1 -- || \
 						printl "$L"
 				fi
 				if [[ -n "$M" ]]
 				then
 					# shellcheck disable=SC2015
-					[[ ${#M} -ge $(( COLUMNS - 6 )) ]] && \
+					[[ ${#M} -ge $(( COLUMNS - lenBorder )) ]] && \
 						swarm.str.split "$M" | printl -2 -- || \
 						printl "$M"
 				fi
 				if [[ -n "$R" ]]
 				then
 					# shellcheck disable=SC2015
-					[[ ${#R} -ge $(( COLUMNS - 6 )) ]] && \
+					[[ ${#R} -ge $(( COLUMNS - lenBorder )) ]] && \
 						swarm.str.split "$R" | while read -r line
 									do
 										printe "" "" "$line"
@@ -404,6 +425,9 @@
 				;;
 			"header")
 				swarm.str.split "$1" | header --
+				;;
+			*)	echo ganz falsch hier...
+				return 1
 				;;
 			esac
 			return 0
@@ -459,7 +483,7 @@
 			esac
 			;;
 		esac
-		$PRINTF "\r" #${posEND}"
+		#$PRINTF "\r" #${posEND}"
 		$doReturn && $PRINTF "\n"
 	}
 	swarm.str.split() { # "STRING"

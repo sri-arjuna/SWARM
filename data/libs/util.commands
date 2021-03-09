@@ -60,7 +60,7 @@
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#set -x
-		local MODE="none"
+		local MODE="none" doCenter=false
 		# Get args
 		case "$1" in
 		"-1"|"-2")	MODE="${1/-}"
@@ -124,7 +124,7 @@
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		#$PRINTF "$posEND"
+		#$PRINTF "$posEND\n"
 	}
 	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line

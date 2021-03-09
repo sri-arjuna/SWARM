@@ -79,7 +79,7 @@
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8.8
-	SWARM[BUILD]=65
+	SWARM[BUILD]=66
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -350,9 +350,9 @@
 		then	# First Time // No arguments
 			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
 			title "$SWARM_MSG_WORD_LICENSE"
-			printe "" "$SWARM_MSG_PHRASE_WARRANTY1" ""
-			printe "" "$SWARM_MSG_PHRASE_WARRANTY2" ""
-			printe "" "$SWARM_MSG_PHRASE_WARRANTY3" ""
+			printe --center "$SWARM_MSG_PHRASE_WARRANTY1"
+			printe --center "$SWARM_MSG_PHRASE_WARRANTY2"
+			printe --center "$SWARM_MSG_PHRASE_WARRANTY3"
 			title	"$SWARM_MSG_WELCOME_TITLE"
 			status 1 "$SWARM_MSG_WELCOME_INFOLINE1"
 			status 111 "$SWARM_MSG_WELCOME_INFOLINE2"

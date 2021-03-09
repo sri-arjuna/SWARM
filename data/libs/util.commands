@@ -124,7 +124,7 @@
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		$PRINTF "$posEND"
+		#$PRINTF "$posEND"
 	}
 	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line
@@ -225,7 +225,7 @@
 		str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${yn,,})"
 		# Move the cursor
 		local str2=""
-		str2="$(swarm.print.goto $(( COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
+		str2="$(swarm.print.goto $(( COLUMNS - ${#SWARM_THEME_DATA[border-left]} - 1  )))"
 		local RET=""
 		while [[ -z "$RET" ]]
 		do
@@ -283,7 +283,7 @@
 		#	gui_fixer="7" || \
 			gui_fixer=7
 
-		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} - ${#SWARM_THEME_DATA[border-left]} - 1 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		$PRINTF "$value" >&1
 
@@ -454,7 +454,7 @@
 			local NUM=""
 			local POS=""
 			# shellcheck disable=SC2154
-			POS="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
+			POS="$(swarm.print.goto $(( identRight + 2 ))) ${SWARM_THEME_DATA[read]}"
 			# shellcheck disable=SC2015
 			$as_menu && \
 				local min=0 || \

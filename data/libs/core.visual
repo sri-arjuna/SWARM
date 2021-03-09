@@ -420,7 +420,7 @@
 					then	# shellcheck disable=SC2015
 						[[ ${#L} -ge $(( COLUMNS - lenBorder )) ]] && \
 							swarm.str.split "$L" | printe --center -- || \
-							printl "$L"
+							printl "" "$L" ""
 					else	# shellcheck disable=SC2015
 						[[ ${#L} -ge $(( COLUMNS - lenBorder )) ]] && \
 							swarm.str.split "$L" | printl -1 -- || \
@@ -451,7 +451,26 @@
 				swarm.str.split "$1" | title --
 				;;
 			"header")
-				swarm.str.split "$1" | header --
+				# Lets make it simple here...
+				# No nerves for all that word splitting
+				case "${#@}" in
+				0|1)	$ECHO "$1" | header -- ;;
+				2)	len1="${#1}"
+					len2="${#2}"
+					swarm.print.text -h "${1:0:$((len1/2))}" "" "${2:0:$((len2/2))}"
+					$PRINTF "\n"
+					swarm.print.border -h
+					swarm.print.text -h "${1:$((len1/2))}" "" "${2:$((len2/2))}"
+					;;
+				3)	len1="${#1}"
+					len2="${#2}"
+					len3="${#3}"
+					swarm.print.text -h "${1:0:$((len1/2))}" "${2:0:$((len2/2))}" "${3:0:$((len3/2))}"
+					$PRINTF "\n"
+					swarm.print.border -h
+					swarm.print.text -h "${1:$((len1/2))}" "${2:$((len2/2))}" "${3:$((len3/2))}"
+					;;
+				esac
 				;;
 			*)	echo ganz falsch hier...
 				return 1

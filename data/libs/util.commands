@@ -441,70 +441,70 @@
 	# Use -a for autoselect if only 1 entry, and -m as this will present 'Back' (translated)
 		# shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		#
-		# Variables
-		#
-			local AUTO=false failsafe=0
-			local ROWS=""
-			ROWS="3"
-			local as_menu=false
-		#
-		# Catch arguments
-		#
-			for opt in "${@}"
-			do	if [[ "-" == "${opt:0:1}" ]]
-				then	case "${opt/-}" in
-					1|2|3)	ROWS="${opt/-}"
-						shift
-						;;
-					"a")	AUTO=true
-						shift
-						;;
-					"m")	trap "return 130" INT ABRT
-						as_menu=true
-						shift
-						;;
-					esac
-				fi
-			done
-			# Can not be set earlier because of possible options
-			# Which state wether it is 'as menu' or default
-			# shellcheck disable=SC2015
-			$as_menu && \
-				local ARGS=( "${SWARM_MSG_WORD_BACK}" "${@}" ) || \
-				local ARGS=("${@}")
-		# Handle auto-pick (only 1 option)
-			$AUTO && \
-				[ "$#" -eq 1 ] && \
-				$PRINTF '%s\n' "${ARGS[@]}" >&1 && \
-				return 4
-		# Show the items to pick from
-			# shellcheck disable=SC2015
-			$as_menu && \
-				printlist -n -"$ROWS" -0 "${ARGS[@]}" || \
-				printlist -n -"$ROWS" "${ARGS[@]}"
-		# Set dynamic values
-			# Amount of arguments
-			local pick_count=${#ARGS[@]}
-			# Character length of the amount
-			local pick_len=${#pick_count}
-			# Special handling
-			local invalid=true
-			#local todo=false
-			local NUM=""
-			local POS=""
-			# shellcheck disable=SC2154
-			POS="$(swarm.print.goto $(( identRight + 2 ))) ${SWARM_THEME_DATA[read]}"
-			# shellcheck disable=SC2015
-			$as_menu && \
-				local min=0 || \
-				local min=1
-		#
-		# Visuals
-		#
+	#
+	# Variables
+	#
+		local AUTO=false failsafe=0
+		local ROWS=""
+		ROWS="3"
+		local as_menu=false
+	#
+	# Catch arguments
+	#
+		for opt in "${@}"
+		do	if [[ "-" == "${opt:0:1}" ]]
+			then	case "${opt/-}" in
+				1|2|3)	ROWS="${opt/-}"
+					shift
+					;;
+				"a")	AUTO=true
+					shift
+					;;
+				"m")	trap "return 130" INT ABRT
+					as_menu=true
+					shift
+					;;
+				esac
+			fi
+		done
+		# Can not be set earlier because of possible options
+		# Which state wether it is 'as menu' or default
+		# shellcheck disable=SC2015
+		$as_menu && \
+			local ARGS=( "${SWARM_MSG_WORD_BACK}" "${@}" ) || \
+			local ARGS=("${@}")
+	# Handle auto-pick (only 1 option)
+		$AUTO && \
+			[ "$#" -eq 1 ] && \
+			$PRINTF '%s\n' "${ARGS[@]}" >&1 && \
+			return 4
+	# Show the items to pick from
+		# shellcheck disable=SC2015
+		$as_menu && \
+			printlist -n -"$ROWS" -0 "${ARGS[@]}" || \
+			printlist -n -"$ROWS" "${ARGS[@]}"
+	# Set dynamic values
+		# Amount of arguments
+		local pick_count=${#ARGS[@]}
+		# Character length of the amount
+		local pick_len=${#pick_count}
+		# Special handling
+		local invalid=true
+		#local todo=false
+		local NUM=""
+		local POS=""
+		# shellcheck disable=SC2154
+		POS="$(swarm.print.goto $(( identRight + 2 ))) ${SWARM_THEME_DATA[read]}"
+		# shellcheck disable=SC2015
+		$as_menu && \
+			local min=0 || \
+			local min=1
+	#
+	# Visuals
+	#
 		while ${invalid:-true}
 		do
-		# Print the input line:
+			# Print the input line:
 			swarm.print.border >&2
 			$PRINTF "$POS      $POS " >&2
 		# Read the input
@@ -527,11 +527,12 @@
 			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 
-		# Output
+	# Output
 		$ECHO "${ARGS[$NUM]}" >&1
-		#set -x
+		$as_menu && \
+			REPLAY=$NUM || \
+			REPLY=$(( NUM +1 ))
 		[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&2
-		#set +x
 		unset opt
 	}
 	press() { # [-c -l -r] [STR]

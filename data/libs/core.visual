@@ -540,7 +540,6 @@
 	swarm.str.split() { # "STRING"
 	# Splittes passed string in half at the nearest word
 	# and prints each part as a new line
-		#[[ -z "$1" ]] && return 1
 		case "$1" in
 		"-"|"--")
 			shift
@@ -549,14 +548,23 @@
 			done
 			return 0
 			;;
-		"")
+		""|-h|--help|-\?)
 			swarm.help.usage "$FUNCNAME"
 			return 1
 			;;
 		esac
+	# Vars
 		local str="" ; str="${*}"
 		local tmp_count=$(( ${#str} / 3 * 2 ))
-		$ECHO "$1" | $FOLD -sw "$tmp_count"
+		local two_liner=""
+		SPLIT1=""
+		SPLIT2=""
+	# Action
+		two_liner=$($ECHO "$1" | $FOLD -sw "$tmp_count")
+		$ECHO "$two_liner"
+	# Env
+		SPLIT1=$($ECHO "$two_liner" | head -n1)
+		SPLIT2=$($ECHO "$two_liner" | tail -n1)
 	}
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM

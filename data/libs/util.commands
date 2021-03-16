@@ -651,7 +651,7 @@
 	# Variables
 	#
 		local AUTO=false failsafe=0
-		local ROWS=""
+		local ROWS="" beQuiet=false
 		ROWS="3"
 		local as_menu=false
 	#
@@ -668,6 +668,9 @@
 					;;
 				"m")	trap "return 130" INT ABRT
 					as_menu=true
+					shift
+					;;
+				"q")	beQuiet=true
 					shift
 					;;
 				esac
@@ -739,7 +742,9 @@
 		$as_menu && \
 			REPLY=$NUM || \
 			REPLY=$(( NUM +1 ))
-		[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&3
+		if $beQuiet
+		then	[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&3
+		fi
 		unset opt
 	}
 	press() { # [-c -l -r] [STR]

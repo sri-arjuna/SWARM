@@ -508,7 +508,6 @@
 		"printe")
 			out="$SWARM_MSG_PRINTE_USAGE"
 			;;
-			;;
 		"header")
 			out="$SWARM_MSG_HEADER_USAGE"
 			;;

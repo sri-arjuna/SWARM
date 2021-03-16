@@ -35,18 +35,23 @@ It is used by all functions that print text.
 
 
 .SH EXAMPLE
+.P
 swarm.print.text 			<STRING1>	<STRING2>	<STRING3>
-.RE
-swarm.print.text 			<STRING1>				<STRING2>
-.RE
-swarm.print.text -h			<STRING1> 				<STRING2>
-.RE
+.P
+swarm.print.text -n			<STRING1>		""	<STRING3>
+.P
+swarm.print.text -h			<STRING1> 	""	<STRING3>
+.P
 swarm.print.text -t					<STRING1>
+.P
+swarm.print.text 			<STRING1>
 .RE
-swarm.print.text -n --right 						<STRING1>
+swarm.print.text --center 			<STRING1>
+.RE
+swarm.print.text -n --right 					<STRING1>
 
 .SH SEE ALSO
-\fBbash\fP(1), \fBconsole_codes\fP(4), \fBgawk\fP(1), \fBgrep\fP(1), \fBprintf\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
+\fBbash\fP(1), \fBconsole_codes\fP(4), \fBgawk\fP(1), \fBgrep\fP(1), \fBprintf\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1), \fBswarm.list.theme\fP(1), \fBswarm.update.theme\fP(1)
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM/issues\fP

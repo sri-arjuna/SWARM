@@ -36,18 +36,23 @@ This is the function that should be used the most to display any data to enduser
 		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
 
 .SH EXAMPLE
+.P
 printe "Hello World"
-.RE
+.P
 printe "left" "right"
+.P
+printe "left side" "in the center" "on the right side"
+.P
+printe --center "center string"
 .RE
-printe "" "center" ""
-.PP
+printe -n --right "right string"
+.P
 grep PATTERN FILE | printe -2 --
 
 
 
 .SH SEE ALSO
-\fBbash\fP(1), \fBprintl\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
+\fBbash\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM/issues\fP

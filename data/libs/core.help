@@ -690,27 +690,31 @@
 	# Opens the manpage according to passed FUNCNAME
 	#
 		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
-		if [[ -f "$1" ]]
+		local thisFile ; thisFile="$1"
+		if [[ "swarm.list." == "${thisFile:0:11}" ]]
+		then	thisFile="swarm.list.all"
+		fi
+		if [[ -f "$thisFile" ]]
 		then	# Passed argument exists
-			tManpage="$1"
-		elif [[ -f "$tDir/${1}.1" ]]
+			tManpage="$thisFile"
+		elif [[ -f "$tDir/${thisFile}.1" ]]
 		then	# default handling
-			tManpage="$tDir/${1}.1"
-		elif [[ -z "$1" ]]
+			tManpage="$tDir/${thisFile}.1"
+		elif [[ -z "$thisFile" ]]
 		then	# Default error
 			#shellcheck disable=SC2128
 			swarm.help.usage "$FUNCNAME"
 			return 1
 		else	# Lets use fallback language : english
 			tdir="$SWARM_DIR_ROOT/docs/en_GB"
-			if [[ -f "$tdir/${1}.1" ]]
-			then	tManpage="$tDir/${1}.1"
+			if [[ -f "$tdir/${thisFile}.1" ]]
+			then	tManpage="$tDir/${thisFile}.1"
 			else
-				swarm.help.usage "$1"
+				swarm.help.usage "$thisFile"
 				return 1
 			fi
 		fi
-		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
+		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$thisFile"
 	}
 #
 # Configuration handler

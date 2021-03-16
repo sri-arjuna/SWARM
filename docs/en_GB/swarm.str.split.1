@@ -1,0 +1,36 @@
+.\" Manpage template for SWARM
+.TH swarm.str.split 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.str.split\fP - Splits given string at 2/3 of the string count at the nearest word.
+
+.SH SYNOPSYS
+swarm.str.split  [ -q | -- ] "STRING"
+
+.SH DESCRIPTION
+Splits any given \fBSTRING\fP into two lines. First line should be 2/3 of the original length. On shorter \fBSTRINGS\fP it may also result near half the length.
+
+.SH OPTIONS
+.TP
+\fB-q\fP
+Does not print result to \fBstdout\fP. Should be used when using \fB$SPLIT1\fP & \fB$SPLIT2\fP
+
+.SH EXAMPLE
+.P
+swarm.str.split "Hello world"
+.P
+swarm.str.split -q "$(uname -a)"
+.RE
+$ECHO "1:$SPLIT1 // 2:$SPLIT2"
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBls\fP(1), \fBgawk\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

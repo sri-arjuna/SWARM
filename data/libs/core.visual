@@ -402,10 +402,11 @@
 	swarm.str.split() { # "STRING"
 	# Splittes passed string in half at the nearest word
 	# and prints each part as a new line
+		local beQuiet=false
 		case "$1" in
 		"-"|"--")
 			shift
-			while $READ line;do
+			while $READ -r line;do
 				$FUNCNAME "$line"
 			done
 			return 0
@@ -414,9 +415,10 @@
 			swarm.help.usage "$FUNCNAME"
 			return 1
 			;;
+		"-q")	beQuiet=true
+			;;
 		esac
 	# Vars
-#	set -x
 		local str="" ; str="${*}"
 		local tmp_count ; tmp_count=$(( ${#str} / 3 * 2 ))
 		local two_liner=""
@@ -425,13 +427,9 @@
 	# Action
 		tmp=$(( COLUMNS / 2 ))
 		[[ 0 -eq $tmp_count ]] && tmp_count=$tmp
-		#two_liner=$($ECHO "$1" | $FOLD -sw "${tmp_count/0/$tmp}")
 		two_liner=$($FOLD -sw "$tmp_count" -- <<< "$1")
-		$ECHO "$two_liner" >&1
-#	set +x
+		$beQuiet || $ECHO "$two_liner" >&1
 	# Env
-		#SPLIT1=$($ECHO "$two_liner" | head -n1)
-		#SPLIT2=$($ECHO "$two_liner" | tail -n1)
 		SPLIT1=$( head -n1 -- <<< "$two_liner")
 		SPLIT2=$( tail -n1 -- <<< "$two_liner")
 	}

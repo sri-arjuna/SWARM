@@ -742,7 +742,7 @@
 		$as_menu && \
 			REPLY=$NUM || \
 			REPLY=$(( NUM +1 ))
-		if $beQuiet
+		if ! $beQuiet
 		then	[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&3
 		fi
 		unset opt

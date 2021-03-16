@@ -121,7 +121,7 @@ swarm.util.tar() { # DIR1 DIR2 ...
 			status "$RET" "$SWARM_MSG_WORD_EXTRACTED: $FOLDER"
 		else	DEST=$(swarm.str.genfilename "$($PWD_EXEC)/$THIS.$TAR_EXT")
 			status -r 2 "$SWARM_MSG_WORD_READING..."
-			$ECHO -e "tar -ac --one-file-system -f \"$DEST\" \"$THIS\" 2>&1 > /dev/null > $TMP" > "$FILE_CMD"
+			$ECHO -e "tar -ac --one-file-system -f \"$DEST\" \"$THIS\" 2>&1 > /dev/null > '$TMP'" > "$FILE_CMD"
 			#shellcheck disable=SC2164 disable=2086
 			$CD "$(dirname $FOLDER)"
 			$CHMOD +x "$FILE_CMD"
@@ -221,9 +221,10 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			bar -m "$MAX" -c "$COUNT" "$SWARM_MSG_WORD_COPYING : $src"
 			# shellcheck disable=SC2086
 			$CP_EXEC $optargs "$src" "$cp_target"
+			[[ -d "$src" ]] && this_type="$SWARM_MSG_WORD_DIR" || this_type="$SWARM_MSG_WORD_FILE"
 			#$PRINTF "$POS_END\n"
-			status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
-			init.log "$CP $(swarm.str.bool2str -s $?) $src"
+			status -c $? "$SWARM_MSG_WORD_COPIED $(swarm.print.bold $this_type): ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
+			init.log "$CP $(swarm.str.bool2str -d $?) $src"
 			((COUNT++))
 		done
 	else	# Show all in one line;

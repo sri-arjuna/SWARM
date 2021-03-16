@@ -6,19 +6,17 @@ Checklist upon adding new functions:
 
 
 Todo
-core.conf SWARM_MSG_SU_NFOUND check name & occourences.. phrase?!?!
+- core.conf SWARM_MSG_SU_NFOUND check name & occourences.. phrase?!?!
+- eval_gettext
+- TUI_FONT_BOLD
 
 TODO MANPAGE:
 -------------
-* swarm.util.cp
-* swarm.util.rm
-* swarm.os.install
+* <all done>
 
 
 Missing: Small Functions
 ----------------------
-* swarm.os.install, WIP
-* asRoot
 * swarm.str.dirlist *dirtree
 * the list move
 
@@ -30,8 +28,6 @@ Missing: Small Functions
 
 KNOWN ISSUES
 ------------
-print{e,l}, header,title:	String splitting
-swarm.str.split			empty line???
 bar				alignment
 swarm.str.usb			linux works, BSD/arm not so sure
 yesno ??			fix empty line in ssh session?
@@ -46,8 +42,6 @@ Post 1.0-XX build?
 * download : certificates?
 * add roman2num :: https://www.unix.com/302928187-post7.html
 * add bar dir/item [x/Y] if cp entrie is a dir // same with mv
-* swarm.util.cp @ $CP		on/e line output, subdir & error handling
-* swarm.util.mv @ $MV		on/e line output, subdir & error handling
 
 
 Statement
@@ -76,15 +70,15 @@ ROADMAP:
     ++ small functions
     0.8.5
     ++ cfg.edit RAW/wip
-    -- rework swarm.util.'file stuff'
-    -- keep updating: docs/*
+    ++ rework swarm.util.'file stuff'
+    ++ keep updating: docs/*
     0.9
     ++ cfg.edit
     -+ additions & fixes
     0.9.5
-    -- swarm.os.install - finalize
+    ++ swarm.os.install - finalize
     0.9.6
-    -- asRoot
+    ++ asRoot
     0.9.8
     -- swarm / WIP
     1.0

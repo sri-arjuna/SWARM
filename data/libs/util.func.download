@@ -2,8 +2,6 @@
 download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... URL99 ...]
 # Uses either CURL or WGET to download passed URL/s
 # Returns 0 for success or the number of failed downloads (1 per URL)
-	#ME="$FUNCNAME"
-	swarm.protect "$@" && exit 1
 	# Show usage if no argument is given
 	# shellcheck disable=SC2128
 	[[ -z "$1" ]] && \

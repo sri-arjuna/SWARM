@@ -5,8 +5,8 @@
 # License:	GPL v2			     #
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
-# Changed:	2021.03.09	 	     #
-# Build:	65			     #
+# Changed:	2021.03.16	 	     #
+# Build:	67			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -74,13 +74,9 @@
 	declare -A SWARM
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	isSWARMfirstTime=true
-	# hasCOLUMNS is for internal use only
-	[[ -n "$COLUMNS" ]] && \
-		hasCOLUMNS=true || \
-		hasCOLUMNS=false
 	#echo $hasCOLUMNS;exit
-	SWARM[VERSION]=0.8.8
-	SWARM[BUILD]=66
+	SWARM[VERSION]=0.9
+	SWARM[BUILD]=67
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -107,18 +103,35 @@
 	PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
 	[[ -n "$SSH_CLIENT" ]] && isSSH=true || isSSH=false
-	TERM="${TERM:-GNU-Linux}"
-	if [[ "" == "${TERM/GNU-Linux}" ]] || [[ "dumb" == "${TERM}" ]]
-	then	TERM="xterm"
+	TERM="${TERM:-GNU_Linux}"
+	if [[ "" == "${TERM/GNU_Linux}" ]] || [[ "dumb" == "${TERM}" ]]
+	then	echo "
+You are within a 'limited' SSH session - no regular ENV is set.
+It is recomended to use: 'ssh -t user@host', not -T.
+"
+		TERM="xterm"
 		# This is required to work within a SSH env
 		export TERM
 		isSSH=true
 		# Skip selection if COLUMNS are preset
 		if [[ -z "$COLUMNS" ]]
-		then	echo "How many COLUMNS (width) does your terminal have?"
+		then	# TODO:: check without this block
+			echo "How many COLUMNS (width) does your terminal have?"
 			select COLUMNS in 60 70 80 90 100 110 120 150 200 239;do break;done
 			export COLUMNS
 		fi
+	fi
+#
+# Handle COLUMNS after TERM
+# This is to avoid 80 COlUMNS screens in a ssh -T session 190 COLUMNS window.
+	# hasCOLUMNS is for internal use only
+	if [[ -n "$COLUMNS" ]]
+	then	hasCOLUMNS=true
+	else	# This is still required, So swarm.update.geometry will update the value
+		# to adjust to terminal window changes - that otherwise (hasColumns=true)
+		# would happen automatically, or be forced to a specific width
+		hasCOLUMNS=false
+		COLUMNS=$(tput cols)
 	fi
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
@@ -227,7 +240,7 @@
 	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
 	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 #
-# Load english strings for overall coverage for error messages.
+# Load english strings for overall coverage of error messages.
 # This is the default language, another one will only be attempted to load,
 # if it is not starting with en_*  --> See line 260'ish
 #
@@ -240,6 +253,11 @@
 #
 # Load SWARM settings, core and sanity functions
 #
+	# Prepare for LOG stream
+	# This is the backup swarm for stderr :: restore @ line 358'ish
+	exec 4>&2
+	# Prepare for SWARM interface descriptor:
+	exec  3>/dev/tty
 	declare tmp_swarm_loading="" 	tmp_len=0	tmp_empty=""
 	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env
 	do
@@ -251,7 +269,7 @@
 #
 # SWARM Environment checks
 #
-
+	# Load functions
 	for this in "${SWARM_DIR_LIBS}"/*
 	do
 		# Skip if core.env
@@ -267,7 +285,7 @@
 					tmp_len=${#this} && \
 					tmp_empty=$($PRINTF '%*s' $COLUMNS)
 			sleep "${SWARM_INTERVALL_SLOW_LOADING:-0.3}"
-			$PRINTF  "\r$tmp_empty"
+			$PRINTF  "\r$tmp_empty" >&1
 		fi
 
 		# Minimalistic output
@@ -276,12 +294,12 @@
 		then	# shellcheck disable=SC1090
 			if source "$this"
 			then	# All good
-				$PRINTF '\r%s' "${tmp_swarm_loading}"
-				 ${doLogExt:-false} && \
-				 	init.msg.log "$SWARM_MSG_INIT_FILE_FOUND $this"
+				$PRINTF '\r%s' "${tmp_swarm_loading}" >&1
+				${doLogExt:-false} && \
+				 	init.msg "$SWARM_MSG_INIT_FILE_FOUND $this" >&2
 			else	# Not good
 				 ${doLogExt:-false} &&  \
-					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this"
+					 init.msg "$SWARM_MSG_INIT_FILE_MISSING $this" >&1 >&2
 			fi
 		fi
 	done
@@ -324,7 +342,7 @@
 				# shellcheck disable=SC2015
 				source "$uf" && \
 					$PRINTF "." || \
-					init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
+					init.msg "$uf : $SWARM_MSG_INIT_FILE_MISSING" >&1 >&2
 			fi
 		done
 	fi
@@ -342,6 +360,12 @@
 	swarm.init.theme "$SWARM_THEME"
 	swarm.update.geometry
 #
+# Reset the stderr filedescripter
+# Only the startup sequence of SWARM should be loged (on errors)
+#
+	$CAT "${SWARM_LOG}.tmp" >> "${SWARM_LOG}"
+	exec 2>&4
+#
 # Initiate Interface : Runtime Executed
 #
 	# Check wether the runtime is executed or sourced
@@ -350,20 +374,17 @@
 	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
-			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
+			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) | $($DATE_TIME)" #  	--default
 			title "$SWARM_MSG_WORD_LICENSE"
-		#	set -x
-			printe --center "$SWARM_MSG_PHRASE_WARRANTY1"
-		#	set +x
-			printe --center "$SWARM_MSG_PHRASE_WARRANTY2"
-			printe --center "$SWARM_MSG_PHRASE_WARRANTY3"
+			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY1"
+			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY2"
+			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY3"
 			title	"$SWARM_MSG_WELCOME_TITLE"
 			status 1 "$SWARM_MSG_WELCOME_INFOLINE1"
 			status 111 "$SWARM_MSG_WELCOME_INFOLINE2"
 			printe "$SWARM_MSG_WELCOME_INFOLINE3" "${SWARM_USER_DIR_SCRIPTS}/SWARM"
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
-			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
-			$PRINTF '\n'
+			printe -2 -- <<< "$SWARM_MSG_WELCOME_CONTENT"
 			exit 0
 		else	# Has arguments, lets parse
 			$PRINTF "$(swarm.print.goto 0)"
@@ -450,8 +471,19 @@
 				done
 				;;
 			"log")
+				if [[ "rm" == "$2" ]]
+				then	$RM_EXEC "$SWARM_LOG"
+					exit 0
+				fi
 				title "SWARM LOG"
-				${MORELESS:-cat} "$SWARM_LOG"
+				export COLUMNS=$COLUMNS LINES=$LINES TERM=$TERM
+				# Sadly, this needs this workaround until i fixed FD2 usage for the log
+				# My preference is more, wich fails the hardest in this situation :(
+				${MORELESS} "$SWARM_LOG"
+				exit $?
+				swarm.util.which less >/dev/zero && \
+					${MORELESS/more/less} "$SWARM_LOG" || \
+					cat "$SWARM_LOG"
 				exit $?
 				;;
 			"stats")
@@ -542,6 +574,7 @@
 #
 # Exit script or beginn user scripts
 # If you want 'sucessfull' exit cone on sourceing this file,
-# you got to have it this way. 
+# you got to have it this way.
 #
 ! ${DEBUG:-false} || set +x
+#

@@ -18,13 +18,17 @@ You can however pass \fB-m\fP to start it in \fImenu\fP-mode.
   -m		Prints '\fBBack\fP' (translated) as option \fB0\fP in the selection.
   		If '\fBBack\fP' is selected, return code is 4, 0 otherwise.
 
+.SH ENVIRONMENT
+.TP
+REPLY
+Contains the number of the itme that was selected last.
 
 .SH EXAMPLE
 pick $LIST
 .RE
 var=$(pick -a $LIST)
 .RE
-var=$(pick -2 -m "${ARRAY[@]}")
+var=$(pick -2 -m "${ARRAY[@]}") ; $ECHO $REPLY
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP

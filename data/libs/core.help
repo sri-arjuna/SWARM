@@ -7,7 +7,6 @@
 	swarm.eu.function.list() { # [FILE]
 	# Prints a list of properly declared functions
 	# see ./docs/{MANUAL,SYNTAX}.md for details
-		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tmp_oldpwd="${PWD:-$($PWD_EXEC)}"
 		local tmp_file="${1##*/}"
 		local tmp_dir=${1/$tmp_file}
@@ -51,8 +50,6 @@
 	swarm.eu.function.show() { # MODE [FILE] FUNCTIONNAME		## MODE= --text || --code
 	# Prints either these 2 comment lines or the code
 	# Please see: ./docs/contribute/{MANUAL,SYNTAX}.md)
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Vars
 		#
@@ -125,8 +122,6 @@
 	swarm.eu.show.basics() { #
 	# Shows the basic core functions
 	#
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
 		#list=$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.commands")
@@ -160,8 +155,6 @@
 	swarm.eu.show.variables() { #
 	# Shows the basic core functions
 	#
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
 		list="isDir isRoot isGUI DESKTOP DISTRO BASED TAR EX CP MV"
@@ -191,8 +184,6 @@
 	swarm.eu.show.advanced() { #
 	# Shows the basic core functions
 	#
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		# Get full list of all functions
 		local list="" this="" item=""
@@ -262,8 +253,9 @@
 
 		local tmp=""
 		#shellcheck disable=SC2046
-		tmp=$(pick $(swarm.list.theme))
-		status "$RET_SKIP" "$SWARM_MSG_WORD_SELECTED : $tmp"
+		#tmp=$(
+		pick $(swarm.list.theme)  #)
+		status "$RET_SKIP" "$SWARM_MSG_WORD_SELECTED : $PICKED = #$REPLY"
 
 		title "Progress Bars"
 
@@ -278,7 +270,7 @@
 
 		while [[ $C -le $M ]]
 		do
-			bar -B num -m $M -c $C "my Message"
+			bar -B num -m $M -c $C "my Message" "Somemthing additional"
 			((C++))
 			sleep 0.3
 		done
@@ -287,7 +279,7 @@
 
 		while [[ $C -le $M ]]
 		do
-			bar -B dash "my Message"
+			bar -B dash "my Message" "Somemthing additional"
 			((C++))
 			sleep 0.3
 		done
@@ -483,8 +475,6 @@
 	swarm.help.usage() { # FUNCNAME
 	# Returns the 'usage help screen' according to passed FUNCNAME
 	#
-		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local out=""
 	# Parse argument
 		case "$1" in
@@ -518,8 +508,6 @@
 		"printe")
 			out="$SWARM_MSG_PRINTE_USAGE"
 			;;
-		"printl")
-			out="$SWARM_MSG_PRINTL_USAGE"
 			;;
 		"header")
 			out="$SWARM_MSG_HEADER_USAGE"
@@ -702,7 +690,6 @@
 	swarm.help.manpage() { # FUNCNAME
 	# Opens the manpage according to passed FUNCNAME
 	#
-		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
 		if [[ -f "$1" ]]
 		then	# Passed argument exists

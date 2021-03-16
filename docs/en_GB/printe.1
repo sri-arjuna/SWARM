@@ -17,9 +17,23 @@ This is the function that should be used the most to display any data to enduser
 * Prints three strings left, centered and right
 
 .SH OPTIONS
-  --		Recieve strings from pipe
-  -1		Force left aligned text only
-  -2		Force left & right aligned text only
+.TP
+--			Recieve strings from pipe
+.TP
+-1			Force left aligned text only
+.TP
+-2			Force left & right aligned text only
+.TP
+-n			Prints a tailing newline character.
+.TP
+--left		Default behaviour if only STRING1 (left) is pased.
+		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+.TP
+--center  	Prints STRING1 (left) in the center of the line.
+		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+.TP
+--right		Prints STRING1 (left) on the right side.
+		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
 
 .SH EXAMPLE
 printe "Hello World"

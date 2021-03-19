@@ -19,7 +19,7 @@
 # Varname & function
 #
 	SWARM_MSG_ASROOT_USAGE="${SWARM_MSG_WORD_USAGE}: asRoot [-r ${SWARM_MSG_WORD_FILE^^}_${SWARM_MSG_WORD_RETURN^^}_${SWARM_MSG_WORD_VALUE^^}] ${SWARM_MSG_WORD_COMMAND^^} ${SWARM_MSG_WORD_ARGUMENTS^^}"
-	SWARM_MSG_LOG_USAGE="${SWARM_MSG_WORD_USAGE}: log [-?$(swarm.str.num2uni 2502)-h$(swarm.str.num2uni 2502)--help] [-f '${SWARM_MSG_WORD_FILE^^}'=\$script_log ] [-r '${SWARM_MSG_WORD_REASON}'=\$script_name ] '${SWARM_MSG_WORD_MESSAGE^^}'"
+	SWARM_MSG_LOG_USAGE="${SWARM_MSG_WORD_USAGE}: log [-?|-h|--help] [-f '${SWARM_MSG_WORD_FILE^^}'=\$script_log ] [-r '${SWARM_MSG_WORD_REASON}'=\$script_name ] '${SWARM_MSG_WORD_MESSAGE^^}'"
 	SWARM_MSG_ISDIR_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.util.isDir $SWARM_MSG_WORD_PATHTODIR"
 	SWARM_MSG_ISGUI_USAGE="${SWARM_MSG_WORD_USAGE}: if swarm.util.isGUI then echo \$DESKTOP_SESSION fi"
 	SWARM_MSG_ISROOT_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.util.isRoot" # : Returns TRUE if XDG_CURRENT_DESKTOP, DESKTOP_SESSION or XAUTHORITY is set "
@@ -30,8 +30,8 @@
 	SWARM_MSG_PRINT_UNDERLINE_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.underline ${SWARM_MSG_WORD_STR^^}"
 	SWARM_MSG_PRINT_BOLD_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.bold ${SWARM_MSG_WORD_STR^^}"
 	SWARM_MSG_PRINT_GOTO_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.goto ${SWARM_MSG_WORD_NUM^^}"
-	SWARM_MSG_PRINT_BORDER_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.border [-h$(swarm.str.num2uni 2502)-t]"
-	SWARM_MSG_PRINT_TEXT_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.text [-h$(swarm.str.num2uni 2502)-t$(swarm.str.num2uni 2502)--left$(swarm.str.num2uni 2502)--center$(swarm.str.num2uni 2502)--right] [-n$(swarm.str.num2uni 2502)-r] [${SWARM_MSG_WORD_STR}1] [${SWARM_MSG_WORD_STR}2] [${SWARM_MSG_WORD_STR}3]"
+	SWARM_MSG_PRINT_BORDER_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.border [-h|-t]"
+	SWARM_MSG_PRINT_TEXT_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.print.text [-h|-t|--left|--center|--right] [-n|-r] [${SWARM_MSG_WORD_STR}1] [${SWARM_MSG_WORD_STR}2] [${SWARM_MSG_WORD_STR}3]"
 	SWARM_MSG_COLOR_LIST_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.color.list"
 	SWARM_MSG_COLOR_BG_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.color.bg ${SWARM_MSG_WORD_NAME^^}"
 	SWARM_MSG_COLOR_FG_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.color.fg ${SWARM_MSG_WORD_NAME^^}"
@@ -41,7 +41,7 @@
 	SWARM_MSG_STR_DIRLIST_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.str.dirlist $SWARM_MSG_WORD_PATHTODIR"
 	SWARM_MSG_STR_DIRSIZE_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.str.dirsize [-k -m] $SWARM_MSG_WORD_PATHTODIR"
 	SWARM_MSG_STR_FILESIZE_USAGE="${SWARM_MSG_WORD_USAGE}: swarm.str.filesize [-k -m] $SWARM_MSG_WORD_PATHTOFILE"
-	SWARM_MSG_STR_HASH_USAGE="$SWARM_MSG_WORD_USAGE: swarm.str.hash [-v$(swarm.str.num2uni 2502)--verbose] [-t$(swarm.str.num2uni 2502)--type md5,sha1,sha224,sha256,sha384,sha512] -- $(swarm.str.num2uni 2502) ${SWARM_MSG_WORD_STR}1 ${SWARM_MSG_WORD_FILE}2 .."
+	SWARM_MSG_STR_HASH_USAGE="$SWARM_MSG_WORD_USAGE: swarm.str.hash [-v|--verbose] [-t|--type md5,sha1,sha224,sha256,sha384,sha512] -- | ${SWARM_MSG_WORD_STR}1 ${SWARM_MSG_WORD_FILE}2 .."
 #
 # SWARM Internals
 #

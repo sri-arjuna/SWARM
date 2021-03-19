@@ -49,11 +49,11 @@ $0 help
 Lets you browse through all provided functions.
 $0 help FUNCNAME
 Prints the manpage of the according FUNCNAME.
-$0 help help$(swarm.str.num2uni 2502)faq$(swarm.str.num2uni 2502)SWARM
+$0 help help|faq|SWARM
 Prints the help for help or a general FAQ.
 $0 new KEYWORD
 Helps to create new scripts, functions, manpages and projects
-$0 words$(swarm.str.num2uni 2502)phrases
+$0 words|phrases
 Prints a list of strings that are translated/able by SWARM.
 $0 demo
 Useses several commands of SWARM and prints its source code."

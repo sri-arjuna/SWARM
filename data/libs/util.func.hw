@@ -26,37 +26,37 @@
 #	.chassis
 #
 #
-swarm.sysinfo.cpu() { #
+swarm.sysinfo.box.cpu() { #
 # Prints the CPU name, family, cores and mhz
 #
 	LC_ALL=C $AWK -F':' '/^model name/ {print $2}' /proc/cpuinfo | uniq | $SED -e 's/^[ \t]*//'
 }
-swarm.sysinfo.cpu.sockets() {
+swarm.sysinfo.box.cpu.sockets() {
 # Prints the amount of cpu sockets on the platine
 #
 	LC_ALL=C lscpu | $AWK -F ":" '/^Socket/ {print $2}'
 }
-swarm.sysinfo.cpu.cores() {
+swarm.sysinfo.box.cpu.cores() {
 # Prints the amount of cores per cpu
 #
 	LC_ALL=C lscpu | $AWK -F ":" '/^Core/ {print $2}'
 }
-swarm.sysinfo.cpu.threads() {
+swarm.sysinfo.box.cpu.threads() {
 # Prints the amount of threads per core
 #
 	LC_ALL=C lscpu | $AWK -F ":" '/^Thread/ {print $2}'
 }
-swarm.sysinfo.cpu.mhz() {
+swarm.sysinfo.box.cpu.mhz() {
 # Prints either the 'fix' mhz
 # or the range of valid values.
 	LC_ALL=C lscpu | $AWK -F ":" '/[Mm][hH]z/ {print $1" "$2}' | $SED s,"CPU ","",g
 }
-swarm.sysinfo.cpu.vendor() {
+swarm.sysinfo.box.cpu.vendor() {
 # Prints either the 'fix' mhz
 # or the range of valid values.
 	LC_ALL=C lscpu | $AWK -F ":" '/^Vendor/ {print $2}'
 }
-swarm.sysinfo.cpu.mips() { #
+swarm.sysinfo.box.cpu.mips() { #
 #
 #
 	LC_ALL=C lscpu | $AWK -F ":" '/^BogoMIPS/ {print $2}'
@@ -67,38 +67,52 @@ _swarm.sysinfo.list_input() {
 	$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g # | \
 	return
 }
-swarm.sysinfo.keyboard() {
+swarm.sysinfo.box.keyboard() {
 # Prints connected keyboards
 # 1 per line
-	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e key -e touchpad | $SORT -u
+	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e key -e touchpad | uniq
 }
-swarm.sysinfo.mouse() {
+swarm.sysinfo.box.mouse() {
 # Prints connected mice
 # 1 per line
-	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mouse -e track | $SORT -u | $SED s,"Dell Dell","Dell",
+	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mouse -e track | uniq | $SED s,"Dell Dell","Dell",
 }
-swarm.sysinfo.video() {
+swarm.sysinfo.hw.video() {
 # Prints connected video
 # 1 per line
-	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e video -e hdmi | $GREP -i -v sound | $SORT -u
+	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e video -e hdmi | $GREP -i -v sound | uniq
 }
-swarm.sysinfo.video.path() {
-	$GREP -A10 "$(swarm.sysinfo.video|$GREP -i video )" "/proc/bus/input/devices" | $GREP -i -v sound | $AWK -F "Sysfs=" '/Sysfs=/ {print $2}'
+swarm.sysinfo.hw.video.drivers() { #
+# Parses a few known video drivers and prints those it found
+#
+	{
+		# TODO use dynamic FD to lesser hw usage
+		$AWK  '/i[89]/ {print $18}' /proc/bus/pci/devices
+		$AWK  '/nouv/ {print $18}' /proc/bus/pci/devices
+		$AWK  '/radeon/ {print $18}' /proc/bus/pci/devices
+		# These 2 below are just blind shots
+		$AWK  '/[nN][vV][iI][dD][iI][aA]/ {print $18}' /proc/bus/pci/devices
+		$AWK  '/[aA][tT][iI]/ {print $18}' /proc/bus/pci/devices
+
+	} | uniq
 }
-swarm.sysinfo.video.list() {
+swarm.sysinfo.hw.video.path() {
+	$GREP -A10 "$(swarm.sysinfo.hw.video|$GREP -i video )" "/proc/bus/input/devices" | $GREP -i -v sound | $AWK -F "Sysfs=" '/Sysfs=/ {print $2}'
+}
+swarm.sysinfo.hw.video.list() {
 	$LS .1 /dev/vid* 2>/dev/zero
 }
-swarm.sysinfo.mic() {
+swarm.sysinfo.box.mic() {
 # Prints connected microphones
 # 1 per line
 	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mic -e voice | $SORT -u
 }
-swarm.sysinfo.headphones() {
+swarm.sysinfo.box.headphones() {
 # Prints connected headphones
 # 1 per line
 	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e headph | $SORT -u
 }
-swarm.sysinfo.screen() {
+swarm.sysinfo.hw.screen() {
 # Prints connected screens/monitor/display
 # 1 per line
 	if ! $isGUI
@@ -111,7 +125,7 @@ swarm.sysinfo.screen() {
 	# the space makes the difference!
 	LC_ALL=C xrandr | $AWK '/ connected/ {print $1}'
 }
-swarm.sysinfo.screen.list() {
+swarm.sysinfo.hw.screen.list() {
 # Prints connected screens/monitor/display
 # 1 per line
 	if ! $isGUI
@@ -126,7 +140,7 @@ swarm.sysinfo.screen.list() {
 	# the space makes the difference! (dis(-)connected)
 	LC_ALL=C xrandr | $AWK '/connected/ {print $1}'
 }
-swarm.sysinfo.screen.res() {
+swarm.sysinfo.hw.screen.res() {
 # Prints the screens resolution
 #
 	if ! $isGUI
@@ -144,6 +158,16 @@ swarm.sysinfo.net() {
 	swarm.util.which ip >/dev/zero || return 1
 	LC_ALL=C ip addr | $GREP -v "NO-CARRIER" | $AWK -F ":" '/BROADCAST/ {print $2}'
 }
+swarm.sysinfo.net.wifi() {
+# Returns true and the name of the wifi if available
+#
+	$GREP -i ^w <<< $(swarm.sysinfo.net)
+}
+swarm.sysinfo.net.wifi.driver() {
+# Returns the driver for wireless
+#
+	LC_ALL=C lspci|$AWK -F: '/Wireless/ {print $3}'
+}
 swarm.sysinfo.net.list() {
 # Prints available network device names
 #
@@ -151,7 +175,7 @@ swarm.sysinfo.net.list() {
 	#swarm.util.which ip >/dev/zero || return 1
 	#LC_ALL=C ip addr | $AWK -F ":" '/^[1-9]/ {print $2}'
 }
-swarm.sysinfo.net.ip() {
+swarm.sysinfo.net.ip4() {
 # Prints the IPv4 adress
 #
 	swarm.util.which ip >/dev/zero || return 1
@@ -169,9 +193,11 @@ swarm.sysinfo.net.ip6() {
 	swarm.util.which ip >/dev/zero || return 1
 	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet " | $AWK '{print $2}'
 }
-swarm.sysinfo.net.external_ip() { # [-v]
+swarm.sysinfo.net.ip_ext() { # [-v]
 # Prints the external IPv4 adress
 #
+	return
+
 	local failsafe=0 data beVerbose=false ret=1
 	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
 	if swarm.util.which dig &>/dev/zero
@@ -194,17 +220,17 @@ swarm.sysinfo.net.hostname() {
 		$CAT "/etc/hostname" || \
 		hostname
 }
-swarm.sysinfo.device.vendor() {
+swarm.sysinfo.box.vendor() {
 # Prints the chassis vendor
 #
 	$CAT /sys/class/dmi/id/chassis_vendor 2>/dev/zero || $ECHO "$SWARM_MSG_WORD_UNKOWN"
 }
-swarm.sysinfo.device.name() {
+swarm.sysinfo.box.name() {
 # Prints the product name / description
 #
 	$CAT /sys/class/dmi/id/product_name 2>/dev/zero || $ECHO "$SWARM_MSG_WORD_UNKOWN"
 }
-swarm.sysinfo.device.type() {
+swarm.sysinfo.box.type() {
 # Prints the wether the system is VM or physical
 #
 	vserver=$(LC_ALL=C lscpu | $GREP Hypervisor | $WC -l) || return 1
@@ -213,7 +239,7 @@ swarm.sysinfo.device.type() {
 	else 	$ECHO "Physical"
 	fi
 }
-swarm.sysinfo.ssh() {
+swarm.sysinfo.net.ssh() {
 # Prints true or false, depending if 'this' is a SSH session
 #
 	local ret
@@ -221,68 +247,85 @@ swarm.sysinfo.ssh() {
 	$isSSH && ret=0 || ret=1
 	return $ret
 }
-swarm.sysinfo.ssh.client() {
+swarm.sysinfo.net.ssh.client() {
 # Prints the ip of the SSH client
-	if swarm.sysinfo.ssh >/dev/zero
+	if swarm.sysinfo.net.ssh >/dev/zero
 	then	$ECHO ${SSH_CLIENT/ */}
 	else	return 1
 	fi
 }
-swarm.sysinfo.ssh.connection() {
+swarm.sysinfo.net.ssh.connection() {
 # Prints information about the SSH connection
 #
-	if swarm.sysinfo.ssh >/dev/zero
+	if swarm.sysinfo.net.ssh >/dev/zero
 	then	$ECHO ${SSH_CONNECTION} | \
 			$AWK -v arrow="$(swarm.str.num2uni 2794)" '{print $1" "arrow" "$3}'
 	else	return 1
 	fi
 }
-swarm.sysinfo.ssh.tty() {
+swarm.sysinfo.net.ssh.tty() {
 # Prints which TTY is used for SSH
 #
-	if swarm.sysinfo.ssh >/dev/zero
+	if swarm.sysinfo.net.ssh >/dev/zero
 	then	$ECHO $SSH_TTY
 	else	return 1
 	fi
 }
-swarm.sysinfo.ram() {
+swarm.sysinfo.box.ram() {
 # Prints an overview of ram values
 #
 	local total free used
-	total="$(swarm.sysinfo.ram.total| swarm.str.humanreadable --)"
-	used=$(swarm.sysinfo.ram.used | swarm.str.humanreadable --)
-	free=$(swarm.sysinfo.ram.free | swarm.str.humanreadable --)
+	total="$(swarm.sysinfo.box.ram.total| swarm.str.humanreadable --)"
+	used=$(swarm.sysinfo.box.ram.used | swarm.str.humanreadable --)
+	free=$(swarm.sysinfo.box.ram.free | swarm.str.humanreadable --)
 	#$PRINTF '%s/%s : %s\n' "$(swarm.sysinfo.ram.used|swarm.str.humanreadable --)" "$(swarm.sysinfo.ram.total|swarm.str.humanreadable --)" "$(swarm.sysinfo.ram.free|swarm.str.humanreadable --)"
 	$ECHO "$used/$total : $free"
 }
-swarm.sysinfo.ram.total() { #
+swarm.sysinfo.box.ram.total() { #
 # Prints how much ram is installed
 #
 	local input_k size
 	input_k=$($AWK '/MemTotal/ {print $2}' /proc/meminfo)
 	$ECHO $(( input_k * 1024 ))
 }
-swarm.sysinfo.ram.free() { #
+swarm.sysinfo.box.ram.free() { #
 # Prints the free ram
 #
 	local input_k size
 	input_k=$($AWK '/MemAvailable/ {print $2}' /proc/meminfo)
 	$ECHO $(( input_k * 1024 ))
 }
-swarm.sysinfo.ram.used() { #
+swarm.sysinfo.box.ram.used() { #
 # Prints how much ram is used
 #
-	$ECHO "$(swarm.sysinfo.ram.total)" "$(swarm.sysinfo.ram.free)" | $AWK '{print ($1 - $2) }'
+	$ECHO "$(swarm.sysinfo.box.ram.total)" "$(swarm.sysinfo.box.ram.free)" | $AWK '{print ($1 - $2) }'
 }
-swarm.sysinfo.user.local() { #
+swarm.sysinfo.os.user.local() { #
 # Shows local users (that have a home directory)
 #
 	$LS "$HOME/.."
 }
-swarm.sysinfo.user.loged() {
+swarm.sysinfo.os.user.loged() {
 # Shows users that are currently loged in
 #
 	users
+}
+
+swarm.sysinfo.hw.audio() { #
+# Prints audio information found by lspci
+#
+	#lspci | $GREP -i audio | swarm.str.split --
+	#lspci -vvv | grep -A10 -i audio | grep -i -e audio -e subs
+	#lspci -vvv | grep -A1 -i audio  | printe -1 --right -n -- ; printf "\n"
+	LC_ALL=C raw=$(lspci -vvv | $GREP -A1 -i audio | $GREP -v "\-\-" ) || { init.log.msg "$SWARM_MSG_PHRASE_FILENOTFOUND: lspci" ; return 1 ; }
+	$AWK -F: '/Audio device/ {print $3}' <<< "$raw" | uniq
+	$AWK -F: '/Subsystem/ {print $2}' <<< "$raw" | uniq
+}
+swarm.sysinfo.hw.audio.driver() { #
+# Prints a list of know audio drivers
+#
+	$AWK '/snd/  {print $18}' /proc/bus/pci/devices | uniq
+
 }
 _swarm.sysinfo.() {
 # Prints the IPv6 adress

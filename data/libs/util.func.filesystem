@@ -177,9 +177,11 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			shift
 			;;
 		"-l")	show_Longnames=true ; shift	;;
-		"-t")	cp_target="$2" ; shift 2	;;
+		"-t")	[[ -z "$2" ]] && { swarm.help.usage "$FUNCNAME" ; return 1 ;} 
+			cp_target="$2" ; shift 2	;;
 		"-q")	beVerbose=false ; shift		;;
-		"--")	# Do Pipe
+		"--")	# Do Pipe, but since it is pipe,
+			# we cannot take 'last argument' as target...
 			# shellcheck disable=SC2128
 			[[ -z "$cp_target" ]] && \
 				swarm.help.manpage "$FUNCNAME" && \
@@ -188,7 +190,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			while read line
 			do
 				# shellcheck disable=SC2086
-				$CP $optargs "$line" "$cp_target"
+				$FUNCNAME $optargs "$line" "$cp_target"
 			done
 			return 0
 			;;
@@ -222,7 +224,6 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			# shellcheck disable=SC2086
 			$CP_EXEC $optargs "$src" "$cp_target"
 			[[ -d "$src" ]] && this_type="$SWARM_MSG_WORD_DIR" || this_type="$SWARM_MSG_WORD_FILE"
-			#$PRINTF "$POS_END\n"
 			status -c $? "$SWARM_MSG_WORD_COPIED $(swarm.print.bold $this_type): ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
 			init.log "$CP $(swarm.str.bool2str -d $?) $src"
 			((COUNT++))
@@ -231,7 +232,6 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 		bar "$SWARM_MSG_WORD_COPYING $SWARM_MSG_WORD_FILES"
 		# shellcheck disable=SC2086
 		$CP $optargs "${ARGS[@]}" "$cp_target"
-		#$PRINTF "$POS_END\n"
 		status $? "$SWARM_MSG_WORD_COPIED $MAX $SWARM_MSG_WORD_FILES"
 		init.log "$CP $(swarm.str.bool2str -s $?) FILES::${ARGS[*]}  TARGET::$cp_target"
 	fi

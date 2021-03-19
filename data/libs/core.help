@@ -693,6 +693,8 @@
 		local thisFile ; thisFile="$1"
 		if [[ "swarm.list." == "${thisFile:0:11}" ]]
 		then	thisFile="swarm.list.all"
+		elif [[ "swarm.sysinfo." == "${thisFile:0:14}" ]]
+		then	thisFile="swarm.sysinfo.all"
 		fi
 		if [[ -f "$thisFile" ]]
 		then	# Passed argument exists

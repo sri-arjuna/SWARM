@@ -1,0 +1,111 @@
+.\" Manpage template for SWARM
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.sysinfo.*\fP - Summarized manpage for swarm.sysinfo.* functions
+
+.SH SYNOPSIS
+.TP
+\fBswarm.sysinfo.<SECTION>.(<SUBSECTION>.)<KEY>\fP
+
+.SH DESCRIPTION
+.P
+The \fBswarm.sysinfo.*\fP functions are designed to give a convenient way to access certain system or OS related information.
+.P
+All of the \fB*sysinfo*\fP function were created by the initial idea to ease upcoming projects of mine for \fBScript-Tools\fP which among others will include a visual (CLI of course) wrapper for \fBxrandr\fP, most other functions were then added for fun and research.
+.P
+However, I wanted them to be as usefull as possible, so any function that returns a \fBNAME\fP of a \fIplug-able\fP (or otherwise might have a 'toggle-able' state) device can also be used a boolean by passing \fB-q\fP tu surpress visual output.
+.RE
+This includes, but is not limited to: headphones, keyboard, wifi.
+
+.P
+
+
+.SH SYNTAX
+.TP
+
+swarm.sysinfo.	*
+		box.	*
+			name
+			vendor
+			type
+			keyboard
+			mouse
+			mic
+			headphones
+			speakers (TODO)
+			--------------------
+			cpu.	*
+			--------------------
+			ram.	*
+			--------------------
+			swap.	* (TODO)
+			--------------------
+		hw.	*
+			audio.	*
+			 	device
+				list
+				path
+				driver
+			--------------------
+			video.	*		Full name, example: "nVidia Gefore 970GTX"
+			 	device		: according /dev/ reference: /dev/video
+				list		: are there more : /dev/video* ?
+				paths		: according /sys/{bus,dev,device,*} reference
+				driver
+			--------------------
+			screen.	*
+			 	list
+				res
+		-------------------
+		.os.	*
+			based
+			distro
+			pretty (TODO)
+			version (TODO)
+			desktop
+			pkg_mgr
+			user.	*
+				local
+				loged
+				current
+		-------------------
+		fhs.	*
+			bin
+			sbin
+			...
+		-------------------
+		net.	*			Current network device.. wlp3s0, eth0, etc...
+			wifi.	*
+				driver		Realtek?
+				bssid		Current connection?
+			wired.	*
+				driver?
+			ip.4
+			ip.6
+			ip.ext
+			hostname
+
+
+
+
+.SH EXAMPLE
+.P
+newTHEME=$(pick $(swarm.list.theme))
+.RE
+swarm.update.theme "$newTHEME"
+.P
+title "Select a sub directory to store your backup:"
+.RE
+pick -q $(swarm.list.dirs "$BACKUP_DEST")
+.RE
+status $? "Selected:" "$PICKED"
+
+.SH BUGS
+.PP
+ Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+ SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+ General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage was written by Simon Arjuna Erat (sea) for SWARM version 1.0

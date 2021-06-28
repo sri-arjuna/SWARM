@@ -26,6 +26,7 @@
 				"${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.sysinfo.os.distro|$SED s,'"','',g))" \
 				"" \
 				"$($PRINTF '%s ' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
+			return 0
 			;;
 		esac
 	# Action
@@ -39,11 +40,10 @@
 
 				if [[ ${#1} -gt $len ]]
 				then	# Left needs split
-					swarm.str.split "$1" >/dev/zero
-					l1="$SPLIT1"
-					l2="$SPLIT2"
-					swarm.print.text -h "$l1"
-					swarm.print.text -h "$l2" "" "$2"
+					local org="$1"
+					swarm.str.split -q "$1"
+					header "${SPLIT1}"	## TODO FIX:: This line works with "header", but will display empty when using "swarm.print.text -h" (performance)
+					swarm.print.text -h "${SPLIT2}" "" "$2"
 				elif [[ ${#2} -gt $len ]]
 				then	# right nees splitting
 					swarm.str.split "$2" >/dev/zero

@@ -56,7 +56,11 @@ Helps to create new scripts, functions, manpages and projects
 $0 words|phrases
 Prints a list of strings that are translated/able by SWARM.
 $0 demo
-Useses several commands of SWARM and prints its source code."
+Useses several commands of SWARM and prints its source code.
+$0 sysinfo
+Prints information about your current device and OS.
+$0 log
+Prints the log."
 #
 # SWARM Runtime Help Menu
 #

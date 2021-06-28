@@ -416,6 +416,7 @@
 			return 1
 			;;
 		"-q")	beQuiet=true
+			shift
 			;;
 		esac
 	# Vars

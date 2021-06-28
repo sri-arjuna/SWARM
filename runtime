@@ -54,9 +54,9 @@ SWARM[LICENSE]="GPLv2"	# License: ./docs/GPLv2	#
 # Idea:		1995				#
 # Copyleft:	2011-2021			#
 # Created:	2020.01.18			#
-# Changed:	2021.03.19	 		#
+# Changed:	2021.06.28	 		#
 SWARM[VERSION]=0.9
-SWARM[BUILD]=68
+SWARM[BUILD]=69
 SWARM[GIT]="http://github.com/sri-arjuna/SWARM"
 SWARM[ISSUES]="${SWARM[GIT]}/issues"
 #################################################
@@ -416,7 +416,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
-			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) | $($DATE_TIME)"
+			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "$($DATE_TODAY) | $($DATE_TIME)"
 			title "$SWARM_MSG_WORD_LICENSE"
 			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY1"
 			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY2"

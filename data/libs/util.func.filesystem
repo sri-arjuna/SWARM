@@ -162,8 +162,7 @@ swarm.util.tar() { # DIR1 DIR2 ...
 swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 # Copies SOURCE to TARGET
 # Returns 1 if TARGET-dir does not exist and was not create
-	# shellcheck disable=SC2128
-	[[ -z "${@}" ]] && swarm.help.usage "$FUNCNAME" && return 1
+	[[ -z "${@}" ]] && swarm.help.usage "${FUNCNAME[0]}" && return 1
 	#local force_Overwrite=false
 	local show_Longnames=false
 	local cp_target=""
@@ -177,7 +176,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			shift
 			;;
 		"-l")	show_Longnames=true ; shift	;;
-		"-t")	[[ -z "$2" ]] && { swarm.help.usage "$FUNCNAME" ; return 1 ;} 
+		"-t")	[[ -z "$2" ]] && { swarm.help.usage "$FUNCNAME" ; return 1 ;}
 			cp_target="$2" ; shift 2	;;
 		"-q")	beVerbose=false ; shift		;;
 		"--")	# Do Pipe, but since it is pipe,
@@ -198,6 +197,11 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 				optargs+=" $opt" && shift	;;
 		esac
 	done
+# Internal functions
+	_check.files() { # SRC TARGET
+	# Reeturns true if both hashes match
+		echo
+	}
 # Make sure target is set
 	local ARGS=("${@}")
 	# If TARGET was not passed as option,
@@ -216,7 +220,10 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 
 # Action
 	if $beVerbose
-	then	# Show each file on its own line
+	then	# If there was a target argument passed last, it was removed by now
+		# So if we have more than 2 arguments, target must be a directory
+		[[ -n "$2" ]] && swarm.util.mkdir "$cp_target"
+		# Show each file on its own line
 		for src in "${ARGS[@]}"
 		do
 			$show_Longnames && src_show="$src" || src_show="${src##*/}"

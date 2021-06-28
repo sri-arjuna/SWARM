@@ -297,6 +297,7 @@
 	swarm.eu.help.menu() { # [ITEM]
 	# Prints help to ITEM and returns with 1
 	# Prints help menu if no ITEM is passed and returns with 0
+#set -x
 		local item=""
 	# Catch Argument
 		if [[ -n "$1" ]]
@@ -320,12 +321,17 @@
 		while true
 		do
 			clear
+			echo the other loop
+#set +x
 			header --default "${SWARM_MSG_HELPMENU_ROOT_TITLE}"
 			title "${SWARM_MSG_HELPMENU_ROOT_TITLE}"
 			printe "${SWARM_MSG_HELPMENU_ROOT_TEXT1}"
-
+#set -x
+#			[[ -z "$SWARM_MSG_HELPMENU_ROOT_TOPIC3" ]] && echo yikes
 			local mnu_root_array=("$SWARM_MSG_HELPMENU_ROOT_TOPIC1" "$SWARM_MSG_HELPMENU_ROOT_TOPIC2" "$SWARM_MSG_HELPMENU_ROOT_TOPIC3" )
+#set +x
 			item=$(pick -2 -m  "${mnu_root_array[@]}") #$(swarm.eu.function.list))" || item=""
+#set -x
 
 			case "$item" in
 			"${SWARM_MSG_WORD_BACK}")
@@ -349,6 +355,7 @@
 				;;
 			esac
 		done
+set +x
 	}
 	#shellcheck disable=SC2120
 	swarm.eu.new.menu() { #

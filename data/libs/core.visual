@@ -218,7 +218,7 @@
 		case "${1/-}" in
 		h)	MODE="header"	;;
 		t)	MODE="title"	;;
-		c)	$PRINTF "\e[2K" >&3	;;
+		c)	$PRINTF "\e[2K" >&"${FD_SWARM_UI}"	;;
 		*)	MODE="basic"	;;
 		esac
 	# Make sure values are udpated
@@ -258,7 +258,7 @@
 		local posLEFT="\33[$(( lenRight - 2 ))G"
 		local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num +1 ))G"
 	# Well, left aligned it works. isnt too hard
-		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}\r" >&3
+		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}\r" >&"${FD_SWARM_UI}"
 	}
 	swarm.print.text() { # [-h -t] [ LEFT ] [ CENTER ] [ RIGHT]
 	# This simply puts the text
@@ -338,14 +338,14 @@
 				then
 					echo heer
 					local posMIDDLE="\33[$(( numHALF - $(( ${#L} / 2 ))   ))G"
-					$PRINTF "${posMIDDLE}$L${c_reset}" >&3
+					$PRINTF "${posMIDDLE}$L${c_reset}" >&"${FD_SWARM_UI}"
 				else
-					$PRINTF "${posLEFT}$L" >&3
+					$PRINTF "${posLEFT}$L" >&"${FD_SWARM_UI}"
 				fi
 				;;
 			"title")
 				local posMIDDLE="\33[$(( numHALF - $(( ${#L} / 2 ))   ))G"
-				$PRINTF "${posMIDDLE}${c_front}${c_back}${c_invert}$L${c_reset}" >&3
+				$PRINTF "${posMIDDLE}${c_front}${c_back}${c_invert}$L${c_reset}" >&"${FD_SWARM_UI}"
 				;;
 			esac
 			;;

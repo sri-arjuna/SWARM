@@ -291,13 +291,16 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 		$PRINTF "."
 	done
 #
+# Prepare File Descriptors (FD)
+#
+	# Prepare for SWARM interface descriptor:
+	exec {FD_SWARM_UI}>/dev/tty
+	# This is the backup swarm for stderr :: restore @ line 410'ish
+	exec {FD_BASH_ERR_BKP}>&2
+#
 # Load SWARM settings, core and sanity functions
 #
-	# Prepare for LOG stream
-	# This is the backup swarm for stderr :: restore @ line 358'ish
-	exec 4>&2
-	# Prepare for SWARM interface descriptor:
-	exec  3>/dev/tty
+	# Start loading swarm
 	declare tmp_swarm_loading="" 	tmp_len=0	tmp_empty=""
 	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env
 	do
@@ -305,7 +308,6 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 		source "$thisCFG"
 		$PRINTF "."
 	done
-
 #
 # SWARM Environment checks
 #
@@ -327,8 +329,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 			sleep "${SWARM_INTERVALL_SLOW_LOADING:-0.3}"
 			$PRINTF  "\r$tmp_empty" >&1
 		fi
-
-		# Minimalistic output
+	# Minimalistic output
 		tmp_swarm_loading="${tmp_swarm_loading}."
 		if [[ ! "${this:0:2}" == "\.[\.]" ]]
 		then	# shellcheck disable=SC1090
@@ -357,7 +358,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 # if he has some that is
 #
 	# SWARM_USER_DIR_BASE was defined the the lib-functions
-	# The following the dirs should be kept to default, but can be overwritten
+	# The following dirs should be kept to default, but can be overwritten
 	# by the SWARMRC, also, SWARM_USER_DIR_BASE might have been customized
 	SWARM_USER_DIR_CONF="${SWARM_USER_DIR_CONF:-${SWARM_USER_DIR_BASE}/conf}"
 	SWARM_USER_DIR_LIBS="${SWARM_USER_DIR_LIBS:-${SWARM_USER_DIR_BASE}/libs}"
@@ -392,6 +393,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 # that the user may call/ask by ./runtime help
 #
 	# Update language strings
+	# to user language - if available
 	swarm.update.lang
 	swarm.update.lang.status
 #
@@ -404,7 +406,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 # Only the startup sequence of SWARM should be loged (on errors)
 #
 	$CAT "${SWARM_LOG}.tmp" >> "${SWARM_LOG}"
-	exec 2>&4
+	exec 2>&"${FD_BASH_ERR_BKP}"
 #
 # Initiate Interface : Runtime Executed
 #
@@ -414,7 +416,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
-			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) | $($DATE_TIME)" #  	--default
+			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) | $($DATE_TIME)" 
 			title "$SWARM_MSG_WORD_LICENSE"
 			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY1"
 			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY2"
@@ -541,6 +543,11 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				cd "$SWARM_DIR_ROOT"
 				$ECHO "$LINER"
 				$ECHO -e "\t$SWARM_MSG_STATS_TITLE \"${PWD##*/}\""
+				# Get amount of functions
+				count=0 ; num=0
+				num=$(wc -l <<< $($GREP "[azAZ]()" ${SWARM[ROOTDIR]}/runtime $SWARM_DIR_LIBS/* ))
+				#echo "num--$num"
+
 			# Size
 				$ECHO "$LINER"
 				# shellcheck disable=SC2016

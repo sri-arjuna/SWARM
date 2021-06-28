@@ -494,7 +494,7 @@
 		local RET="$1" len_allowed=15
 		local value="" ; value=$(swarm.str.status "$RET")
 		len_allowed=$(( COLUMNS - ${#BORDER_LEFT} - ${#BORDER_RIGHT} ))
-		swarm.print.border >&3
+		swarm.print.border >&"${FD_SWARM_UI}"
 		if [[ $(( ${#2} + ${#3} + 8 )) -gt $len_allowed ]]
 		then	if [[ ${#2} -gt ${#3} ]]
 			then	declare two_first two_scnd
@@ -507,7 +507,7 @@
 						two_scnd="$line2"
 
 					swarm.print.text -n "${two_first}" "" "" >&1
-					swarm.print.border >&3
+					swarm.print.border >&"${FD_SWARM_UI}"
 					swarm.print.text -r "$two_scnd" "${3}" "" >&1
 					done
 			else	declare three_first three_scnd
@@ -520,7 +520,7 @@
 						three_scnd="$line2"
 
 					swarm.print.text -n "" "$three_first" "" >&1
-					swarm.print.border >&3
+					swarm.print.border >&"${FD_SWARM_UI}"
 					swarm.print.text -r "$2" "${three_scnd}" "" >&1
 					done
 			fi
@@ -565,7 +565,7 @@
 						ROWS="${opt/-}"
 						shift
 						;;
-					"0")	as_menu=true
+					"m")	as_menu=true
 						shift
 						;;
 					"a")	MODE=alpha
@@ -650,13 +650,14 @@
 	#
 	# Variables
 	#
-		local AUTO=false failsafe=0
-		local ROWS="" beQuiet=false
-		ROWS="3"
-		local as_menu=false
+#set -x
+		local AUTO=false ROWS=3
+		local beQuiet=false as_menu=false
+		local save_counter1=0 save_counter2=0
 	#
 	# Catch arguments
 	#
+#		printf '* %s\n' "${@}" >&1
 		for opt in "${@}"
 		do	if [[ "-" == "${opt:0:1}" ]]
 			then	case "${opt/-}" in
@@ -666,7 +667,7 @@
 				"a")	AUTO=true
 					shift
 					;;
-				"m")	trap "return 130" INT ABRT
+				"m")	#trap "return 130" INT ABRT
 					as_menu=true
 					shift
 					;;
@@ -675,6 +676,8 @@
 					;;
 				esac
 			fi
+			((save_counter1++))
+			[[ $save_counter1 -gt 100 ]] && return 1
 		done
 		# Can not be set earlier because of possible options
 		# Which state wether it is 'as menu' or default
@@ -688,9 +691,10 @@
 			$PRINTF '%s\n' "${ARGS[@]}" >&1 && \
 			return 4
 	# Show the items to pick from
+#set +x
 		# shellcheck disable=SC2015
 		$as_menu && \
-			printlist -n -"$ROWS" -0 "${ARGS[@]}" || \
+			printlist -n -"$ROWS" -m "${ARGS[@]}" || \
 			printlist -n -"$ROWS" "${ARGS[@]}"
 	# Set dynamic values
 		# Amount of arguments
@@ -713,9 +717,14 @@
 	#
 		while ${invalid:-true}
 		do
+			# Make sure we do not loop endless...
+			((save_counter2++)) ; [[ $save_counter2 -gt 100 ]] && return 1
 			# Print the input line:
+			echo this loop
+			set +x
 			swarm.print.border
-			$PRINTF "$POS      $POS " >&3
+			set -x
+			$PRINTF "$POS      $POS " >&"${FD_SWARM_UI}"
 		# Read the input
 			${READ:-read} -n "$pick_len" NUM
 		# Catch invalid inputs
@@ -724,6 +733,7 @@
 			# Check for arrow keys, and make sure NUM is numeric only : Thank you MIG
 			[[ $NUM =~ ^[0-9]+$ ]] || continue
 			# If it's exactly 0, it's BACK
+			[[ $NUM == 0 ]] && { invalid=true ; break ; }
 			#[[ ${NUM} -lt $pick_len ]] && todo=false #$PRINTF "\n" && $PRINTF "${ARGS[$NUM]}" >&1 && return 4
 			# Keep reading if it is not greater than 'min'-imum
 			[[ ${NUM} -ge $min ]] || continue
@@ -733,7 +743,6 @@
 			[[ $NUM -gt $pick_count ]] && continue
 		# Exit the loop
 			invalid=false
-			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 
 	# Output
@@ -743,7 +752,7 @@
 			REPLY=$NUM || \
 			REPLY=$(( NUM +1 ))
 		if ! $beQuiet
-		then	[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&3
+		then	[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&"${FD_SWARM_UI}"
 		fi
 		unset opt
 	}
@@ -773,7 +782,7 @@
 			fi
 		done
 	# Display
-		swarm.print.border >&3
+		swarm.print.border >&"${FD_SWARM_UI}"
 		case "$mode" in
 		"center")
 			swarm.print.text --center "${1:-$SWARM_MSG_PRESS_ENTER}"
@@ -824,12 +833,12 @@
 			while [[ -z "$buffer" ]]
 			do
 				((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
-				swarm.print.border >&3
+				swarm.print.border >&"${FD_SWARM_UI}"
 				$PRINTF "$STR " >&1
 				$READ $hideText buffer
 			done
 		else
-			swarm.print.border >&3
+			swarm.print.border >&"${FD_SWARM_UI}"
 			$PRINTF "$STR " >&1
 			$READ $hideText buffer
 		fi

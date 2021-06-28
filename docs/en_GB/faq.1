@@ -1,0 +1,48 @@
+.\" Manpage template for SWARM
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBFAQ\fP - Frenquently Asked Questions
+.P
+Here is a little guide on how to handle manpages of SWARM.
+.TP
+\fIUNDERLINE\fP
+This refers to directories and files. Anything path or $PATH related. However, if a command with arguments is executed, that may be bold for readability.
+.TP
+\fBBOLD\fP
+This is the general highlighter for all kind of keywords, be it variable names, options or arguments. This may 'overwrite' that files or directories beeing underlines, if they are in the context of reference, not execution.
+
+
+.SH Where or how do I start?
+.P
+Lets say you have your scriptdir located in \fB$HOME/bin\fP, therefor the most logic location for SWARM would be \fP$HOME/bin/SWARM\fP. So lets create a new script in your scriptdir, named \fIfirst-try.sh\fP, give it the right permissions and then write:
+
+  	#!/usr/bin/env bash
+  	SWARMDIR="${0/${0##*/}}SWARM"
+  	source "$SWARMDIR/runtime"
+  	status -c $? "SWARM loaded"
+.P
+After this all there is left to do is read the manpages of the basic commands. You can browse them by calling \fB./runtime help\fP and go to the \fBBasic Commands\fP section.
+
+.SH VAR, VAR_EXEC, swarm.util.VAR
+There are certain commands that have wrappers and convenience variables. These are commands like \fIcd\fP, \fIcp\fP, \fImkdir\fP, \fIrm\fP.
+.TP
+\fBswarm.util.VAR\fP
+This is the internal function to represent the full featured variation of \fBVAR_EXEC\fP. This means that upon creating a new directory, or removing a file or directory, it will write an according entry to the \fB$SWARM_LOG\fP.
+.TP
+\fBVAR_EXEC\fP
+This refers to the absolute path of the binary.
+.TP
+\fBVAR\fP
+This would be the 'shorthand' for \fBswarm.util.VAR\fP.
+
+
+
+.SH BUGS
+.PP
+ Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+ SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+ General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage was written by Simon Arjuna Erat (sea) for SWARM version 1.0

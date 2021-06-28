@@ -89,11 +89,12 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	# You can spee up the process by passing: SWARMDIR=
 	SWARM[ROOTDIR]="$SWARMDIR"
 	# Language must be pre-set up until the basic language file was loaded
+	# Read: Every 'core' update that invokes 'language' (new/changed) will be en_GB, thus this must be loaded either way first at all times
+	# Manpages have their seperate fallback method to en_GB (per file!)
 	SWARM[LANG]="en_GB"
 	SWARM_CODE=$$
 	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
 	isSWARMfirstTime=true
-
 #
 # Cross Platform Compatibility (CPC)
 #
@@ -238,7 +239,6 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				unset tmp
 				break
 			fi
-
 			if [[ -d "${tmp}/SWARM" ]]
 			then	# It's a sub dir
 				# As it should be called
@@ -591,7 +591,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				if [[ -n "$2" ]]
 				then	swarm.update.theme "$2"
 					cfg.set -v "$SWARMRC" "SWARM_THEME" "$2"
-					exit 0
+					exit $?
 				else	newtheme=$(pick -m $(swarm.list.theme))
 					if swarm.update.theme "$newtheme"
 					then	cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
@@ -631,43 +631,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 						done
 					done
 				done
-
 				exit
-
-				for ls in $list
-				do
-					# Basics
-					base="${ls/$pre/}"		# Remove the prefix: swarm.sysinfo.
-					toplevel=${base/\.*}		# Remove everything after the first dot (.), should be: os, hw, net
-					item="${base/*\.}"		# Remove everything before the last dot (.)
-					# Now subsections, like: os.version, hw.audio or net.ssh
-					checkval=${base/$toplevel}	# Remove the toplevel
-					checkval=${checkval/$item}	# And the last item
-					checkval=${checkval/\.}		# Any remaining dots
-
-
-					echo "T$toplevel - i$item " # 		\t\t B$base - "
-				#	if [[ ! "$item" == "$toplevel" ]]
-				#	then	# item and toplevel are different,
-						# so lets compare them
-
-						# Lets handle toplevel sections: hw, os
-						if [[ ! "$toplevel" == "$tlast" ]]
-						then	header "" "$toplevel" ""
-							title "$item"
-							tlast="$toplevel"
-						fi
-
-						# Lets see if there is a subsection:
-						if [[ -n "${checkval}" ]]  && [[ ! "$checkval" == "$ilast" ]]
-						then	title "${checkval}"
-							ilast="${checkval}"
-						fi
-				#	else	header "" "$toplevel" ""
-				#		title "$item : $(swarm.sysinfo.$base)"
-				#	fi
-					printe "$ls:" "$($ECHO $($ls))"
-				done
 				;;
 			esac
 		fi

@@ -100,7 +100,7 @@ swarm.sysinfo.hw.video.path() {
 	$GREP -A10 "$(swarm.sysinfo.hw.video|$GREP -i video )" "/proc/bus/input/devices" | $GREP -i -v sound | $AWK -F "Sysfs=" '/Sysfs=/ {print $2}'
 }
 swarm.sysinfo.hw.video.list() {
-	$LS .1 /dev/vid* 2>/dev/zero
+	$LS -1 /dev/vid* 2>/dev/zero
 }
 swarm.sysinfo.box.mic() {
 # Prints connected microphones
@@ -121,7 +121,7 @@ swarm.sysinfo.hw.screen() {
 		return 0
 	fi
 	# Check if the app is needed
-	swarm.util.which xrandr &>/dev/zero || swarm.os.install xrandr
+	swarm.util.which xrandr &>/dev/zero 2&>/dev/zero || swarm.os.install xrandr
 	# the space makes the difference!
 	LC_ALL=C xrandr | $AWK '/ connected/ {print $1}'
 }
@@ -149,8 +149,24 @@ swarm.sysinfo.hw.screen.res() {
 		return 0
 	fi
 	# Check if the app is needed
-	swarm.util.which xrandr &>/dev/zero || swarm.os.install xrandr
-	LC_ALL=C xrandr | $AWK '/\*/ {print $1}'
+	local resDone=false
+	while ! $resDone
+	do
+		if swarm.util.which xrandr &>/dev/zero
+		then	LC_ALL=C xrandr | $AWK '/\*/ {print $1}'
+			resDone=true
+		elif swarm.util.which xdpyinfo
+		then	xdpyinfo | grep dimensions | awk '{print $2}'
+			resDone=true
+		fi
+
+		if ! $resDone
+		then	# An application to detect dimension is required
+			local thisApp=""
+			thisApp=$(pick xrandr xdpyinfo)
+			[[ -z "$thisApp" ]] && swarm.os.install $thisApp
+		fi
+	done
 }
 swarm.sysinfo.net() {
 # Prints the name of the active internet device

@@ -1,0 +1,33 @@
+#
+# Catch arguments
+#
+ 	while :; do
+ 		case "$1" in
+ 		-h|-\?|--help)
+ 			#swarm.help.usage "source swarm.eu.new.function main"
+                        $ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+ 			return 0
+ 			;;
+ 		--)
+ 			# General purpose pipe support, might need adjustment!
+ 			while read line;do
+ 				${FUNCNAME[@]} "$line"
+ 			done
+ 			return 0
+ 			;;
+		--myvar)
+			[[ -n "$2" ]] || { echo "--myvar requires an argument" ; exit 1 ;}
+			# Save the variable for later use:
+			myvar="$2"
+			# This 'removes $2'
+			# technicly it removes the current $1,
+			# because we have another shift at the end of the loop
+			shift
+ 		*)
+ 			break
+ 			;;
+ 		esac
+		# This will 'delete' the current "$1", which was an option
+		# If it was not an option (--myvar) it will 'enter' "*" and will break out of the loop before getting here
+ 		shift
+ 	done

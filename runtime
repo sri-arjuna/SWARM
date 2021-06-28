@@ -416,7 +416,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
-			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) | $($DATE_TIME)" 
+			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) | $($DATE_TIME)"
 			title "$SWARM_MSG_WORD_LICENSE"
 			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY1"
 			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY2"
@@ -593,9 +593,10 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 					cfg.set -v "$SWARMRC" "SWARM_THEME" "$2"
 					exit 0
 				else	newtheme=$(pick -m $(swarm.list.theme))
-					swarm.update.theme "$newtheme"
-					cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
-					exit 0
+					if swarm.update.theme "$newtheme"
+					then	cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
+					fi
+					exit $?
 				fi
 				;;
 			sysinfo)

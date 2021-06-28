@@ -56,18 +56,17 @@ Here is a short overview of the most important/casual functions that are now ava
 
 Basic Visuals
 -------------
-
+These functions are used to print text or other data visualy
 * header "left" "center" "right" 	; All blue background with white text
 * title "my title" 			; All white background with blue text, and blue borders
 * printe "left" "center" "right" 	; blue borders, next output is on a newline
-* printl "left" "center" "right" 	; blue borders, next output overwrites this
 * status $? "Left" "Center"		; Prints a colored 'exit-code-string' based on $?
 * bar _[options]_ min max val ["text"]	; Prints different kind of progress / working
 * printfile "file"                      ; Basicly swarm's version of cat...
 
 User Interactions:
 ------------------
-
+These are wrappers that aim to simplify their original usage while maintaining the SWARM visual style.
 * ask "Question?" 	; catches any full text user input
 * yesno "Question?" 	; the 'yn' is provided by language file and is supported in code
 * pick _[-a -m]_ $LIST 	; the 'select' wrapper, ; 0 (zero) will always be 'Back' and return 4 (back)
@@ -91,7 +90,7 @@ Application Handlers:
 * edit "file" 		; opens CLI or GUI application
 * filemgr "path" 	; opens CLI or GUI file manager
 * web "url" 		; opens CLI or GUI web browser
-* download "url" 	; Downloads an URL
+* download "url" 	; Downloads an URL (using curl or wget)
 
 
 Handy Tools:
@@ -102,7 +101,7 @@ Handy Tools:
 * cfg.set "file" var "val"	; Sets the value of 'var' to 'val' in 'file'
 * cfg.edit "file"		; Full fledged conf file editor, with customizable multiple-choice-options
 * rnd _[max | min max ]_ 	; prints a random number between 0-100; or 0-max.
-* swarm -p "DIR" [options]      ; Used passed dir as menu-base and browse and execute from there on
+* swarm -p "DIR" [options]      ; Used passed dir as menu-base to browse and execute from there on
 
 
 But there is more:
@@ -129,3 +128,11 @@ Either way, here is the current output of the time I'm writing this document:
     swarm.util.echo      swarm.util.isDir     swarm.util.isRoot    swarm.util.tar
 
 Each of these functions has its own manpage, which you may directly access by following this example: **./runtime help swarm.str.genfilename**
+
+
+Most Important:
+---------------
+
+Do **NOT** check SWARM files and think that is the way to use SWARM - it is just the way to make SWARM possible!
+
+But please **DO** check ___./runtime new___ if you want to create something new using SWARM.

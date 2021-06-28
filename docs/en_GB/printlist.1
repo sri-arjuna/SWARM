@@ -14,7 +14,7 @@ This prints a passed list with a leading numbrered index. This can be changed to
   -a		Use letters instead of numbers
   -r		Use roman letters instead of numbers (up to 3000 valid)
   -n		Use regular numbers for counting
-  -0		Print a menu entry "Back" as index 0
+  -m		Print a menu entry "Back" as index 0 (this is used internaly for \fBpick -m\fP)
   -1 | -2	Force to use 1 or 2 rows (left, left & right) instead of 3 (default)
 
 .SH EXAMPLE
@@ -22,13 +22,13 @@ This prints a passed list with a leading numbrered index. This can be changed to
 .PP
   printlist -2 -r "${ARRAY[@]}"
 .PP
-  printlist -0 $LIST
+  printlist -m $LIST
 
 .SH SEE ALSO
 \fBbash\fP(1), \fBprinte\fP(1), \fBswarm.str.num2roman\fP(1), \fBswarm.str.num2alpha\fP(1)
 
 .SH BUGS
-Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP
+Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM/issues\fP
 
 .SH AUTHOR
 Simon Arjuna Erat, Switzerland

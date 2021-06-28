@@ -14,7 +14,7 @@
 	SWARM_MSG_PHRASE_WARRANTY2="This is free software, and you are welcome to redistribute it under certain conditions."
 	SWARM_MSG_PHRASE_WARRANTY3="See ./docs/GPLv2 and ./docs/LICENSE for details."
 	SWARN_MSG_PHRASE_REMOVE_SWARM="This will only remove loose configuration files of SWARM, not the software itself."
-	SWARM_MSG_PHRASE_CRASHREPORT="Please wait while the crash report is written. ($SWARM_LOG_DIR/crash.log)"
+	SWARM_MSG_PHRASE_CRASHREPORT="Please wait while the crash report is written. (${SWARM_LOG_DIR:-$HOME/.config/swarm/log}/crash.log)"
 	SWARM_MSG_SU_NFOUND="Sudo could not be found on your system."
 	SWARM_MSG_PHRASE_SSHSESSION="This is a SSH session. ($SSH_TTY)"
 	SWARM_MSG_PHRASE_TERMINAL="This is a terminal (TTY #${XDG_VTNR}) session."

@@ -7,7 +7,7 @@
 .SH DESCRIPTION
 SWARM is a framework for scripts to give them an interface like feeling,
 some 'bling bling' to output the data, convenience for the endusers
-and coding helpers for scripters.
+and scripters alike.
 
 It has a new approach to the console, as it allows to print your output
 to be either left, center or right aligned, and even print different colored exit status'.
@@ -44,11 +44,15 @@ As I wanted to keep it simple to use everything of SWARM, I figured a single fil
 .PP
 If you are new to scripting or just as lazy as I am, you can always use the \fI./runtime\fP \fBnew script full\fP command to get started.
 .TP
-      \fI./runtime\fP \fBhelp\fP [FUNCNAME]
-      	Lets you browse through a basic help menu or display the manpage of passed FUNCNAME
+      \fI./runtime\fP \fBhelp\fP [FUNCNAME,faq,SWARM,help]
+      	Lets you browse through a basic help menu or display the manpage of passed FUNCNAME or specials (faq,help,SWARM)
 .TP
       \fI./runtime\fP \fBdemo\fP
       	Shows some sample output and prints the source code of that demo function
+.TP
+      \fI./runtime\fP \fBlog\fP [rm]
+      	Prints the logfile of SWARM internals.
+      	When passing \fBrm\vP alongside, it will remove the logfile.
 .TP
       \fI./runtime\fP \fBconfig\fP [rc,settings]
       	Opens a menu to configure SWARM, pass optional names to open their respecting file directly.
@@ -66,6 +70,9 @@ Where ARGUMENT is one of:
 .TP
       \fI./runtime\fP \fBphrases\fP
       	Prints a list of phrases that are translate/able
+.TP
+      \fI./runtime\fP \fBremove\fP
+      	Removes the SWAMRC and all files related with SWARM (~/.swarmrc & ~/.config/swarm)
 .TP
       \fI./runtime\fP \fBstats\fP
       	Prints some stats of the project
@@ -141,4 +148,4 @@ This file stores the most important path and command variables as well as some b
  General help using GNU software: <http://www.gnu.org/gethelp/>
 
 .SH AUTHOR
-This manpage SWARM was written by Simon Arjuna Erat (sea) for SWARM version 1.0
+This manpage was written by Simon Arjuna Erat (sea) for SWARM version 1.0

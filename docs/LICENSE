@@ -1,7 +1,36 @@
+This is for non-lawyers to read.
+All terms of the GPL v2 apply.
+
 https://www.gnu.org/licenses/old-licenses/gpl-2.0
 See file: [GPLv2](./GPLv2)
+=================================================
 
-Allthough your scripts use SWARM, your scripts do not have to be GPLv2.
+Short:
+------
+* SWARM is a BASH library, as such you may use it for anything you do in/with BASH shell.
+* Your project does NOT have to be opensource (example: if used as an ssh/telnet-endpoint/server - menu)
+* The moment you change code of SWARM, you have to (mandatory) provide updates (these changes) to the source of where you have obtained SWARM. (https:/github.com/sri-arjuna/SWARM)
+
+Important:
+----------
+If you are using SWARM within anything that can be loosly or stricly be defined as company or enterprise, I ask you to review code and send me any possible bugfixes you came up with.
+--> I had spent over 5 years creating this, a short review for this otherwise free tool is not too much to ask for.
+(I do not want another Heartbleed incident... Companies using free software but not giving a tiny bit (workforce/effort) in return, to then blame a single person, while they would have had dozens of specialist at hand to find that bug AGES ago!!)
+This said, if companies (anyone for that matter) use SWARM, I deny ANY responsiblity for ANY- and everything that might happen while using SWARM.
+Because I cannot possibly know their proper environment and test for stability. Or have labs with any and every possible OS and configuration model active...
+
+SWARM comes WITHOUT any warranty or 'garantie' of any kind.
+It was written for myself as the base for another project, I had best (cross-platform-)compatibility & stability in mind as goals, while providing alot of tools/functions to ease the task of coding and to reduce overhelmed'ness for casual endusers when it comes to using the terminal.
+
+
+* You may use SWARM within closed environments (example: Government, Military) and for commercial use.
+* Allthough your scripts use SWARM, your scripts do not have to be GPLv2.
+* Meaning, as long you leave SWARM 'as is' you can do whatever you want with it.
+* But the moment you change ANYTHING of SWARMs code, you must provide these changes publicly.
+* A good place to send code pull requests are at: https:/github.com/sri-arjuna/SWARM
+* If you use SWARM within any kind of company, I do ask you to review the code as good as possible and send me any bugfixes you were able to fix.
+
+
 
 
 Terms for Company use:

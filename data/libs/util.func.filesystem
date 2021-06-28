@@ -121,7 +121,7 @@ swarm.util.tar() { # DIR1 DIR2 ...
 			status "$RET" "$SWARM_MSG_WORD_EXTRACTED: $FOLDER"
 		else	DEST=$(swarm.str.genfilename "$($PWD_EXEC)/$THIS.$TAR_EXT")
 			status -r 2 "$SWARM_MSG_WORD_READING..."
-			$ECHO -e "tar -ac --one-file-system -f \"$DEST\" \"$THIS\" 2>&1 > /dev/null > $TMP" > "$FILE_CMD"
+			$ECHO -e "tar -ac --one-file-system -f \"$DEST\" \"$THIS\" 2>&1 > /dev/null > '$TMP'" > "$FILE_CMD"
 			#shellcheck disable=SC2164 disable=2086
 			$CD "$(dirname $FOLDER)"
 			$CHMOD +x "$FILE_CMD"
@@ -162,8 +162,7 @@ swarm.util.tar() { # DIR1 DIR2 ...
 swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 # Copies SOURCE to TARGET
 # Returns 1 if TARGET-dir does not exist and was not create
-	# shellcheck disable=SC2128
-	[[ -z "${@}" ]] && swarm.help.usage "$FUNCNAME" && return 1
+	[[ -z "${@}" ]] && swarm.help.usage "${FUNCNAME[0]}" && return 1
 	#local force_Overwrite=false
 	local show_Longnames=false
 	local cp_target=""
@@ -177,9 +176,11 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			shift
 			;;
 		"-l")	show_Longnames=true ; shift	;;
-		"-t")	cp_target="$2" ; shift 2	;;
+		"-t")	[[ -z "$2" ]] && { swarm.help.usage "$FUNCNAME" ; return 1 ;}
+			cp_target="$2" ; shift 2	;;
 		"-q")	beVerbose=false ; shift		;;
-		"--")	# Do Pipe
+		"--")	# Do Pipe, but since it is pipe,
+			# we cannot take 'last argument' as target...
 			# shellcheck disable=SC2128
 			[[ -z "$cp_target" ]] && \
 				swarm.help.manpage "$FUNCNAME" && \
@@ -188,7 +189,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			while read line
 			do
 				# shellcheck disable=SC2086
-				$CP $optargs "$line" "$cp_target"
+				$FUNCNAME $optargs "$line" "$cp_target"
 			done
 			return 0
 			;;
@@ -196,6 +197,11 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 				optargs+=" $opt" && shift	;;
 		esac
 	done
+# Internal functions
+	_check.files() { # SRC TARGET
+	# Reeturns true if both hashes match
+		echo
+	}
 # Make sure target is set
 	local ARGS=("${@}")
 	# If TARGET was not passed as option,
@@ -214,23 +220,25 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 
 # Action
 	if $beVerbose
-	then	# Show each file on its own line
+	then	# If there was a target argument passed last, it was removed by now
+		# So if we have more than 2 arguments, target must be a directory
+		[[ -n "$2" ]] && swarm.util.mkdir "$cp_target"
+		# Show each file on its own line
 		for src in "${ARGS[@]}"
 		do
 			$show_Longnames && src_show="$src" || src_show="${src##*/}"
 			bar -m "$MAX" -c "$COUNT" "$SWARM_MSG_WORD_COPYING : $src"
 			# shellcheck disable=SC2086
 			$CP_EXEC $optargs "$src" "$cp_target"
-			#$PRINTF "$POS_END\n"
-			status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
-			init.log "$CP $(swarm.str.bool2str -s $?) $src"
+			[[ -d "$src" ]] && this_type="$SWARM_MSG_WORD_DIR" || this_type="$SWARM_MSG_WORD_FILE"
+			status -c $? "$SWARM_MSG_WORD_COPIED $(swarm.print.bold $this_type): ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
+			init.log "$CP $(swarm.str.bool2str -d $?) $src"
 			((COUNT++))
 		done
 	else	# Show all in one line;
 		bar "$SWARM_MSG_WORD_COPYING $SWARM_MSG_WORD_FILES"
 		# shellcheck disable=SC2086
 		$CP $optargs "${ARGS[@]}" "$cp_target"
-		#$PRINTF "$POS_END\n"
 		status $? "$SWARM_MSG_WORD_COPIED $MAX $SWARM_MSG_WORD_FILES"
 		init.log "$CP $(swarm.str.bool2str -s $?) FILES::${ARGS[*]}  TARGET::$cp_target"
 	fi

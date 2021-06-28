@@ -1,0 +1,35 @@
+.\" Manpage template for SWARM
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.list.*\fP - Summarized manpage for list functions
+
+.SH DESCRIPTION
+The \fBswarm.list.*\fP functions are designed to give a convenient way to access certain lists or assist in generating list.
+
+.SH SYNOPSIS
+.TP
+\fBpick -m $(swarm.list.*)\fP
+Get the results from a given list via \fBpick\fP.
+
+
+.SH EXAMPLE
+.P
+newTHEME=$(pick $(swarm.list.theme))
+.RE
+swarm.update.theme "$newTHEME"
+.P
+title "Select a sub directory to store your backup:"
+.RE
+pick -q $(swarm.list.dirs "$BACKUP_DEST")
+.RE
+status $? "Selected:" "$PICKED"
+
+.SH BUGS
+.PP
+ Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+ SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+ General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage was written by Simon Arjuna Erat (sea) for SWARM version 1.0

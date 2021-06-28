@@ -17,26 +17,45 @@ This is the function that should be used the most to display any data to enduser
 * Prints three strings left, centered and right
 
 .SH OPTIONS
-  --		Recieve strings from pipe
-  -1		Force left aligned text only
-  -2		Force left & right aligned text only
+.TP
+--			Recieve strings from pipe
+.TP
+-1			Force left aligned text only
+.TP
+-2			Force left & right aligned text only
+.TP
+-n			Prints a tailing newline character.
+.TP
+--left		Default behaviour if only STRING1 (left) is pased.
+		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+.TP
+--center  	Prints STRING1 (left) in the center of the line.
+		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+.TP
+--right		Prints STRING1 (left) on the right side.
+		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
 
 .SH EXAMPLE
+.P
 printe "Hello World"
-.RE
+.P
 printe "left" "right"
+.P
+printe "left side" "in the center" "on the right side"
+.P
+printe --center "center string"
 .RE
-printe "" "center" ""
-.PP
+printe -n --right "right string"
+.P
 grep PATTERN FILE | printe -2 --
 
 
 
 .SH SEE ALSO
-\fBbash\fP(1), \fBprintl\fP(1), \fBprinte\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
+\fBbash\fP(1), \fBswarm.print.border\fP(1), \fBswarm.print.text\fP(1)
 
 .SH BUGS
-Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM\fP
+Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM/issues\fP
 
 .SH AUTHOR
 Simon Arjuna Erat, Switzerland

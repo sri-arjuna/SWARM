@@ -7,6 +7,7 @@
 	swarm.eu.function.list() { # [FILE]
 	# Prints a list of properly declared functions
 	# see ./docs/{MANUAL,SYNTAX}.md for details
+		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tmp_oldpwd="${PWD:-$($PWD_EXEC)}"
 		local tmp_file="${1##*/}"
 		local tmp_dir=${1/$tmp_file}
@@ -50,6 +51,8 @@
 	swarm.eu.function.show() { # MODE [FILE] FUNCTIONNAME		## MODE= --text || --code
 	# Prints either these 2 comment lines or the code
 	# Please see: ./docs/contribute/{MANUAL,SYNTAX}.md)
+		#shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Vars
 		#
@@ -122,6 +125,8 @@
 	swarm.eu.show.basics() { #
 	# Shows the basic core functions
 	#
+		#shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
 		#list=$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.commands")
@@ -155,6 +160,8 @@
 	swarm.eu.show.variables() { #
 	# Shows the basic core functions
 	#
+		#shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
 		list="isDir isRoot isGUI DESKTOP DISTRO BASED TAR EX CP MV"
@@ -184,6 +191,8 @@
 	swarm.eu.show.advanced() { #
 	# Shows the basic core functions
 	#
+		#shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		# Get full list of all functions
 		local list="" this="" item=""
@@ -253,9 +262,8 @@
 
 		local tmp=""
 		#shellcheck disable=SC2046
-		#tmp=$(
-		pick $(swarm.list.theme)  #)
-		status "$RET_SKIP" "$SWARM_MSG_WORD_SELECTED : $PICKED = #$REPLY"
+		tmp=$(pick $(swarm.list.theme))
+		status "$RET_SKIP" "$SWARM_MSG_WORD_SELECTED : $tmp"
 
 		title "Progress Bars"
 
@@ -270,7 +278,7 @@
 
 		while [[ $C -le $M ]]
 		do
-			bar -B num -m $M -c $C "my Message" "Somemthing additional"
+			bar -B num -m $M -c $C "my Message"
 			((C++))
 			sleep 0.3
 		done
@@ -279,7 +287,7 @@
 
 		while [[ $C -le $M ]]
 		do
-			bar -B dash "my Message" "Somemthing additional"
+			bar -B dash "my Message"
 			((C++))
 			sleep 0.3
 		done
@@ -297,7 +305,6 @@
 	swarm.eu.help.menu() { # [ITEM]
 	# Prints help to ITEM and returns with 1
 	# Prints help menu if no ITEM is passed and returns with 0
-#set -x
 		local item=""
 	# Catch Argument
 		if [[ -n "$1" ]]
@@ -321,17 +328,12 @@
 		while true
 		do
 			clear
-			echo the other loop
-#set +x
 			header --default "${SWARM_MSG_HELPMENU_ROOT_TITLE}"
 			title "${SWARM_MSG_HELPMENU_ROOT_TITLE}"
 			printe "${SWARM_MSG_HELPMENU_ROOT_TEXT1}"
-#set -x
-#			[[ -z "$SWARM_MSG_HELPMENU_ROOT_TOPIC3" ]] && echo yikes
+
 			local mnu_root_array=("$SWARM_MSG_HELPMENU_ROOT_TOPIC1" "$SWARM_MSG_HELPMENU_ROOT_TOPIC2" "$SWARM_MSG_HELPMENU_ROOT_TOPIC3" )
-#set +x
 			item=$(pick -2 -m  "${mnu_root_array[@]}") #$(swarm.eu.function.list))" || item=""
-#set -x
 
 			case "$item" in
 			"${SWARM_MSG_WORD_BACK}")
@@ -355,7 +357,6 @@
 				;;
 			esac
 		done
-set +x
 	}
 	#shellcheck disable=SC2120
 	swarm.eu.new.menu() { #
@@ -482,24 +483,11 @@ set +x
 	swarm.help.usage() { # FUNCNAME
 	# Returns the 'usage help screen' according to passed FUNCNAME
 	#
+		#shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local out=""
 	# Parse argument
 		case "$1" in
-		"all")
-			local list ; list=$(cfg.list "$SWARM_DIR_LANG/${SWARM[LANG]}/strings_usage.lang")
-			local result ; result=""
-			local count ; count=0
-			title "$SWARM_MSG_WORD_USAGE"
-			for item in $list;do
-				result="${!item}"
-				printe "$item" "${result/${SWARM_MSG_WORD_USAGE}:}"
-				if [[ $count -le $(( ${LINES:-24} - 5)) ]]
-				then	((count++))
-				else	count=0
-					press 3>/dev/zero
-				fi
-			done
-			;;
 		"cfg.list")
 			out="$SWARM_MSG_CFG_LIST_USAGE"
 			;;
@@ -514,6 +502,9 @@ set +x
 			;;
 		"printe")
 			out="$SWARM_MSG_PRINTE_USAGE"
+			;;
+		"printl")
+			out="$SWARM_MSG_PRINTL_USAGE"
 			;;
 		"header")
 			out="$SWARM_MSG_HEADER_USAGE"
@@ -677,13 +668,10 @@ set +x
 		"asRoot")
 			out="$SWARM_MSG_ASROOT_USAGE"
 			;;
-		"swarm.str.split")
-			out="$SWARM_MSG_ASROOT_USAGE"
-			;;
 		"")
 			out="$"
 			;;
-		*)	out="TODO: Usage $1"
+		*)	out="TODO: $1"
 			;;
 		esac
 	# Output
@@ -696,34 +684,29 @@ set +x
 	swarm.help.manpage() { # FUNCNAME
 	# Opens the manpage according to passed FUNCNAME
 	#
+		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
-		local thisFile ; thisFile="$1"
-		if [[ "swarm.list." == "${thisFile:0:11}" ]]
-		then	thisFile="swarm.list.all"
-		elif [[ "swarm.sysinfo." == "${thisFile:0:14}" ]]
-		then	thisFile="swarm.sysinfo.all"
-		fi
-		if [[ -f "$thisFile" ]]
+		if [[ -f "$1" ]]
 		then	# Passed argument exists
-			tManpage="$thisFile"
-		elif [[ -f "$tDir/${thisFile}.1" ]]
+			tManpage="$1"
+		elif [[ -f "$tDir/${1}.1" ]]
 		then	# default handling
-			tManpage="$tDir/${thisFile}.1"
-		elif [[ -z "$thisFile" ]]
+			tManpage="$tDir/${1}.1"
+		elif [[ -z "$1" ]]
 		then	# Default error
 			#shellcheck disable=SC2128
 			swarm.help.usage "$FUNCNAME"
 			return 1
 		else	# Lets use fallback language : english
 			tdir="$SWARM_DIR_ROOT/docs/en_GB"
-			if [[ -f "$tdir/${thisFile}.1" ]]
-			then	tManpage="$tDir/${thisFile}.1"
+			if [[ -f "$tdir/${1}.1" ]]
+			then	tManpage="$tDir/${1}.1"
 			else
-				swarm.help.usage "$thisFile"
+				swarm.help.usage "$1"
 				return 1
 			fi
 		fi
-		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$thisFile"
+		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
 	}
 #
 # Configuration handler

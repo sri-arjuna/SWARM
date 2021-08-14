@@ -14,7 +14,7 @@
 #	it will be inveresed from 'border_left'
 #	border-color is not used for 'header'
 #
-	SWARM_THEME_DATA[border-left]="\ "
+	SWARM_THEME_DATA[border-left]=""
 	#SWARM_THEME_DATA[border-right]=""
 	#SWARM_THEME_DATA[border-color]="$blue$WHITE"
 #

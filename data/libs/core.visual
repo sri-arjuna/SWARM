@@ -36,12 +36,12 @@
 		export lenRight="${#BORDER_RIGHT}"
 		export lenClrFont=${#clrFRONT}
 		export lenClrBack=${#clrBACK}
-		export identRight=$(( lenRight - 1 ))
+		export identRight=$(( lenRight + ${#clrCL}  ))
 		#export identRight=$(( lenRight + 4 ))
 
 		# Pre-Calculate positions
 		export numHALF=$(( COLUMNS / 2 ))
-		export numEND=$COLUMNS ##$(( numHALF * 2 ))
+		export numEND=$(( numHALF * 2 ))
 		export posEND="\33[${numEND}G"
 		# swarm.print.border still needs extra handling for posLEFT
 		export posLEFT="\33[$(( lenLeft + 2 ))G"
@@ -61,6 +61,8 @@
 	swarm.update.theme() { # THEME_NAME
 	# This loads the provided THEME_NAME
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# This an assigned array containg the theme related data
 		# Lets make sure each theme gets loaded into clear memory
 		unset SWARM_THEME_DATA[@]	# Use terminal / console / vtr default settings as base
@@ -108,6 +110,8 @@
 	swarm.list.theme() {
 	# Lists all themes available
 	# Includes SWARM_USER_DIR_BASE/themes and SWARM_DIR_THEMES alike
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local d f
 		for d in "$SWARM_USER_DIR_BASE/themes/" "$SWARM_DIR_THEMES/"
 		do
@@ -129,6 +133,8 @@
 	swarm.init.theme () { #
 	# Initiate the theme for the first time
 	# This is only a wrapper for the initial loading.
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.update.theme "${SWARM_THEME:-default-red}"
 	}
 #
@@ -143,6 +149,8 @@
 	swarm.list.color() { #
 	# Simply lists the color names that can be used in SWARM
 	# Reads from the colors.conf file of SWARM if the variables are not found in memory.
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2154
 		if [[ -z "$cb_black" ]]
 		then	# The variables are empty
@@ -168,12 +176,16 @@
 	swarm.color.bg() {  # COLORNAME
 	# Returns the color code of provided COLORNAME
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local str=cb_${1:-blue}
 		eval "$PRINTF" \$"${str}"
 	}
 	swarm.color.fg() {  # COLORNAME
 	# Returns the color code of provided COLORNAME
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local str=cf_${1:-white}
 		eval "$PRINTF" \$"${str}"
 	}
@@ -181,29 +193,39 @@
 	# Returns the positioncode for passed NUM location
 	# Returns number 0 if no argument is passed
 		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		# shellcheck disable=SC2145
 		$PRINTF "\33[${1:-0}G"
 	}
 	swarm.print.bold() { # "STR"
 	# Returns STR with wrapped code for BOLD
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[1m${@}\033[0m"
 	}
 	swarm.print.blink() { # "STR"
 	# Returns STR with wrapped code to blink
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[5m${@}\033[0m"
 	}
 	swarm.print.stroke() { # "STR"
 	# Returns STR with wrapped code for STROKE
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[9m${@}\033[0m"
 	}
 	swarm.print.underline() { # "STR"
 	# Returns STR with wrapped code for UNDERLINE
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[4m${@}\033[0m"
 	}
@@ -218,7 +240,7 @@
 		case "${1/-}" in
 		h)	MODE="header"	;;
 		t)	MODE="title"	;;
-		c)	$PRINTF "\e[2K" >&"${FD_SWARM_UI}"	;;
+		c)	$PRINTF "\e[2K"	;;
 		*)	MODE="basic"	;;
 		esac
 	# Make sure values are udpated
@@ -232,8 +254,9 @@
 			pos_cor_num=0
 			;;
 		"header")
-			local filler_num="" filler_str=""
-			filler_num=$(( numEND - $(( lenRight + lenLeft ))  ))
+			local filler_num=""
+			filler_num=$(( numEND - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+			local filler_str=""
 			filler_str=$($PRINTF "%*s" ${filler_num})
 			PRINT_LEFT_IN="$filler_str" #$c_reset"
 			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
@@ -242,7 +265,7 @@
 			;;
 		"title")
 			local filler_num=""
-			filler_num=$(( COLUMNS - $(( lenRIGHT + lenLeft )) - 2  ))
+			filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
 			local filler_str=""
 			filler_str=$($PRINTF "%*s" ${filler_num})
 			# shellcheck disable=SC2154
@@ -254,189 +277,204 @@
 		*)	pos_cor_num=0 ;;
 		esac
 	# Get some numbers
-#		local identRight=$(( lenRight + ${#clrCL}  ))
-		local posLEFT="\33[$(( lenRight - 2 ))G"
-		local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num +1 ))G"
+		local identRight=$(( lenRight + ${#clrCL}  ))
+		local posLEFT="\33[$(( ${#BORDER_LEFT} - 2 ))G"
+		local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num ))G"
 	# Well, left aligned it works. isnt too hard
-		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}\r" >&"${FD_SWARM_UI}"
+		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" >&2
+	# The right side is much more challenging
+		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
+		$PRINTF "${posEND}"
 	}
 	swarm.print.text() { # [-h -t] [ LEFT ] [ CENTER ] [ RIGHT]
 	# This simply puts the text
 	# according to MODE
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# Had to disable because I sent bold text through this for title... hmm.. disable?
 		local fix_header_r=0
-		local MODE=basic ORIENTATION=default
-		local doNewline=false doReturn=false
-		while :;
-		do
-			case "${1}" in
-			"-t")	MODE=title
-				doNewline=true
-				split_opt="$1"
-				;;
-			"-h")	MODE=header
+		local MODE=basic
+		local doReturn=false
+
+		[[ "-" = "${1:0:1}" ]] && \
+			case ${1/-} in
+			t)	MODE=title
+				shift	;;
+			h)	MODE=header
 				fix_header_r=0
-				doNewline=true
-				split_opt="$1"
-				;;
-			"-n") 	doNewline=true
-				;;
-			"-r") 	doReturn=true
-				;;
-			"--center")
-				ORIENTATION=center
-				doReturn=true
-				doCenter=true
-				;;
-			"--left")
-				ORIENTATION=left
-				doReturn=true
-				;;
-			"--right")
-				ORIENTATION=right
-				doReturn=true
-				;;
-			*)	break
-				#swarm.help.usage "${FUNCNAME}"
-				#return 1
-					;;
+				shift	;;
+			e) 	doReturn=true
+				shift	;;
 			esac
-			shift
-		done
+
 
 		# Check if it is too short, if so, print fallback mode and return
 		[[ ${COLUMNS} -lt 25 ]] && \
-			$PRINTF "%s\n" "${@}" >&1 && \
+			$PRINTF "%s\n" "${@}" && \
 			return 1
 
 		# Make sure values are udpated
 		swarm.update.geometry
 
-	# Get the actual string
+		# Get the actual string
 		local ARGS=("${@}")
 		local L="${ARGS[0]}"
 		local M="${ARGS[1]}"
 		local R="${ARGS[2]}"
-	# Retrieve their length
+		#echo " THIS  ${#ARGS[*]}   THIS --> ${ARGS[*]}"
+		#for a in "${ARGS[@]}"; do echo "N- $BASH_SOURCE - NN $a";done
+		local evalLeft=""
+		evalLeft=$($PRINTF "$L")
+		local evalMiddle=""
+		evalMiddle=$($PRINTF "$M")
+		local evalRight=""
+		evalRight=$($PRINTF "$R")
+
+		# Retrieve their length
+		local lenEvalLeft=${#evalLeft}
+		local lenEvalMiddle=${#evalMiddle}
+		local lenEvalRight=${#evalRight}
 		local lenEvalLeft=${#L}
 		local lenEvalMiddle=${#M}
 		local lenEvalRight=${#R}
-	# Before we attempt to print anything, lets check about the length
-		local lenBorder=$(( lenRight + lenLeft + 2 ))
+
+		# Before we attempt to print anything, lets check about the length
 		local len_strings_total=$(( lenEvalLeft + lenEvalMiddle + lenEvalRight ))
-		local len_max_length=$(( COLUMNS - lenBorder ))
-	# Now check wether we need to split or not
-	# Output
+
+		if [[ ${len_strings_total:-0} -ge $(( COLUMNS - 6 )) ]]
+		then	# Needs splitting
+			case "$MODE" in
+			"basic")
+				if false; then
+				# Wish this would work, but all this shows are empty lines
+					local L_one="" L_two=""
+					local M_one="" M_two=""
+					local R_one="" R_two=""
+
+					[[ ${#L} -ge $(( (COLUMNS - 6)/3 )) ]] && \
+						swarm.str.split "$L" | while ${READ} -r L_one ;do ${READ} -r L_two;break;done || \
+						L_one="$L"
+
+					[[ ${#M} -ge $(( (COLUMNS - 6)/3 )) ]] && \
+						swarm.str.split "$M" | while ${READ} -r M_one ;do ${READ} -r M_two;break;done || \
+						M_one="$M"
+
+					[[ ${#R} -ge $(( (COLUMNS - 6)/3 )) ]] && \
+						swarm.str.split "$R" | while ${READ} -r R_one ;do ${READ} -r R_two;break;done || \
+						R_one="$R"
+
+					# This should be enough,
+					# as from here on further sub-splitting will be done
+					# shellcheck disable=SC2031
+					swarm.print.text "$L_one" "$M_one" "$R_one"
+					# shellcheck disable=SC2119
+					swarm.print.border
+					# shellcheck disable=SC2031
+					swarm.print.text  "$L_two" "$M_two" "$R_two"
+					# We're done here, lets get out
+				#	return 0
+				fi
+				## works, but not nice.. empty line???
+				if [[ -n "$L" ]]
+				then
+					# shellcheck disable=SC2015
+					[[ ${#L} -ge $(( COLUMNS - 6 )) ]] && \
+						swarm.str.split "$L" | printl -1 -- || \
+						printl "$L"
+				fi
+				if [[ -n "$M" ]]
+				then
+					# shellcheck disable=SC2015
+					[[ ${#M} -ge $(( COLUMNS - 6 )) ]] && \
+						swarm.str.split "$M" | printl -2 -- || \
+						printl "$M"
+				fi
+				if [[ -n "$R" ]]
+				then
+					# shellcheck disable=SC2015
+					[[ ${#R} -ge $(( COLUMNS - 6 )) ]] && \
+						swarm.str.split "$R" | while read -r line
+									do
+										printe "" "" "$line"
+									done || \
+									printe "$R"
+				fi
+				;;
+			"title")
+				swarm.str.split "$1" | title --
+				;;
+			"header")
+				swarm.str.split "$1" | header --
+				;;
+			esac
+			return 0
+		# ELSE : Normal handling
+		fi
+		# Output
 		case ${#@} in
 		0)	# Nothing to print
 			$PRINTF "${posLEFT}"
 			;;
 		1)	# Just left oriented
+			if [[ "$MODE" == "title" ]]
+			then
+				local posMIDDLE="\33[$(( numHALF - $(( ${#1} / 2 ))   ))G"
+				$PRINTF "${posMIDDLE}${c_front}${c_back}${c_invert}$(swarm.print.bold "$1")${c_reset}"
+			else
+				$PRINTF "${posLEFT}$1"
+			fi
+			#return
+			;;
+		2)	# 2nd arg is right oriented
+			#local posRIGHT="\33[$(( $numEND - $lenMiddle - ${lenEvalMiddle} - 1 ))G"
 			case "$MODE" in
 			"basic")
-				if $doCenter
-				then
-					echo heer
-					local posMIDDLE="\33[$(( numHALF - $(( ${#L} / 2 ))   ))G"
-					$PRINTF "${posMIDDLE}$L${c_reset}" >&"${FD_SWARM_UI}"
-				else
-					$PRINTF "${posLEFT}$L" >&"${FD_SWARM_UI}"
-				fi
+				$PRINTF "${posLEFT}$1"
+				# shellcheck disable=SC2154
+				local posRIGHT="\33[$(( numEND - lenMiddle - lenEvalMiddle - 1 ))G"
+				$PRINTF "${posRIGHT}$2"
 				;;
-			"title")
-				local posMIDDLE="\33[$(( numHALF - $(( ${#L} / 2 ))   ))G"
-				$PRINTF "${posMIDDLE}${c_front}${c_back}${c_invert}$L${c_reset}" >&"${FD_SWARM_UI}"
+			"header")
+				local posRIGHT="\33[$(( numEND - lenMiddle - lenEvalMiddle - 1 - fix_header_r ))G"
+				$PRINTF "${posLEFT}${c_front}${c_back}$1"
+				$PRINTF "${posRIGHT}$2${c_reset}"
 				;;
 			esac
 			;;
 		3)
 			# Default handling
-			local posMIDDLE="\33[$(( numHALF - $(( ${#M} / 2 ))  ))G"
-			local split_opt=""
-			local header_start="" header_end=""
-			local posRIGHT="\33[$(( numEND - identRight - lenEvalRight - 1  ))G"
-		# Prepare variables
+			local posMIDDLE="\33[$(( numHALF - $(( ${#2} / 2 ))  ))G"
 			case "$MODE" in
+			"basic")
+				local posRIGHT="\33[$(( numEND - identRight - lenEvalRight - 1  ))G"
+				$PRINTF "${posLEFT}$1"
+				$PRINTF "${posMIDDLE}$2"
+				$PRINTF "${posRIGHT}$3"
+				;;
 			"header")
-				split_opt+="-h -n"
-				header_start="${c_front}${c_back}"
-				header_end="${c_reset}"
-				local posRIGHT="\33[$(( numEND - identRight - ${#R} - 1 - fix_header_r ))G"
+				local posRIGHT="\33[$(( numEND - identRight - ${#3} - 1 - fix_header_r ))G"
+				$PRINTF "${posLEFT}${c_front}${c_back}$1"
+				$PRINTF "${posMIDDLE}$2"
+				$PRINTF "${posRIGHT}$3${c_reset}"
 				;;
 			esac
-		# Actualy print
-			if [[ ${#L} -gt $(( COLUMNS - lenRight - lenLeft - 2 )) ]]
-			then	# L Needs splitting
-				swarm.str.split "$L" >/dev/zero
-				swarm.print.text $split_opt "$SPLIT1"
-				swarm.print.border $split_opt
-				swarm.print.text $split_opt "$SPLIT2" "$M" "$R"
-			elif [[ ${#M} -gt $(( COLUMNS - lenRight - lenLeft - 2 )) ]]
-			then	# R Needs splitting
-				swarm.str.split "$M" >/dev/zero
-				swarm.print.text $split_opt "$L" "$SPLIT1" ""
-				swarm.print.border $split_opt
-				swarm.print.text $split_opt "" "$SPLIT2" "$R"
-			elif [[ ${#R} -gt $(( COLUMNS - lenRight - lenLeft - 2 )) ]]
-			then	# R Needs splitting
-				swarm.str.split "$R" >/dev/zero
-				swarm.print.text $split_opt "$L" "$M" "$SPLIT1"
-				swarm.print.border $split_opt
-				swarm.print.text $split_opt "" "" "$SPLIT2"
-			elif [[ $(( ${#L} + ${#M} + ${#R} )) -gt $(( COLUMNS - lenRight - lenLeft - 2 )) ]]
-			then	# 1 and 2 need be seperated
-				swarm.print.text $split_opt "$L"
-				swarm.print.border $split_opt
-				swarm.print.text $split_opt "" "$M" ""
-				swarm.print.border $split_opt
-				swarm.print.text $split_opt "" "" "$R"
-			else	# Normal output
-				swarm.print.border $split_opt
-				$PRINTF "${posLEFT}${header_start}$L${posMIDDLE}$M${posRIGHT}$R${header_end}"
-			fi
 			;;
 		esac
-		$doReturn && $PRINTF "$(swarm.print.goto 0)"
-		$doNewline && $PRINTF "$(swarm.print.goto $COLUMNS)\n"
+		$PRINTF "${posEND}"
+		$doReturn && $PRINTF "\n"
 	}
 	swarm.str.split() { # "STRING"
 	# Splittes passed string in half at the nearest word
 	# and prints each part as a new line
-		local beQuiet=false
-		case "$1" in
-		"-"|"--")
-			shift
-			while $READ -r line;do
-				$FUNCNAME "$line"
-			done
-			return 0
-			;;
-		""|-h|--help|-\?)
-			swarm.help.usage "$FUNCNAME"
-			return 1
-			;;
-		"-q")	beQuiet=true
-			shift
-			;;
-		esac
-	# Vars
-		local str="" ; str="${*}"
-		local tmp_count ; tmp_count=$(( ${#str} / 3 * 2 ))
-		local two_liner=""
-		SPLIT1=""
-		SPLIT2=""
-	# Action
-		tmp=$(( COLUMNS / 2 ))
-		[[ 0 -eq $tmp_count ]] && tmp_count=$tmp
-		two_liner=$($FOLD -sw "$tmp_count" -- <<< "$1")
-		$beQuiet || $ECHO "$two_liner" >&1
-	# Env
-		SPLIT1=$( head -n1 -- <<< "$two_liner")
-		SPLIT2=$( tail -n1 -- <<< "$two_liner")
+		[[ -z "$1" ]] && return 1
+		#local tmp_count=$(( ( $($ECHO "${1}" | $WC -c)  ) / 2 ))
+		local tmp_count=$(( ${#1} / 2 ))
+		$ECHO "$1" | $FOLD -sw "$tmp_count"
 	}
 	swarm.str.status() { # ERRNUM
 	# Returns the string to be printed according to ERRNUM
 	# This already takes care of terminal only or GUI visuals
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Colors
 		#

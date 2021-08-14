@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+##############################################
+# SWARM = Shell Wrapper and Runtime Modifier #
+# Author:	Simon Arjuna Erat (sea)	     #
+# License:	GPL v2			     #
+# Copyleft:	1995-2021		     #
+# Created:	2020.01.18		     #
+# Changed:	2021.08.14	 	     #
+# Build:	66-new			     #
+##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
 #	It is an interface between script authors and end users.
@@ -38,141 +47,76 @@
 # * Optionaly, you may pass SWARM_RAMDISK_DIR=/path/to/mountpoint
 ##############################################
 #
-# Clear certain env and other variables
-#
-	${DEBUG:-false} && set -x
-	# shellcheck disable=SC2086,SC2184
-	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
-	declare -A SWARM
-#
-#	    ---   Datasheet   ---
-#
-#################################################
-# SWARM = Shell Wrapper and Runtime Modifier	#
-# Author:	Simon Arjuna Erat (sea)		#
-SWARM[LICENSE]="GPLv2"	# License: ./docs/GPLv2	#
-# Idea:		1995				#
-# Copyleft:	2011-2021			#
-# Created:	2020.01.18			#
-# Changed:	2021.06.28	 		#
-SWARM[VERSION]=0.9
-SWARM[BUILD]=69
-SWARM[GIT]="http://github.com/sri-arjuna/SWARM"
-SWARM[ISSUES]="${SWARM[GIT]}/issues"
-#################################################
-#
 # Version Check
 #
 	if [[ -z ${BASH_VERSINFO[@]} ]] || [[ ${BASH_VERSINFO[0]} -lt 4  ]]
-	then	# Print error if no BASH variables were found
+	then	# Print error of no BASH variables where found
 		# Or if BASH version is too low
-		printf '%s\n' "Requires BASH 4.3 or higher"
-		return 2>/dev/zero || exit
+		printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
 	else	# Bash version seems is 4 or higher
 		if [[ 4 -eq ${BASH_VERSINFO[0]} ]]
 		then 	# Major matches
 			if [[ ${BASH_VERSINFO[1]} -lt 3  ]]
 			then	# Minor does not
-				printf '%s\n' "Requires BASH 4.3 or higher"
-				# At least that is where I can guarantue it works as promised.
-				return 2>/dev/zero || exit
+				printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
 			fi
 		fi
 	fi
 #
 # Core Public Variables
 #
+	# SWARM
+	${DEBUG:-false} && set -x
+	# shellcheck disable=SC2086 disable=SC2184
+	unset SWARM[@] ${!SWARM_DIR_*} IFS >/dev/zero
+	declare -A SWARM
+	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
+	export isSWARMfirstTime=true
+	# hasCOLUMNS is for internal use only
+	[[ -n "$COLUMNS" ]] && \
+		hasCOLUMNS=true || \
+		hasCOLUMNS=false
+	export hasCOLUMNS
+	#echo $hasCOLUMNS;exit
+	SWARM[VERSION]=0.8.9
+	SWARM[BUILD]=66-new
+	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
+	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
+	SWARM[LICENSE]="GPLv2"
 	# This is default 'highlighted' MACHINE or ROOT display
 	# Non-root users (if existing) have very hardcoded 'default-blue' (fallback) theme
 	SWARM[THEME]="default-red"
-	# This refers to the location of this file
-	# You can spee up the process by passing: SWARMDIR=
-	SWARM[ROOTDIR]="$SWARMDIR"
+	SWARM[ROOTDIR]=""
 	# Language must be pre-set up until the basic language file was loaded
-	# Read: Every 'core' update that invokes 'language' (new/changed) will be en_GB, thus this must be loaded either way first at all times
-	# Manpages have their seperate fallback method to en_GB (per file!)
 	SWARM[LANG]="en_GB"
-	SWARM_CODE=$$
-	# isSWARMfirstTime will be set to false if SWARMRC (~/.swarmrc) is found
-	isSWARMfirstTime=true
+	export SWARM_CODE=$$
 #
-# Cross Platform Compatibility (CPC)
+# Set first time default
 #
-# There are hints on:
-# * https://community.unix.com/t/tip-template-for-a-safe-and-portable-script/375171
-# But I'm ignoring  the recomended language setting, since SWARM scripts do support different languages,
-# and does already a specific LC_ALL=C before 'system' calls it parses.
-	# Exporting an empty variable, but if it is, it will be filled with the current path. (they are mis-spelled on purpose!)
-	# This is used in swarm.cleanup to restore the env if this file was sourced
-	# Lets add an appending : so we restore to a non-path env as (if) it were
-	PATH_ORGINAL="${PATH_ORGINAL:-$PATH:}"
-	PWD_ORGINAL=="${PWD_ORGINAL:-${PWD:-$(pwd)}}"
-	# HP-UX is Posix-compliant with
-	export UNIX95=
-	# GREP_OPTIONS can obscure GNU grep
-	unset GREP_OPTIONS
-	# LD_* can obscure external commands
-	unset LD_LIBRARY_PATH LD_PRELOAD
-	# no glob file-matching in command args and word lists (for loop)
-#	set -f
-	# Unix optional packages install in
-	opt_path="/usr/local/bin:/usr/local/sbin"
-	solaris_opt_path="/usr/sfw/bin:/opt/csw/bin"
-	# Catch if we are 'within' a 'configure' env
-	[[ -n "$BINDIR$SBINDIR"  ]] && configure_PATH="$BINDIR:$SBINDIR"
-	# Catch other seen variables...
-	[[ -n "$OS_DIR_BIN$OS_DIR_SBIN"  ]] && os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
-	# These are the most basic places to look for executables
-	# Since the usr-move, it is prefered to first look for those directories
-	posix_PATH="/usr/bin:/usr/sbin:/bin:/sbin"
-	# Create a new PATH based on existing templates
-	path_new="/usr/xpg4/bin:/usr/ucb"
-	# After all, users might have taken their time to provide required/desired path attributes to their ENV..
-	# Lets make sure they do not get forgotton, just handle those as last... ;)
-	for elem in $(sed s,":","\n",g -- <<< "${posix_PATH}:${opt_path}:${configure_PATH}:${os_PATH}:${PATH}" )
-	do
-		[[ :"$path_new": != *:"$elem":* ]] && \
-			path_new+=":$elem"
-	done
-	# set PATH so no PATH is inherited, export it to all children
-	PATH="$path_new" ; unset path_new
-	export PATH
-	# Check if we need special treatment
-	[[ -n "$SSH_CLIENT" ]] && isSSH=true || isSSH=false
+#	This is just ment as failsafe if PATH is not set
+#	to get the most elementary basics on/of most default systems
+	posix_PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+	configure_PATH="$BINDIR:$SBINDIR"
+	os_PATH=":$OS_DIR_BIN:$OS_DIR_SBIN"
+	# Exporting an empty variable, but if it is, it will be filled with the current path.
+	export PATH_OLD="${PATH_OLD:-$PATH}"
+	# Use current PATH or if empty, default POSIX path, and append additional cross over paths
+	# Might result in double entries if this file is source multiple times without properly
+	# clearing the ENV by the use of swarm.cleanup
+	PATH="${PATH:-$posix_PATH}:$configure_PATH:$os_PATH"
 	# Make sure TERM is set
-	TERM="${TERM:-GNU_Linux}"
-	# Check if it were empty or even worse, if we are in a 'dumb' TERM...
-	# And of course, if we idenfity ourself already as SSH_Client, then of course we have to go there!
-	if [[ "dumb" == "${TERM}" ]] || [[ "" == "${TERM/GNU_Linux}" ]] || $isSSH
-	then	# Lets fix term to something useful
-		TERM="xterm"
+	[[ -n "$SSH_CLIENT" ]] && isSSH=true || isSSH=false
+	TERM="${TERM:-GNU-Linux}"
+	if [[ "" == "${TERM/GNU-Linux}" ]] || [[ "dumb" == "${TERM}" ]]
+	then	TERM="xterm"
 		# This is required to work within a SSH env
 		export TERM
-		# If there were another reason we have a restricted session
-		# Lets just reuse this for the same purpose - for now... (because its the only reason I know of!)
-		isSSH=true
 		# Skip selection if COLUMNS are preset
 		if [[ -z "$COLUMNS" ]]
-		then	# TODO:: check without this block
-			echo "How many COLUMNS (width) does your terminal have?"
+		then	echo "How many COLUMNS (width) does your terminal have?"
 			select COLUMNS in 60 70 80 90 100 110 120 150 200 239;do break;done
 			export COLUMNS
 		fi
-	fi
-	# This is to avoid 80 COlUMNS screens in a ssh -T session while the screen is a 190 COLUMNS window.
-	# hasCOLUMNS is for internal use only
-	if [[ -n "$COLUMNS" ]]
-	then	# We want this to applied even - well specialy - within a SSH env
-		# because if the SSH terminal requires us to set a specific width
-		# - there wont be a way to idenfity the proper width of the screen/tty.
-		hasCOLUMNS=true
-	else	# This is still required, So swarm.update.geometry will update the value
-		# to adjust to terminal window changes - that otherwise (hasColumns=true)
-		# would happen automatically, or be forced to a specific width
-		hasCOLUMNS=false
-		# This is now invoked for a first value
-		# swarm.update.geometry will update this value every given intervall automatically
-		COLUMNS=$(tput cols)
 	fi
 	# Most basic commands ; do not change (But pre-set these variables in the shell for first use)!
 	# This WILL be overwritten by the SWARMRC (~/.swarmrc)
@@ -211,9 +155,9 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	# shellcheck disable=SC2155
 	export -r PRINTABLE_LESSER="$(${ECHO:-echo} -e \\u003c)" 2&>/dev/zero
 #
-# Date pre-formatting
+# Some other things
 #
-	# Need to get these updating them self upon call, like: $($DATE_TIME_LOG)
+	# Need to get these updating them self upon call
 	# Use these to set the date variable: `
 	export DATE_TODAY="$DATE +%F"
 	export DATE_TIME="$DATE +%T"
@@ -239,6 +183,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				unset tmp
 				break
 			fi
+
 			if [[ -d "${tmp}/SWARM" ]]
 			then	# It's a sub dir
 				# As it should be called
@@ -257,9 +202,9 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 		if [[ -f "${SWARMDIR}/runtime" ]]
 		then	# Assign the variable
 			SWARM[ROOTDIR]="$SWARMDIR"
-		else	# This is the last hardcoded 'english only' message
+		else	# This is the only hardcoded 'english only' message
 			$PRINTF '%s\n' "Fatal, provided SWARMDIR=$SWARMDIR dir not found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
-			sleep 3
+			sleep 5
 			return 1 || exit 1
 		fi
 	fi
@@ -270,37 +215,29 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	# Some might wonder why I did not use BASH_SOURCE[0]
 	# -> Because if it was sourced with a relative reference,
 	# I would not get an abslute path
-	SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
-	SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
-	SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
-	SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
-	SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
-	SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
-	SWARM_DIR_LIST="${SWARM_DIR_DATA}/lists"
-	SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
-	SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
+	export SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
+	export SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
+	export SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
+	export SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
+	export SWARM_DIR_LIBS="${SWARM_DIR_DATA}/libs"
+	export SWARM_DIR_LANG="${SWARM_DIR_DATA}/lang"
+	export SWARM_DIR_LIST="${SWARM_DIR_DATA}/lists"
+	export SWARM_DIR_THEMES="${SWARM_DIR_DATA}/themes"
+	export SWARM_DIR_TEMPLATES="${SWARM_DIR_DATA}/templates"
 #
-# Load english strings for overall coverage of error messages.
+# Load english strings for overall coverage for error messages.
 # This is the default language, another one will only be attempted to load,
 # if it is not starting with en_*  --> See line 260'ish
 #
 	for lang_file in "$SWARM_DIR_LANG/en_GB"/*.lang
 	do
 		# shellcheck disable=SC1090
-		source "$lang_file" ## 2>/dev/zero	# Sadly, some strings cause issues as they rely on functions that are not yet loaded
+		source "$lang_file" 2>/dev/zero	# Sadly, some strings cause issues as they rely on functions that are not yet loaded
 		$PRINTF "."
 	done
 #
-# Prepare File Descriptors (FD)
-#
-	# Prepare for SWARM interface descriptor:
-	exec {FD_SWARM_UI}>/dev/tty
-	# This is the backup swarm for stderr :: restore @ line 410'ish
-	exec {FD_BASH_ERR_BKP}>&2
-#
 # Load SWARM settings, core and sanity functions
 #
-	# Start loading swarm
 	declare tmp_swarm_loading="" 	tmp_len=0	tmp_empty=""
 	for thisCFG in "${SWARM_DIR_CONF}"/* "${SWARM_DIR_LIBS}"/core.env
 	do
@@ -308,46 +245,48 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 		source "$thisCFG"
 		$PRINTF "."
 	done
+
 #
 # SWARM Environment checks
 #
-	# Load functions
-	for this in "${SWARM_DIR_LIBS}"/*
+
+	for this_lib in "${SWARM_DIR_LIBS}"/*
 	do
 		# Skip if core.env
-		[[ "$this" == "$SWARM_DIR_LIBS/core.env" ]] && continue
+		[[ "$this_lib" == "$SWARM_DIR_LIBS/core.env" ]] && continue
 		# Special handling for slow-mode
 		if ${doSlowLoading:-false}
 		then
 			# This is off by default because nowadays it's too fast to see the regular way
 			# Only recomended with numbers between 0.5 to 2 for application-like scripts
 			# To have a 'cool intro'
-			$PRINTF '\r%s' "$this"
-			[[ $tmp_len -lt ${#this} ]] && \
-					tmp_len=${#this} && \
+			$PRINTF '\r%s' "$this_lib"
+			[[ $tmp_len -lt ${#this_lib} ]] && \
+					tmp_len=${#this_lib} && \
 					tmp_empty=$($PRINTF '%*s' $COLUMNS)
 			sleep "${SWARM_INTERVALL_SLOW_LOADING:-0.3}"
-			$PRINTF  "\r$tmp_empty" >&1
+			$PRINTF  "\r$tmp_empty"
 		fi
-	# Minimalistic output
+
+		# Minimalistic output
 		tmp_swarm_loading="${tmp_swarm_loading}."
-		if [[ ! "${this:0:2}" == "\.[\.]" ]]
+		if [[ ! "${this_lib:0:2}" == "\.[\.]" ]]
 		then	# shellcheck disable=SC1090
-			if source "$this"
+			if source "$this_lib"
 			then	# All good
-				$PRINTF '\r%s' "${tmp_swarm_loading}" >&1
-				${doLogExt:-false} && \
-				 	init.msg "$SWARM_MSG_INIT_FILE_FOUND $this" >&2
+				$PRINTF '\r%s' "${tmp_swarm_loading}"
+				 ${doLogExt:-false} && \
+				 	init.msg.log "$SWARM_MSG_INIT_FILE_FOUND $this_lib"
 			else	# Not good
 				 ${doLogExt:-false} &&  \
-					 init.msg "$SWARM_MSG_INIT_FILE_MISSING $this" >&1 >&2
+					 init.log "$SWARM_MSG_INIT_FILE_MISSING $this_lib"
 			fi
 		fi
 	done
 	unset tmp_swarm_loading \
 			tmp_len \
 			tmp_empty \
-			this
+			this_lib
 #
 # CORE is loaded, lets adapt the user settings
 #
@@ -358,7 +297,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 # if he has some that is
 #
 	# SWARM_USER_DIR_BASE was defined the the lib-functions
-	# The following dirs should be kept to default, but can be overwritten
+	# The following the dirs should be kept to default, but can be overwritten
 	# by the SWARMRC, also, SWARM_USER_DIR_BASE might have been customized
 	SWARM_USER_DIR_CONF="${SWARM_USER_DIR_CONF:-${SWARM_USER_DIR_BASE}/conf}"
 	SWARM_USER_DIR_LIBS="${SWARM_USER_DIR_LIBS:-${SWARM_USER_DIR_BASE}/libs}"
@@ -383,7 +322,7 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				# shellcheck disable=SC2015
 				source "$uf" && \
 					$PRINTF "." || \
-					init.msg "$uf : $SWARM_MSG_INIT_FILE_MISSING" >&1 >&2
+					init.log "$uf : $SWARM_MSG_INIT_FILE_MISSING"
 			fi
 		done
 	fi
@@ -393,7 +332,6 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 # that the user may call/ask by ./runtime help
 #
 	# Update language strings
-	# to user language - if available
 	swarm.update.lang
 	swarm.update.lang.status
 #
@@ -401,12 +339,6 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 #
 	swarm.init.theme "$SWARM_THEME"
 	swarm.update.geometry
-#
-# Reset the stderr filedescripter
-# Only the startup sequence of SWARM should be loged (on errors)
-#
-	$CAT "${SWARM_LOG}.tmp" >> "${SWARM_LOG}"
-	exec 2>&"${FD_BASH_ERR_BKP}"
 #
 # Initiate Interface : Runtime Executed
 #
@@ -416,17 +348,18 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
-			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "$($DATE_TODAY) | $($DATE_TIME)"
+			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
 			title "$SWARM_MSG_WORD_LICENSE"
-			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY1"
-			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY2"
-			printe -n --center "$SWARM_MSG_PHRASE_WARRANTY3"
+			printe "" "$SWARM_MSG_PHRASE_WARRANTY1" ""
+			printe "" "$SWARM_MSG_PHRASE_WARRANTY2" ""
+			printe "" "$SWARM_MSG_PHRASE_WARRANTY3" ""
 			title	"$SWARM_MSG_WELCOME_TITLE"
 			status 1 "$SWARM_MSG_WELCOME_INFOLINE1"
 			status 111 "$SWARM_MSG_WELCOME_INFOLINE2"
 			printe "$SWARM_MSG_WELCOME_INFOLINE3" "${SWARM_USER_DIR_SCRIPTS}/SWARM"
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
-			printe -2 -- <<< "$SWARM_MSG_WELCOME_CONTENT"
+			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
+			$PRINTF '\n'
 			exit 0
 		else	# Has arguments, lets parse
 			$PRINTF "$(swarm.print.goto 0)"
@@ -489,10 +422,9 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				do
 					((C++))
 					((T++))
-					if [[ $C -eq $(( ${LINES:-24} - 5 )) ]]
-					then	C=0
-						press #title
-					fi
+					[[ $C -eq 11 ]] && \
+						C=1 && \
+						title
 					printe "$T" "$this_word" "${!this_word}"
 				done
 				;;
@@ -513,19 +445,8 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				done
 				;;
 			"log")
-				if [[ "rm" == "$2" ]]
-				then	$RM_EXEC "$SWARM_LOG"
-					exit 0
-				fi
 				title "SWARM LOG"
-				export COLUMNS=$COLUMNS LINES=$LINES TERM=$TERM
-				# Sadly, this needs this workaround until i fixed FD2 usage for the log
-				# My preference is more, wich fails the hardest in this situation :(
-				${MORELESS} "$SWARM_LOG"
-				exit $?
-				swarm.util.which less >/dev/zero && \
-					${MORELESS/more/less} "$SWARM_LOG" || \
-					cat "$SWARM_LOG"
+				${MORELESS:-cat} "$SWARM_LOG"
 				exit $?
 				;;
 			"stats")
@@ -543,11 +464,6 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				cd "$SWARM_DIR_ROOT"
 				$ECHO "$LINER"
 				$ECHO -e "\t$SWARM_MSG_STATS_TITLE \"${PWD##*/}\""
-				# Get amount of functions
-				count=0 ; num=0
-				num=$(wc -l <<< $($GREP "[azAZ]()" ${SWARM[ROOTDIR]}/runtime $SWARM_DIR_LIBS/* ))
-				#echo "num--$num"
-
 			# Size
 				$ECHO "$LINER"
 				# shellcheck disable=SC2016
@@ -591,55 +507,35 @@ SWARM[ISSUES]="${SWARM[GIT]}/issues"
 				if [[ -n "$2" ]]
 				then	swarm.update.theme "$2"
 					cfg.set -v "$SWARMRC" "SWARM_THEME" "$2"
-					exit $?
+					exit 0
 				else	newtheme=$(pick -m $(swarm.list.theme))
-					if swarm.update.theme "$newtheme"
-					then	cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
-					fi
-					exit $?
+					swarm.update.theme "$newtheme"
+					cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
+					exit 0
 				fi
 				;;
 			sysinfo)
 				pre='swarm\.sysinfo\.'
 				list=$(	declare | $GREP "$pre" | $AWK '/\(\)/ {print $1}' | $GREP -v ^"_" )
-				toplevels=$($AWK -F. '{print $3}' <<< "$list"|uniq)
+				cur="" last="x"
 			# Output
 				header --default "$SWARM_MSG_WORD_SYSTEM $SWARM_MSG_WORD_INFORMATION"
-				for section in $toplevels
+				for ls in $list
 				do
-					header "" "$section" ""
-					#title "$($ECHO $(swarm.sysinfo.$section 2>/dev/zero || $ECHO $section))"
-					subs=$($GREP "$section"  <<< "$list" | $AWK -F '.' '{print $4}'|uniq)
-					tasks=""
-					for s in $subs
-					do
-						if $GREP -q "${section}\.${s}\." <<< "$list"
-						then	last+=" $s"
-						else	first+=" $s"
-						fi
-					done
-					tasks="$first $last"
-					for sub in $tasks
-					do
-						if $GREP -q "${section}\.${sub}\." <<< "$list"
-						then
-							title "$sub"
-						fi
-						for l in $($GREP "\.${section}\." <<< "$list" | $GREP "$sub")
-						do
-							printe "$l" "$($ECHO $($l))"
-						done
-					done
+					cur="${ls/$pre/}"
+					cur=${cur/\.*}
+					if [[ ! "$cur" == "$last" ]]
+					then	title "${cur}"
+						last="$cur"
+					fi
+					printe "$ls:" "$(echo $($ls))"
 				done
-				exit
 				;;
 			esac
 		fi
 	fi
 #
 # Exit script or beginn user scripts
-# If you want 'sucessfull' exit cone on sourceing this file,
-# you got to have it this way.
+# The "!" is required so it ends successfully
 #
 ! ${DEBUG:-false} || set +x
-#

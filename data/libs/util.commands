@@ -10,6 +10,9 @@
 	header() { # LEFT CENTER RIGHT
 	# This prints a full line in blue (default-back), with white (default-front) text
 	# TODO long string adjustments TODO, uses script_{name,version} before it uses its SWARM counterparts
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		swarm.print.border -h
 		case "$1" in
 		"--")
 			shift
@@ -24,76 +27,21 @@
 			# shellcheck disable=SC2068
 			swarm.print.text -h \
 				"${script_name:-SWARM} ${script_version:-${SWARM[VERSION]}-${SWARM[BUILD]}} ($(swarm.sysinfo.os.distro|$SED s,'"','',g))" \
-				"" \
+				" " \
 				"$($PRINTF '%s ' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
-			return 0
+			;;
+		*)
+			swarm.print.text -h "$1" "$2" "$3"
 			;;
 		esac
-	# Action
-		swarm.print.border -h
-		local len=$(( COLUMNS - lenRight - lenLeft - 2   ))
-		case "${#@}" in
-		2)	if [[ $(( ${#1} + ${#2} )) -gt $len ]]
-			then	# needs splitting
-				local l1 l2 r1 r2
-				SPLIT1="" SPLIT2=""
-
-				if [[ ${#1} -gt $len ]]
-				then	# Left needs split
-					local org="$1"
-					swarm.str.split -q "$1"
-					header "${SPLIT1}"	## TODO FIX:: This line works with "header", but will display empty when using "swarm.print.text -h" (performance)
-					swarm.print.text -h "${SPLIT2}" "" "$2"
-				elif [[ ${#2} -gt $len ]]
-				then	# right nees splitting
-					swarm.str.split "$2" >/dev/zero
-					r1="$SPLIT1"
-					r2="$SPLIT2"
-					swarm.print.text -h "$1" "" "$r1"
-					swarm.print.text -h "" "" "$r2"
-				else
-					swarm.print.text -h "$1" "" ""
-					swarm.print.text -h "" "" "$2"
-				fi
-			else	swarm.print.text -h "$1" "" "$2"
-			fi
-			;;
-		*)	if [[ $(( ${#1} + ${#2} + ${#3} )) -gt $len ]]
-			then	local l1 l2 m1 m2 r1 r2
-				SPLIT1="" SPLIT2=""
-				if [[ ${#1} -gt $len ]]
-				then	# Left needs split
-					swarm.str.split "$1" >/dev/zero
-					l1="$SPLIT1"
-					l2="$SPLIT2"
-					swarm.print.text -h "$l1" "" ""
-					swarm.print.text -h "$l2" "$2" "$3"
-				elif [[ ${#2} -gt $len ]]
-				then	# right nees splitting
-					swarm.str.split "$2" >/dev/zero
-					m1="$SPLIT1"
-					m2="$SPLIT2"
-					swarm.print.text -h "$1" "$m1" ""
-					swarm.print.text -h "" "$m2" "$3"
-				elif [[ ${#3} -gt $len ]]
-				then	# right nees splitting
-					swarm.str.split "$3" >/dev/zero
-					r1="$SPLIT1"
-					r2="$SPLIT2"
-					swarm.print.text -h "$1" "" "$r1"
-					swarm.print.text -h "" "$2" "$r2"
-				else
-					swarm.print.text -h "$1" "" "$3"
-					swarm.print.text -h "" "$2" ""
-				fi
-			else	swarm.print.text -h "$1" "$2" "$3"
-			fi
-			;;
-		esac
+		# shellcheck disable=SC2154
+		$PRINTF "$posEND\n"
 	}
 	title() { # Text
 	# This prints a single centered string on a line
 	# It has blue borders and fills the inner line with white (Default-{front,back})
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		if [[ "--" == "$1" ]]
 		then
 			while $READ -r line;do
@@ -102,322 +50,151 @@
 			return 0
 		else
 			swarm.print.border -t
-			if [[ $(( ${#1} + lenRight + lenLeft )) -gt $(( COLUMNS - 2 )) ]]
-			then	# Needs splitting
-				swarm.str.split "$1" >/dev/zero
-				swarm.print.text -n -t "${SPLIT1}"
-				swarm.print.border -t
-				swarm.print.text -n -t "${SPLIT2}"
-			else	#
-				swarm.print.text -n -t "${1}"
-			fi
+			swarm.print.text -t "${1}"
+			$PRINTF "$posEND\n"
 		fi
 	}
 	printe() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
-		local MODE="none" doCenter=false
-		local localOpts="" ORIENTATION="default"
-		local doNewline=false
-		lenBorder=$(( lenLeft + lenRight + 2 ))
-	# Get args
-		while :;do
-			case "$1" in
-			"-1"|"-2"|"-3")
-				MODE="${1/-}"
-				localOpts+=" $1"
-				;;
-			"--left")
-				ORIENTATION="left"
-				localOpts+=" $1"
-				#doNewline=false
-				;;
-			"--center")
-				ORIENTATION="center"
-				localOpts+=" $1"
-				#doNewline=false
-				;;
-			"--right")
-				ORIENTATION="right"
-				localOpts+=" $1"
-				#doNewline=false
-				;;
-			"-n")
-				doNewline=true
-				;;
-			"-"|"--")
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#set -x
+		local MODE="none"
+		# Get args
+		case "$1" in
+		"-1"|"-2")	MODE="${1/-}"
 				shift
-				case $MODE in
-				1)
-					while $READ -r line
-					do	printe $localOpts "$line"
-					done
-					return 0
-					;;
-				2)
-					while $READ -r line
-					do	$READ -r line2
-						printe $localOpts "$line" "$line2"
-					done
-					return 0
-					;;
-				3|*)
-					while $READ -r line
-					do	$READ -r line2
-						$READ -r line3
-						printe $localOpts "$line" "$line2" "$line3"
-					done
-					return 0
-					;;
-				esac
 				;;
-			*)	break
+		*)		MODE="normal"
 				;;
-			esac
-			shift
-		done
-	# Get arg number if not forced yet
+		esac
+		# Get arg number if not forced yet
 		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
-	# Get the actual string
-		local ARGS=("${@}")
-		local L="${ARGS[0]}"
-		local M="${ARGS[1]}"
-		local R="${ARGS[2]}"
-		case ${#@} in
-		2)	# Its two arguments, so 2nd must go right
-			R="$M"
-			M=""
-			;;
-		esac
-	# Now handle input
-		local breaker=0
-		# This produces kind of a hash-value to directly jump to the required task.
-		[[ -n "$L" ]] && ((breaker++))
-		[[ -n "$M" ]] && ((breaker+=4))
-		[[ -n "$R" ]] && ((breaker+=8))
-	# Make it super simple
-		swarm.print.border
-		case "$breaker" in
-		1)	# Left oriented
-			local l_is_greater=false
-			# Lets handle variable splitting here - if need be
-			if [[ ${#L} -gt $((COLUMNS - lenBorder)) ]]
-			then	l_is_greater=true
-				SPLIT1="" SPLIT2=""
-				swarm.str.split "$L" >/dev/zero
-				L_one="$SPLIT1"
-				L_two="$SPLIT2"
-			fi
-		# Get the LEFT action
-			case "$ORIENTATION" in
-			default) # Default is left anyway, so using that
-				if $l_is_greater
-				then	# L is wider than the terminal
-					swarm.print.text -n "$L_one"
-					swarm.print.border
-					swarm.print.text -n "$L_two"
-					return
-				else	swarm.print.text -n "$L"
-				return
-				fi
+		# Get pipe?
+		case "$1" in
+		"--"|"-")
+			shift
+			case "$MODE" in
+			"2")
+				# Read pipe, expect 2 lines
+				while $READ -r LEFT
+				do
+					$READ -r RIGHT
+					printe "$LEFT" "" "$RIGHT"
+				done
+				return 0
 				;;
-			left)
-				# Default behaviour for 1 argument on the left
-				if $l_is_greater
-				then	# L is wider than the terminal
-					swarm.print.text -n "$L_one"
-					swarm.print.border
-					swarm.print.text -n "$L_two"
-					return
-				else	swarm.print.text "$L"
-				return
-				fi
+			"1")
+				# Read pipe, expect 1 lines
+				while $READ -r LEFT
+				do
+					printe "$LEFT"
+				done
+				return 0
 				;;
-			center) # Special handle for orientation
-				if $l_is_greater
-				then	# L is wider than the terminal
-					swarm.print.text -n "" "$L_one" ""
-					#[[ "x$MODE" == "xtitle" ]] && $PRINTF "\n" >&1		## TODO : not sure.....
-					swarm.print.border
-					swarm.print.text -n "" "$L_two" ""
-					return
-					#$doStart || return 0
-				else	swarm.print.text  "" "$L" ""
-				#$doNewline || return
-				fi
-				;;
-			right) # Special handle for orientation
-				if $l_is_greater
-				then	# L is wider than the terminal
-					swarm.print.text -n "" "" "$L_one"
-					#$PRINTF "\n"  >&1
-					swarm.print.border
-					swarm.print.text -n  "" "" "$L_two"
-					return
-				else	swarm.print.text  "" "" "$L"
-				return
-				fi
+			*)
+				# Read pipe, expect 3 lines (default)
+				while $READ -r LEFT
+				do
+					$READ -r CENTER; $READ -r RIGHT
+					printe "$LEFT" "$CENTER" "$RIGHT"
+				done
+				return 0
 				;;
 			esac
 			;;
-		4)	#   Middle / Center oriented
-			swarm.print.text -n "" "$M" ""
-			return
-			;;
-		8)	#     R
-			swarm.print.text -n "" "" "$R"
-			return
-			;;
-		# -----------------------
-		5)	# L M
-		# L
-			local l_is_greater=false
-			# Lets handle variable splitting here - if need be
-			if [[ ${#L} -gt $((COLUMNS - lenBorder)) ]]
-			then	l_is_greater=true
-				SPLIT1="" SPLIT2=""
-				swarm.str.split "$L" >/dev/zero
-				L_one="$SPLIT1"
-				L_two="$SPLIT2"
-			fi
-		# M	# Handle the both:
-			if $l_is_greater
-			then	swarm.print.text -n "$L_one" "" ""
-				swarm.print.border
-				swarm.print.text -n "$L_two" "$M" ""
-				return
-			else	# only here we need to handle the R argument
-				local r_is_greater=false
-				# Lets handle variable splitting here - if need be
-				if [[ ${#M} -gt $((COLUMNS - lenBorder)) ]]
-				then	SPLIT1="" SPLIT2=""
-					swarm.str.split "$M" >/dev/zero
-					swarm.print.text -n "$L" "$SPLIT1" ""
-					swarm.print.border
-					swarm.print.text -n "" "$SPLIT2" ""
-					return
-				else	# Neither L nor R needs splitting
-					# However, can they be printed on the same line?
-					if [[ $(( ${#L} + ${#R} + (2* $lenRight) )) -lt $COLUMNS  ]]
-					then 	# default
-						swarm.print.text -n "$L" "$M" ""
-						return
-					else 	# print on different lines
-						swarm.print.text -n "$L" "" ""
-						swarm.print.text -n "" "$M" ""
-						return
-					fi
-				fi
-			fi
-			;;
-		9)	# L   R
-		# L
-			local l_is_greater=false
-			# Lets handle variable splitting here - if need be
-			if [[ ${#L} -gt $((COLUMNS - lenBorder )) ]]
-			then	l_is_greater=true
-				SPLIT1="" SPLIT2=""
-				swarm.str.split "$L" >/dev/zero
-				L_one="$SPLIT1"
-				L_two="$SPLIT2"
-			fi
-		# Handle the both:
-			if $l_is_greater
-			then	#echo yay
-				swarm.print.text -n "$SPLIT1" "" ""
-				swarm.print.border
-				swarm.print.text -n "$SPLIT2" "" "$R"
-				return
-			else	# only here we need to handle the R argument
-				local r_is_greater=false
-				# Lets handle variable splitting here - if need be
-				if [[ ${#R} -gt $((COLUMNS - lenBorder)) ]]
-				then	SPLIT1="" SPLIT2=""
-					swarm.str.split "$R" >/dev/zero
-					swarm.print.text -n "$L" "" ""
-					swarm.print.border
-					swarm.print.text -n "" "" "$SPLIT1"
-					swarm.print.border
-					swarm.print.text -n "" "" "$SPLIT2"
-					return
-				else	# Neither L nor R needs splitting
-					# However, can they be printed on the same line?
-					if [[ $(( ${#L} + ${#R} + (2* $lenRight) )) -lt $COLUMNS  ]]
-					then 	# default
-						swarm.print.text -n "$L" "" "$R"
-						return
-					else 	# print on different lines
-						swarm.print.text -n "$L" "" ""
-						swarm.print.text -n "" "" "$R"
-						return
-					fi
-				fi
-			fi
-			;;
-		12)	#   M R
-		# M
-			local m_is_greater=false
-			# Lets handle variable splitting here - if need be
-			if [[ ${#M} -gt $((COLUMNS - lenBorder)) ]]
-			then	m_is_greater=true
-				SPLIT1="" SPLIT2=""
-				swarm.str.split "$M" >/dev/zero
-				M_one="$SPLIT1"
-				M_two="$SPLIT2"
-			fi
-		# Handle the both:
-			if $m_is_greater
-			then	swarm.print.text -n "$M_one" "" ""
-				swarm.print.border
-				swarm.print.text -n "$M_two" "$R"
-			else	# only here we need to handle the R argument
-				local r_is_greater=false
-				# Lets handle variable splitting here - if need be
-				if [[ ${#R} -gt $((COLUMNS - lenBorder)) ]]
-				then	SPLIT1="" SPLIT2=""
-					swarm.str.split "$R" >/dev/zero
-					swarm.print.text -n "" "$M" "$SPLIT1"
-					swarm.print.border
-					swarm.print.text -n "" "" "$SPLIT2"
-					return
-				else	# Neither M nor R needs splitting
-					# However, can they be printed on the same line?
-					if [[ $(( ${#M} + ${#R} + (2* $lenRight) + 2 )) -lt $COLUMNS  ]]
-					then 	# default
-						swarm.print.text -n "" "$M" "$R"
-						return
-					else 	# print on different lines
-						swarm.print.text -n "" "$M" ""
-						swarm.print.text -n "" "" "$R"
-						return
-					fi
-				fi
-			fi
-			;;
-		# ----------------------
-		13)	# L M R
-		# Just testing
-			local L_one="" L_two=""
-			local M_one="" M_two=""
-			local R_one="" R_two=""
-		# Prepare
-			swarm.str.split "$L" >/dev/zero
-			L_one="$SPLIT1"
-			L_two="$SPLIT2"
-			swarm.str.split "$M" >/dev/zero
-			M_one="$SPLIT1"
-			M_two="$SPLIT2"
-			swarm.str.split "$R" >/dev/zero
-			R_one="$SPLIT1"
-			R_two="$SPLIT2"
-		# Make this one simple
-			swarm.print.text -n "$L_one" "$M_one" "$R_one"
-			swarm.print.border
-		#	swarm.print.text -n "$L_two" "$M_two" "$R_two"
-			return
+		esac
+		#set +x
+		case "$MODE" in
+			"0")
+				swarm.print.border -e
+				swarm.print.text -e "" "" ""
+				;;
+			"1")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" ""
+				;;
+			"2")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" "$2"
+				;;
+			"3")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "$2" "$3"
+				;;
+		esac
+		$PRINTF "$posEND"
+	}
+	printl() { # [-|--] STR1 STR2 STR3
+	# Simply prints the strings as passed, stays on the same line
+	# It requires 3 strings to use the center
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#set -x
+		local MODE="none"
+		# Get args
+		case "$1" in
+		"-1"|"-2")	MODE="${1/-}"
+				shift
+				;;
+		*)		MODE="normal"
+				;;
+		esac
+		# Get arg number if not forced yet
+		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
+		# Get pipe?
+		case "$1" in
+		"--"|"-")
+			case "$MODE" in
+			"2")
+				# Read pipe, expect 2 lines
+				while $READ -r LEFT
+				do
+					$READ -r RIGHT
+					printe "$LEFT" "" "$RIGHT"
+				done
+				return 0
+				;;
+			"1")
+				# Read pipe, expect 1 lines
+				while $READ -r LEFT
+				do
+					printe "$LEFT"
+				done
+				return 0
+				;;
+			*)
+				# Read pipe, expect 3 lines (default)
+				while $READ -r LEFT
+				do
+					$READ -r CENTER; $READ -r RIGHT
+					printe "$LEFT" "$CENTER" "$RIGHT"
+				done
+				return 0
+				;;
+			esac
 			;;
 		esac
-		${doNewline:-false} && $PRINTF "$POS_END\n"
+		#set +x
+		case "$MODE" in
+			"0")
+				swarm.print.border -e
+				swarm.print.text -e "" "" ""
+				;;
+			"1")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" ""
+				;;
+			"2")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "" "$2"
+				;;
+			"3")
+				swarm.print.border -e
+				swarm.print.text -e "$1" "$2" "$3"
+				;;
+		esac
 	}
 #
 # Visual outputs - 'End user' stuff - Core Convenience
@@ -425,6 +202,8 @@
 	yesno() { # "What question?"
 	# Ask a yes/no question, returns 0/true for yes and 1/false for no
 	# y/n are taken from language file and are used in code
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local Y="${SWARM_MSG_WORD_YES:0:1}"
 		local N="${SWARM_MSG_WORD_NO:0:1}"
 		local failsafe=0
@@ -446,7 +225,7 @@
 		str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${yn,,})"
 		# Move the cursor
 		local str2=""
-		str2="$(swarm.print.goto $(( COLUMNS - ${#SWARM_THEME_DATA[border-left]} - 1  )))"
+		str2="$(swarm.print.goto $(( COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
 		local RET=""
 		while [[ -z "$RET" ]]
 		do
@@ -471,6 +250,8 @@
 	status() { # [ -r -c] $? ["Text Left"] ["Text Center"]
 	# Prints text and exit with passed return code
 	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		unset RET TXT1 TXT2
 		local doReturn=false
 	# Check for options
@@ -491,49 +272,18 @@
 		[[ -z "$1" ]] && \
 			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
 			return 99
-		local RET="$1" len_allowed=15
+		local RET="$1"
 		local value="" ; value=$(swarm.str.status "$RET")
-		len_allowed=$(( COLUMNS - ${#BORDER_LEFT} - ${#BORDER_RIGHT} ))
-		swarm.print.border >&"${FD_SWARM_UI}"
-		if [[ $(( ${#2} + ${#3} + 8 )) -gt $len_allowed ]]
-		then	if [[ ${#2} -gt ${#3} ]]
-			then	declare two_first two_scnd
-				#echo "arbeite mit ${#2} : $2"
-				$ECHO "$2" | swarm.str.split -- | \
-					while $READ line
-					do
-						two_first="$line"
-						$READ line2
-						two_scnd="$line2"
 
-					swarm.print.text -n "${two_first}" "" "" >&1
-					swarm.print.border >&"${FD_SWARM_UI}"
-					swarm.print.text -r "$two_scnd" "${3}" "" >&1
-					done
-			else	declare three_first three_scnd
-				#echo "arbeite mit ${#2} : $2"
-				$ECHO "$3" | swarm.str.split -- | \
-					while $READ line
-					do
-						three_first="$line"
-						$READ line2
-						three_scnd="$line2"
-
-					swarm.print.text -n "" "$three_first" "" >&1
-					swarm.print.border >&"${FD_SWARM_UI}"
-					swarm.print.text -r "$2" "${three_scnd}" "" >&1
-					done
-			fi
-		else	# DINGELINGELING.. Aaaand eeeeverything is good!
-			swarm.print.text  "$2" "$3" "" >&1
-		fi
+		swarm.print.border >&2
+		swarm.print.text  "$2" "$3" "" >&1
 
 		# Adjust fixer according to X or TTY, used to be required by TUI
 		#[[ -n "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-$XAUTHORITY}}" ]] && \
 		#	gui_fixer="7" || \
 			gui_fixer=7
 
-		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} - ${#SWARM_THEME_DATA[border-left]} - 1 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		$PRINTF "$value" >&1
 
@@ -546,6 +296,8 @@
 	printlist() { # [options] $LIST or ${ARRAYS[@]}
 	# Prints up to 3 'indexed'/numbered entries per row
 	# Options -12arn ; 1 or 2 rows (instead of 3=default), alpha, roman, num=default
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Variable defaults (options)
 		#
@@ -565,7 +317,7 @@
 						ROWS="${opt/-}"
 						shift
 						;;
-					"m")	as_menu=true
+					"0")	as_menu=true
 						shift
 						;;
 					"a")	MODE=alpha
@@ -622,14 +374,14 @@
 					then	OUT["$CUR"]="${count}${SEP}${OPT}"
 						shown=false
 						((CUR++))
-					else	printe  "${OUT[@]}" >&1
+					else	printe  "${OUT[@]}" >&2
 						# shellcheck disable=SC2184
 						CUR=0 && unset OUT[@]
 						[ -z "$OPT" ] && shown=true
 						OUT["$CUR"]="${count}${SEP}${OPT}"
 						((CUR++))
 					fi
-				else 	printe  "${OUT[@]}" >&1
+				else 	printe  "${OUT[@]}" >&2
 					# shellcheck disable=SC2184
 					CUR=0 && unset OUT[@]
 					[ -z "$OPT" ] && shown=true
@@ -641,90 +393,80 @@
 		#
 		# Display
 		#
-			! $shown && printe  "${OUT[@]}" >&1
+			! $shown && printe  "${OUT[@]}" >&2
 			return 0
 	}
 	pick() { # [-1 -2 -a -m] $LIST or ${ARRAYS[@]}
 	# Select an item of a LIST or an ARRAY, that will be returned
 	# Use -a for autoselect if only 1 entry, and -m as this will present 'Back' (translated)
-	#
-	# Variables
-	#
-#set -x
-		local AUTO=false ROWS=3
-		local beQuiet=false as_menu=false
-		local save_counter1=0 save_counter2=0
-	#
-	# Catch arguments
-	#
-#		printf '* %s\n' "${@}" >&1
-		for opt in "${@}"
-		do	if [[ "-" == "${opt:0:1}" ]]
-			then	case "${opt/-}" in
-				1|2|3)	ROWS="${opt/-}"
-					shift
-					;;
-				"a")	AUTO=true
-					shift
-					;;
-				"m")	#trap "return 130" INT ABRT
-					as_menu=true
-					shift
-					;;
-				"q")	beQuiet=true
-					shift
-					;;
-				esac
-			fi
-			((save_counter1++))
-			[[ $save_counter1 -gt 100 ]] && return 1
-		done
-		# Can not be set earlier because of possible options
-		# Which state wether it is 'as menu' or default
-		# shellcheck disable=SC2015
-		$as_menu && \
-			local ARGS=( "${SWARM_MSG_WORD_BACK}" "${@}" ) || \
-			local ARGS=("${@}")
-	# Handle auto-pick (only 1 option)
-		$AUTO && \
-			[ "$#" -eq 1 ] && \
-			$PRINTF '%s\n' "${ARGS[@]}" >&1 && \
-			return 4
-	# Show the items to pick from
-#set +x
-		# shellcheck disable=SC2015
-		$as_menu && \
-			printlist -n -"$ROWS" -m "${ARGS[@]}" || \
-			printlist -n -"$ROWS" "${ARGS[@]}"
-	# Set dynamic values
-		# Amount of arguments
-		local pick_count=${#ARGS[@]}
-		# Character length of the amount
-		local pick_len=${#pick_count}
-		# Special handling
-		local invalid=true
-		#local todo=false
-		local NUM=""
-		local POS=""
-		# shellcheck disable=SC2154
-		POS="$(swarm.print.goto $(( identRight + 2 ))) ${SWARM_THEME_DATA[read]}"
-		# shellcheck disable=SC2015
-		$as_menu && \
-			local min=0 || \
-			local min=1
-	#
-	# Visuals
-	#
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#
+		# Variables
+		#
+			local AUTO=false failsafe=0
+			local ROWS=""
+			ROWS="3"
+			local as_menu=false
+		#
+		# Catch arguments
+		#
+			for opt in "${@}"
+			do	if [[ "-" == "${opt:0:1}" ]]
+				then	case "${opt/-}" in
+					1|2|3)	ROWS="${opt/-}"
+						shift
+						;;
+					"a")	AUTO=true
+						shift
+						;;
+					"m")	trap "return 130" INT ABRT
+						as_menu=true
+						shift
+						;;
+					esac
+				fi
+			done
+			# Can not be set earlier because of possible options
+			# Which state wether it is 'as menu' or default
+			# shellcheck disable=SC2015
+			$as_menu && \
+				local ARGS=( "${SWARM_MSG_WORD_BACK}" "${@}" ) || \
+				local ARGS=("${@}")
+		# Handle auto-pick (only 1 option)
+			$AUTO && \
+				[ "$#" -eq 1 ] && \
+				$PRINTF '%s\n' "${ARGS[@]}" >&1 && \
+				return 4
+		# Show the items to pick from
+			# shellcheck disable=SC2015
+			$as_menu && \
+				printlist -n -"$ROWS" -0 "${ARGS[@]}" || \
+				printlist -n -"$ROWS" "${ARGS[@]}"
+		# Set dynamic values
+			# Amount of arguments
+			local pick_count=${#ARGS[@]}
+			# Character length of the amount
+			local pick_len=${#pick_count}
+			# Special handling
+			local invalid=true
+			#local todo=false
+			local NUM=""
+			local POS=""
+			# shellcheck disable=SC2154
+			POS="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
+			# shellcheck disable=SC2015
+			$as_menu && \
+				local min=0 || \
+				local min=1
+		#
+		# Visuals
+		#
 		while ${invalid:-true}
 		do
-			# Make sure we do not loop endless...
-			((save_counter2++)) ; [[ $save_counter2 -gt 100 ]] && return 1
-			# Print the input line:
-			echo this loop
-			set +x
-			swarm.print.border
-			set -x
-			$PRINTF "$POS      $POS " >&"${FD_SWARM_UI}"
+		# Print the input line:
+			swarm.print.border >&2
+			$PRINTF "$POS      $POS " >&2
 		# Read the input
 			${READ:-read} -n "$pick_len" NUM
 		# Catch invalid inputs
@@ -733,7 +475,6 @@
 			# Check for arrow keys, and make sure NUM is numeric only : Thank you MIG
 			[[ $NUM =~ ^[0-9]+$ ]] || continue
 			# If it's exactly 0, it's BACK
-			[[ $NUM == 0 ]] && { invalid=true ; break ; }
 			#[[ ${NUM} -lt $pick_len ]] && todo=false #$PRINTF "\n" && $PRINTF "${ARGS[$NUM]}" >&1 && return 4
 			# Keep reading if it is not greater than 'min'-imum
 			[[ ${NUM} -ge $min ]] || continue
@@ -743,26 +484,23 @@
 			[[ $NUM -gt $pick_count ]] && continue
 		# Exit the loop
 			invalid=false
+			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
 
-	# Output
-		PICKED="${ARGS[$NUM]}"
-		#$ECHO "$PICKED" >&1
-		$as_menu && \
-			REPLY=$NUM || \
-			REPLY=$(( NUM +1 ))
-		if ! $beQuiet
-		then	[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&"${FD_SWARM_UI}"
-		fi
+		# Output
+		$ECHO "${ARGS[$NUM]}" >&1
+		#set -x
+		[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&2
+		#set +x
 		unset opt
 	}
 	press() { # [-c -l -r] [STR]
 	# Requires the user to press [Enter/Return] before script continues
 	# c=center ,l=left , r=right
-	# Vars
+		# Vars
 		local mode=""
 		local doReturn=false
-	# Catch arguments
+		# Catch arguments
 		for opt in "${@}"
 		do	if [[ "-" == "${opt:0:1}" ]]
 			then	case "${opt:1}" in
@@ -782,30 +520,31 @@
 			fi
 		done
 	# Display
-		swarm.print.border >&"${FD_SWARM_UI}"
 		case "$mode" in
 		"center")
-			swarm.print.text --center "${1:-$SWARM_MSG_PRESS_ENTER}"
+			printl "" "${1:-$SWARM_MSG_PRESS_ENTER}" ""
 			;;
 		"left")
-			swarm.print.text "${1:-$SWARM_MSG_PRESS_ENTER}"
+			printl "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		"right")
-			swarm.print.text "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+			printl "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
-		*)	# Default / fallback mode
-			swarm.print.text "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+		*)
+			printl "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		esac
 	# Action :p
 		#$doReturn && \
 		#	$PRINTF "$(swarm.print.goto 0)" && \
 		#	(var=$(builtin read -u buffer n0 2>/dev/null)) & || \
-			$READ -r
+			read -r
 	}
 	ask() { # "A question?"
 	# Reads a user's input
 	# Returns the buffer
+		# shellcheck disable=SC2128
+		swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local hideText="" buffer="" STR=""
 		local notEmpty=false failsafe=0
@@ -833,17 +572,16 @@
 			while [[ -z "$buffer" ]]
 			do
 				((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
-				swarm.print.border >&"${FD_SWARM_UI}"
-				$PRINTF "$STR " >&1
+				swarm.print.border >&2
+				$PRINTF "$STR " >&2
 				$READ $hideText buffer
 			done
 		else
-			swarm.print.border >&"${FD_SWARM_UI}"
-			$PRINTF "$STR " >&1
+			swarm.print.border >&2
+			$PRINTF "$STR " >&2
 			$READ $hideText buffer
 		fi
 	# Output
-		swarm.protect "$FUNCNAME" "$buffer" && return 1
 		$ECHO "$buffer" >&1
 	}
 	rnd() { #
@@ -1037,6 +775,7 @@
 	log() { # [-?|-h|--help] [-f FILE=$script_log ] [-r "REASON=$script_name" ] "MESSAGE"
 	# Purpose and result
 	# additional description
+	 	swarm.protect "${FUNCNAME[@]}" "${CALLER:-$SWARM_MSG_WORD_UNKOWN}" "${@}" && return 1
 	#
 	# Variables
 	#

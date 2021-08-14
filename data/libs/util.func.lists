@@ -108,7 +108,7 @@ swarm.list.hid() { #
 # Returns a list of Human Interface Devices that are connected
 # Usualy this refers to mouse and keyboard (not laptop keyboards though)
 	local content verified="" work=""
-	content=( $($CD "/dev/input/by-id/" ; $LS -1) )
+	content=( $(cd "/dev/input/by-id/" ; $LS -1) )
 	for item in "${content[@]}"
 	do
 		work=${item/usb-}
@@ -120,7 +120,7 @@ swarm.list.hid() { #
 swarm.list.video() { #
 # Returns a list of video devices
 # Usualy things like webcams
-	$CD /dev
+	cd /dev
 	$LS -1 | $GREP -i [vV]ideo
 	cd "$OLDPWD"
 }
@@ -145,5 +145,5 @@ swarm.list.hdd() { # [-u]
 swarm.list.network() { #
 # Print a list of network devices
 # On laptops this is usualy a 3 item listk incl io
-	ifconfig | $AWK  '/^[a-z]/ {print $1}' | $SED s/":"// || { init.log.msg "$SWARM_MSG_PHRASE_FILENOTFOUND: ifconfig" ; return 1 ; }
+	ifconfig | $AWK  '/^[a-z]/ {print $1}' | $SED s/":"//
 }

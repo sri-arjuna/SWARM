@@ -15,12 +15,12 @@ Example
 
     echo one
     echo two
-    
+
 
 Read More
 ---------
 * [Name](link)
-* [Me](./README.md)
+* [Me](./docs/README.md)
 
 
 Credits

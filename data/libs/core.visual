@@ -320,8 +320,6 @@
 		local L="${ARGS[0]}"
 		local M="${ARGS[1]}"
 		local R="${ARGS[2]}"
-		#echo " THIS  ${#ARGS[*]}   THIS --> ${ARGS[*]}"
-		#for a in "${ARGS[@]}"; do echo "N- $BASH_SOURCE - NN $a";done
 		local evalLeft=""
 		evalLeft=$($PRINTF "$L")
 		local evalMiddle=""
@@ -445,7 +443,13 @@
 			local posMIDDLE="\33[$(( numHALF - $(( ${#2} / 2 ))  ))G"
 			case "$MODE" in
 			"basic")
-				local posRIGHT="\33[$(( numEND - identRight - lenEvalRight - 1  ))G"
+				local posRIGHT=""
+				# The following grep is required for (util.func.)bar
+				if $ECHO "$3" | $GREP -q '%%'
+				then	posRIGHT="\33[$(( numEND - identRight - lenEvalRight ))G"
+				else	posRIGHT="\33[$(( numEND - identRight - lenEvalRight - 1  ))G"
+				fi
+
 				$PRINTF "${posLEFT}$1"
 				$PRINTF "${posMIDDLE}$2"
 				$PRINTF "${posRIGHT}$3"

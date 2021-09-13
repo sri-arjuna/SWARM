@@ -6,8 +6,6 @@ bar()  { # [options] [MESSAGE]
 	local TYPE=""		# Start with no display mode
 	# shellcheck disable=SC1003
 	local INDI=( '/' '-' '\' '|' )	# For asynchronus display
-#	local TOTAL=$(( ${#INDI[@]} -1))
-	#WIDTH=${COLUMNS:-$(tput cols)}
 	# id file?
 	local ID_CUR="$$"	# -i ID storage id
 	local ID=""		# -i ID storage id
@@ -21,14 +19,11 @@ bar()  { # [options] [MESSAGE]
 	# opts
 	local MAX=""
 	local VAL #="1"		# This is used as index for the dash animation
-	#local BAR='='
 	# Display
 	local PROGRESS=""
 	local STATUS=""
 	local MESSAGE=""
 	local STR_COLORS_RAW
-	# This should not be required
-	#swarm.update.geometry
 #
 #	Functions
 #
@@ -72,7 +67,7 @@ bar()  { # [options] [MESSAGE]
 #
 #	Catching Arguments
 #
-	while : #for opt in "${@}" #while getopts "c:CB:bi:lm:rh" name
+	while :
 	do 	case "$1" in
 		-B)	BAR="$2"
 			hadOpts=true
@@ -128,7 +123,6 @@ bar()  { # [options] [MESSAGE]
 			shift 1
 		hadOpts=false
 	done
-
 #
 #	Check for all required options
 #
@@ -169,10 +163,8 @@ bar()  { # [options] [MESSAGE]
 
 		case $VAL in
 		0|1|2)	STATUS="${POS}[  ${INDI[$VAL]}   ]"	;;
-		# Below is a failback setting (injection protection)
-		3)	#source "$SWARM_DIR_THEMES/${SWARM_THEME:-default-blue}"
-			#STATUS="${POS}${STATUS}"
-			STATUS=$($PRINTF "${POS}[  \174   ]")
+		# Below is a failback setting (due to: injection protection)
+		3)	STATUS=$($PRINTF "${POS}[  \174   ]")
 			;;
 		esac
 		;;
@@ -180,7 +172,6 @@ bar()  { # [options] [MESSAGE]
 		# shellcheck disable=SC2128
 		[[ $VAL -gt $MAX ]] && \
 			swarm.help.usage "$FUNCNAME"
-			#echo "$(eval_gettext '$ME: Should have called \"${TUI_FONT_BOLD}$ME -r\" first!${TUI_FONT_RESET}')" >&2
 		STATUS="[ $VAL / $MAX ]"
 		;;
 	BAR)	# Show pro-cent only if wanted
@@ -207,8 +198,7 @@ bar()  { # [options] [MESSAGE]
 			esac
 			# shellcheck disable=SC2154
 			length=$(( numEND - (2 * ${#BORDER_LEFT}) - 2 - ${#MESSAGE} - 5 - fixer - fixer_fix  ))
-			#STATUS="[ ${pro}.${cent}%% ]"		# Nope
-			STATUS="[ ${pro}.${cent}%% ]"	# Ok, what?
+			STATUS="[ ${pro}.${cent}%% ]"
 			# shellcheck disable=SC2016
 			len=$( $ECHO "$length" "$procent" | $AWK '{print ($1/100*$2) }' )
 		else	STATUS=""
@@ -221,14 +211,14 @@ bar()  { # [options] [MESSAGE]
 			# shellcheck disable=SC2016
 			len=$( $ECHO "$length" "$MAX" "$VAL" | $AWK '{print ($1/$2*$3) }' )
 		fi
-#		echo "len: $len // length: $length // width: $WIDTH // numEND: $numEND"
+
 		# Colorize?
 		if [[ -z "${SWARM_BAR_COLORS[@]}" ]]
-		then
+		then 	## No color = default
 			bars=$($PRINTF '%*s' "${len/.*}")
 			# shellcheck disable=SC2140
 			bars=$($ECHO "$bars"|$SED s," ","\\$BAR",g)
-		else
+		else 	## With Color = Experimental / Dismiss ??
 			# shellcheck disable=SC2154
 			local bars_counter=$(( numEND - ( 2 * identRight ) ))
 			local bars_curret=0
@@ -255,9 +245,10 @@ bar()  { # [options] [MESSAGE]
 		bar_total="[${bars}${bar_total:${#bars}}]"
 		PROGRESS="$bar_total"
 		;;
-	#	*)	tui-status 1 "Error, type ($TYPE) is unhandled"	;;
+		*)	status 1 "Error, progressbar type ($TYPE) is unhandled"
+			return $?
+		;;
 	esac
-	#[ -z "$PROGRESS" ] && printe -S 1 "Something went terrible wrong..." && exit 1
 #
 #	Display & Action
 #
@@ -279,11 +270,6 @@ bar()  { # [options] [MESSAGE]
 	BAR)	if $longBar
 		then	if [[ -z "$MESSAGE" ]]
 		 	then	# No message
-				#set -x
-			#	printf "$posLEFT${PROGRESS}"
-			#	num=$(( $posEND - $identRight - ${#STATUS} ))
-			#	printf "$(swarm.print.goto $num)$STATUS"
-				#set +x
 				swarm.print.text "$PROGRESS" "" "$STATUS"
 			else 	# With message
 				swarm.print.text "$MESSAGE" "" "${PROGRESS}${STATUS}"
@@ -292,7 +278,6 @@ bar()  { # [options] [MESSAGE]
 		then 	# No message
 			# shellcheck disable=SC2154
 			$PRINTF "$posLEFT${PROGRESS}\n"
-			#printf "\n"
 		else 	# With message
 			swarm.print.text "$MESSAGE" "" "${PROGRESS}"
 		fi

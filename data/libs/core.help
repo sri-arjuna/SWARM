@@ -718,7 +718,7 @@
 		while true
 		do
 			clear
-			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "$($DATE_TODAY) / $($DATE_TIME)"
+			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "" "$($DATE_TODAY) / $($DATE_TIME)"
 			if [[ -z "$1" ]]
 			then
 				title "$SWARM_MSG_WORD_CONFIGURE : SWARM"

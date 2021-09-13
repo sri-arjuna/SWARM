@@ -159,7 +159,7 @@ swarm.util.tar() { # DIR1 DIR2 ...
 	done
 	return $RET
 }
-swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
+swarm.util.cp() { # [-f -l -q -r -t TARGET] SOURCE [TARGET]
 # Copies SOURCE to TARGET
 # Returns 1 if TARGET-dir does not exist and was not create
 	# shellcheck disable=SC2128
@@ -169,6 +169,7 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 	local cp_target=""
 	local beVerbose=true
 	local optargs=""
+	local recursive=false
 # Catch arguments
 	for opt in "${@}"
 	do	case "${opt}" in
@@ -179,6 +180,8 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 		"-l")	show_Longnames=true ; shift	;;
 		"-t")	cp_target="$2" ; shift 2	;;
 		"-q")	beVerbose=false ; shift		;;
+		"-r")	recursive=true
+			optargs+=" -r" ; shift 		;;
 		"--")	# Do Pipe
 			# shellcheck disable=SC2128
 			[[ -z "$cp_target" ]] && \
@@ -192,8 +195,10 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			done
 			return 0
 			;;
-		*)	[[ "-" = "${opt:0:1}" ]] && \
-				optargs+=" $opt" && shift	;;
+		*)	#[[ "-" = "${opt:0:1}" ]] && \
+			#	optargs+=" $opt" && shift
+			break
+			;;
 		esac
 	done
 # Make sure target is set
@@ -220,19 +225,18 @@ swarm.util.cp() { # [-f -l -q -t TARGET] SOURCE [TARGET]
 			$show_Longnames && src_show="$src" || src_show="${src##*/}"
 			bar -m "$MAX" -c "$COUNT" "$SWARM_MSG_WORD_COPYING : $src"
 			# shellcheck disable=SC2086
-			$CP_EXEC $optargs "$src" "$cp_target"
+			$CP_EXEC $optargs "$src" "$cp_target" 2>/dev/zero
 			#$PRINTF "$POS_END\n"
-			status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: ${src_show} $SWARM_MSG_WORD_FROMTO_TO $cp_target"
-			init.log "$CP $(swarm.str.bool2str -s $?) $src"
+			status -c $? "$SWARM_MSG_WORD_COPIED $SWARM_MSG_WORD_FILE: ${src_show}" "$SWARM_MSG_WORD_FROMTO_TO $cp_target"
+			init.log "$CP $(swarm.str.bool2str -d $?) 	T:$cp_target	S:$src"
 			((COUNT++))
 		done
 	else	# Show all in one line;
 		bar "$SWARM_MSG_WORD_COPYING $SWARM_MSG_WORD_FILES"
 		# shellcheck disable=SC2086
-		$CP $optargs "${ARGS[@]}" "$cp_target"
-		#$PRINTF "$POS_END\n"
-		status $? "$SWARM_MSG_WORD_COPIED $MAX $SWARM_MSG_WORD_FILES"
-		init.log "$CP $(swarm.str.bool2str -s $?) FILES::${ARGS[*]}  TARGET::$cp_target"
+		$CP $optargs "${ARGS[@]}" "$cp_target" 2>/dev/zero
+		status $? "$SWARM_MSG_WORD_COPIED $MAX" "$SWARM_MSG_WORD_FILES"
+		init.log "$CP $(swarm.str.bool2str -d $?) FILES::${ARGS[*]}  TARGET::$cp_target"
 	fi
 }
 swarm.util.cd() { # DIR

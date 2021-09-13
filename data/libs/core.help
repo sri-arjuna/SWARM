@@ -295,8 +295,7 @@
 		C=0
 
 		title "Copy"
-		#swarm.util.cp
-		$CP -r "$0" ./docs/* docs "$SWARM_TMP_DIR"
+		swarm.util.cp -r "$0" ./docs/* ./will-fail "$SWARM_TMP_DIR"
 		wait 3s
 		title "Source Code"
 		#shellcheck disable=SC2128

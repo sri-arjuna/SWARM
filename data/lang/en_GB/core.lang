@@ -56,7 +56,9 @@ Helps to create new scripts, functions, manpages and projects
 $0 words$(swarm.str.num2uni 2502)phrases
 Prints a list of strings that are translated/able by SWARM.
 $0 demo
-Useses several commands of SWARM and prints its source code."
+Useses several commands of SWARM and prints its source code.
+$0 log$(swarm.str.num2uni 2502)crash
+Prints the general logfile or the last crash report."
 #
 # SWARM Runtime Help Menu
 #

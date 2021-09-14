@@ -90,6 +90,9 @@
 	# Language must be pre-set up until the basic language file was loaded
 	SWARM[LANG]="en_GB"
 	export SWARM_CODE=$$
+	# This is just a temporary setting in case it fails
+	SWARM_LOG_DIR=/tmp
+	SWARM_CRASH=${SWARM_LOG_DIR}/swarm-crash.log
 #
 # Set first time default
 #
@@ -447,6 +450,16 @@
 			"log")
 				title "SWARM LOG"
 				${MORELESS:-cat} "$SWARM_LOG"
+				exit $?
+				;;
+			"crash")
+				title "SWARM CRASH LOG"
+				title "($SWARM_CRASH)"
+				${MORELESS:-cat} "$SWARM_CRASH"
+				#printfile  "$SWARM_CRASH"
+				num=$($WC -l $SWARM_CRASH | $AWK '{print $1}')
+				new_crashlog="${SWARM_CRASH/crash/crash-$(date +'%Y.%m.%d_%H_%M')}"
+				[[ $num -ge 1 ]] && $CP_EXEC "$SWARM_CRASH" "${new_crashlog}"
 				exit $?
 				;;
 			"stats")

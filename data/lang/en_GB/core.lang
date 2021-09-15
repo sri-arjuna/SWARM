@@ -105,3 +105,7 @@ Prints the general logfile or the last crash report."
 	SWARM_MSG_STATS_BLANK="Blank lines"
 	SWARM_MSG_STATS_AVERAGE="Avrg lines p. file"
 	SWARM_MSG_STATS_FOLDERS="folders with a total of"
+#
+# --- SWARMRC sysinfo text
+#
+	SWARM_MSG_SYSINFO_INFO="You can limit this output by passing the section name as argument."

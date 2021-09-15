@@ -1,14 +1,25 @@
 Checklist upon adding new functions:
 1. Add english usage string in ./data/lang/en_GB/usage.conf
 2. Verify 'function - usage' uses string from file
-3. Put english manpage in ./data/lang/en_GB/man
+3. Put english manpage in ./docs/en_GB
 
 
 
 Todo
 - core.conf SWARM_MSG_SU_NFOUND check name & occourences.. phrase?!?!
-- eval_gettext
-- TUI_FONT_BOLD
+[sea@Workstation SWARM]$ 2 grep eval_gettext data/*/*
+grep: data/lang/en_GB: Ist ein Verzeichnis
+data/libs/util.func.swarm:      help_text="$(eval_gettext '
+
+- [sea@Workstation SWARM]$ 2 grep TUI data/*/*
+data/conf/swarm.conf:#  You'll find the user.conf template in $TUI_DIR_SYSTEM/conf.home
+grep: data/lang/en_GB: Ist ein Verzeichnis
+data/libs/util.commands:                # Adjust fixer according to X or TTY, used to be required by TUI
+data/libs/util.func.download:#  TUI -> SWARM: 2021.01.03
+data/libs/util.func.swarm:  TUI - Homepage: <https://savannah.nongnu.org/projects/tui>
+data/libs/util.func.swarm:              TUI, Version $TUI_VERSION
+data/libs/util.func.swarm:      THE_MEGA_CONFIG="$TUI_DIR_TEMP/$ME_CONFIGS.cfg.tmp"
+
 
 TODO MANPAGE:
 -------------
@@ -28,7 +39,6 @@ Missing: Small Functions
 
 KNOWN ISSUES
 ------------
-bar				alignment
 swarm.str.usb			linux works, BSD/arm not so sure
 yesno ??			fix empty line in ssh session?
 printfile			leading spaces missing / possible performance ??

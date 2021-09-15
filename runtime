@@ -535,7 +535,7 @@
 				header --default "$SWARM_MSG_WORD_SYSTEM $SWARM_MSG_WORD_INFORMATION"
 				for ls_entry in $list
 				do
-					cur="${ls/$pre/}"
+					cur="${ls_entry/$pre/}"
 					cur=${cur/\.*}
 					if [[ ! "$cur" == "$last" ]]
 					then	[[ -n "$2" ]] && title "$2" || title "${cur}"

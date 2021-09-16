@@ -1,0 +1,40 @@
+.\" Manpage template for SWARM
+.TH typewriter 1 "Copyleft 1995-2021" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBtypewriter \fP- Print a string char by char to screen and wrap SWARM borders around it
+\fB
+.SH SYNOPSYS
+typewriter [\fB-d\fP DELAY] "Some String" \.\.\.
+.SH OPTIONS
+.TP
+.B
+\fB-d\fP DELAY
+Waits DELAY seconds before it prints the next char.
+DELAY may be an integer or flaoting point like "0.007"
+
+.SH VARIABLES
+.TP
+\fBdefault_typewriter_intervall\fP
+Time in seconds it shall wait before printing the next character.
+.SH EXAMPLE
+
+typewriter STRING1 [ STRING2 ... ]
+.PP
+typewriter "Hello World"
+.PP
+echo "a string" | typewriter \fB-d 0.1\fP --
+.SH HINTS
+If you want to print files with typewriter style, use '\fBprintfile -t\fP' directly.
+
+.SH SEE ALSO
+\fBbash\fP(1), \fBprintfile\fP(1)
+
+.SH BUGS
+Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM/issues\fP
+
+.SH AUTHOR
+Simon Arjuna Erat, Switzerland
+
+.SH LICENSE
+GNU Public License V2

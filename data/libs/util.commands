@@ -799,14 +799,16 @@
 					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"
 					fi
 					if [[ $C -eq $MAX ]]
-					then	$default_printfile_wait && wait ${default_printfile_intervall:-5}s
+					then	if $default_printfile_wait
+					 	then	$bTypewriter || wait ${default_printfile_intervall:-5}s
+						fi
 						C=0
 					else	((C++))
 					fi
 				done<"$file"
 			elif  [[ ! "--" == "$file" ]]
 			then	# Asuming a string
-				status 1 "$SWARM_MSG_PHRASE_STRING"
+				status 1 "$SWARM_MSG_PHRASE_TW_STRING"
 				return 1
 			else	# this would be piped
 				$bShowTitle && title ""
@@ -818,7 +820,9 @@
 					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"
 					fi
 					if [[ $C -eq $MAX ]]
-					then	$default_printfile_wait && wait ${default_printfile_intervall:-5}s
+					then	if $default_printfile_wait
+					 	then	$bTypewriter || wait ${default_printfile_intervall:-5}s
+						fi
 						C=0
 					else	((C++))
 					fi
@@ -882,6 +886,82 @@
 	#
 		_check.date
 		_log.it "$1"
+	}
+	typewriter() { # [-d 0.5] STRING1 [ STRING2 ... ]
+	# Prints strings char by char
+	#
+		local iCount=0 iPrinted=0 iLen=0
+	#
+	# Catch arguments
+	#
+		while :; do
+		case "$1" in
+			-h|-\?|--help)
+				#swarm.help.usage "source swarm.eu.new.function main"
+				$ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+				return 0
+				;;
+			-d)	# Overwrite the default delay
+				default_typewriter_intervall="$2"
+				shift
+				;;
+			--)
+				# General purpose pipe support, might need adjustment!
+				while read line;do
+				        ${FUNCNAME[@]} "$line"
+				done
+				return 0
+				;;
+			*)
+				break
+				;;
+			esac
+			shift
+		done
+	#
+	# Print the strings
+	#
+		for thisString in "${@}"
+		do
+			if [[ -f "$thisString" ]]
+			then	status 1 "$SWARM_MSG_PHRASE_TW_FILE"
+				continue
+			fi
+			# It is a new string, reset integers...
+			iCount=0 iPrinted=0 iLen="${#thisString}"
+			swarm.print.border
+			swarm.print.goto $(( ${#BORDER_LEFT} + 2 ))
+			while [[ $iPrinted -lt $iLen ]]
+			do
+				toPrint=""
+				# Get the next symbols for display
+				sSingle="${thisString:$iCount:1}"
+				sDouble="${thisString:$iCount:2}"
+				case "$sDouble" in
+				"\t")		toPrint="	"
+						((iCount++))
+						;;
+				"\n"|"\r")	toPrint="${sDouble/\\/\\\\}"
+						((iCount++))
+						;;
+				*)	# It is not a 2-char symbol
+					case "$sSingle" in
+					"	")	toPrint="	"
+							;;
+					"%")		toPrint="%%"
+							;;
+					*)		toPrint="$sSingle"
+							;;
+					esac
+					;;
+				esac
+				((iCount++))
+				sleep $default_typewriter_intervall
+				$PRINTF "$toPrint"
+				((iPrinted++))
+			done
+			$PRINTF "\n"
+		done
 	}
 	asRoot() { # [-r FILE_FOR_RETCODE] "COMMAND" | "/path/to/file"
 	# Executes passed command as root.

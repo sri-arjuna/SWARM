@@ -18,4 +18,5 @@
 	SWARM_MSG_SU_NFOUND="Sudo could not be found on your system."
 	SWARM_MSG_PHRASE_SSHSESSION="This is a SSH session. ($SSH_TTY)"
 	SWARM_MSG_PHRASE_TERMINAL="This is a terminal (TTY #${XDG_VTNR}) session."
-	SWARM_MSG_PHRASE_STRING="Please use the functions 'printe' or 'typewriter' to display strings."
+	SWARM_MSG_PHRASE_TW_STRING="Please use the functions 'printe' or 'typewriter' to display strings."
+	SWARM_MSG_PHRASE_TW_FILE="If you want to print a file, please use printfile with the -t option."

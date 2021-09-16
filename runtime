@@ -457,7 +457,7 @@
 				title "SWARM CRASH LOG"
 				title "($SWARM_CRASH)"
 				#${MORELESS:-cat} "$SWARM_CRASH"
-				if [[ -f "$SWARM_CRASH" ]]
+				if [[ -f "$SWARM_CRASH" ]] && [[ $(swarm.str.filesize "$SWARM_CRASH"|$AWK '{print $1}') -gt 1 ]]
 				then	printfile  "$SWARM_CRASH"
 					# File was displayed, now create a backup
 					num=$($WC -l $SWARM_CRASH | $AWK '{print $1}')
@@ -465,7 +465,8 @@
 					[[ $num -ge 1 ]] && $CP_EXEC "$SWARM_CRASH" "${new_crashlog}"
 				else	status $RET_INFO "$SWARM_MSG_PHRASE_FILENOTFOUND"
 					if yesno "Do you want to check for a previous crash?"
-					then	swarm.list.files "$SWARM_LOG_DIR" | grep ^cr
+					then	oldfile=$(pick -m $(swarm.list.files "$SWARM_LOG_DIR" | grep ^crash- ))
+						printfile "$SWARM_LOG_DIR/$oldfile"
 					fi
 				fi
 				exit $?

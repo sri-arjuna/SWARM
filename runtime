@@ -449,17 +449,25 @@
 				;;
 			"log")
 				title "SWARM LOG"
-				${MORELESS:-cat} "$SWARM_LOG"
+				#${MORELESS:-cat} "$SWARM_LOG"
+				printfile "$SWARM_LOG"
 				exit $?
 				;;
 			"crash")
 				title "SWARM CRASH LOG"
 				title "($SWARM_CRASH)"
-				${MORELESS:-cat} "$SWARM_CRASH"
-				#printfile  "$SWARM_CRASH"
-				num=$($WC -l $SWARM_CRASH | $AWK '{print $1}')
-				new_crashlog="${SWARM_CRASH/crash/crash-$(date +'%Y.%m.%d_%H_%M')}"
-				[[ $num -ge 1 ]] && $CP_EXEC "$SWARM_CRASH" "${new_crashlog}"
+				#${MORELESS:-cat} "$SWARM_CRASH"
+				if [[ -f "$SWARM_CRASH" ]]
+				then	printfile  "$SWARM_CRASH"
+					# File was displayed, now create a backup
+					num=$($WC -l $SWARM_CRASH | $AWK '{print $1}')
+					new_crashlog="${SWARM_CRASH/crash/crash-$(date +'%Y.%m.%d_%H_%M')}"
+					[[ $num -ge 1 ]] && $CP_EXEC "$SWARM_CRASH" "${new_crashlog}"
+				else	status $RET_INFO "$SWARM_MSG_PHRASE_FILENOTFOUND"
+					if yesno "Do you want to check for a previous crash?"
+					then	swarm.list.files "$SWARM_LOG_DIR" | grep ^cr
+					fi
+				fi
 				exit $?
 				;;
 			"stats")

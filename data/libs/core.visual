@@ -321,11 +321,11 @@
 		local M="${ARGS[1]}"
 		local R="${ARGS[2]}"
 		local evalLeft=""
-		evalLeft=$($PRINTF "$L")
+		evalLeft=$($ECHO "$L")
 		local evalMiddle=""
-		evalMiddle=$($PRINTF "$M")
+		evalMiddle=$($ECHO "$M")
 		local evalRight=""
-		evalRight=$($PRINTF "$R")
+		evalRight=$($ECHO "$R")
 
 		# Retrieve their length
 		local lenEvalLeft=${#evalLeft}

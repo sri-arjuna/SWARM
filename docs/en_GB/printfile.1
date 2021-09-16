@@ -9,6 +9,11 @@ printfile [\fB-d\fP DELAY] [\fB-tT\fP] FILE "Some String" \.\.\.
 .SH OPTIONS
 .TP
 .B
+\fB-D\fP DELAY
+When screen is 'full', it waits DELAY seconds before before continueing.
+This can be used to overwrite a users default setting if you expect simple or complex data to be displayed.
+.TP
+.B
 \fB-d\fP DELAY
 Waits DELAY seconds before it prints the next char.
 DELAY may be an integer or flaoting point like "0.007"
@@ -21,18 +26,25 @@ Enables typewriter mode, using default delay of 0.05
 .B
 \fB-T\fP
 Prints the file name with title before it prints its content
+.SH VARIABLES
+.TP
+\fBdefault_printfile_wait\fP
+Boolean wether \fiprintfile\fP should wait when the screen is full
+.TP
+\fBdefault_printfile_intervall\fP
+Time in seconds it shall wait before continuing.
 .SH EXAMPLE
 
 printfile file.txt
 .PP
-printfile \fB-T\fP /path/to/multiple/files*
+printfile \fB-T -t\fP /path/to/multiple/files*
 .PP
-printfile \fB-t\fP "Hello $USER, how are you today?"
+printfile \fB-d 0.1\fP ./dir/somefile
 .SH HINTS
-In typewriter mode you can pass a mixed list of files and strings.
+If you want to print strings with typewriter style, use \fBtypewriter\fP directly.
 
 .SH SEE ALSO
-\fBbash\fP(1), \fBcat\fP(1), \fBread\fP(1)
+\fBbash\fP(1), \fBcat\fP(1), \fBread\fP(1), \fBtypewriter\fP(1)
 
 .SH BUGS
 Report bugs on: \fBhttp://github.com/sri-arjuna/SWARM/issues\fP

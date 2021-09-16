@@ -297,7 +297,7 @@
 	# Prints up to 3 'indexed'/numbered entries per row
 	# Options -12arn ; 1 or 2 rows (instead of 3=default), alpha, roman, num=default
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Variable defaults (options)
 		#
@@ -752,22 +752,76 @@
 	}
 	printfile() { # FILE | --
 	# Prints all given files line by line, separated by "title 'filename'"
-	# -- or no arguments will use read
+	# -- or no arguments will use read from pipe
 		local tmpline="" tmplineb=""
+		local C=0 MAX=$(( ${LINES:-10} - 3 ))
+		local bTypewriter=false
+		local type_ivall=""
+		local bShowTitle=false
+	#
+	# Catch options
+	#
+		while :; do
+			case "$1" in
+			-D)
+				default_printfile_intervall="$2"
+				shift
+				;;
+			-d)
+				type_ivall="-d $2"
+				bTypewriter=true
+				shift
+				;;
+			-t)
+				bTypewriter=true
+				;;
+			-T)
+				bShowTitle=true
+				;;
+			*)
+				break
+				;;
+			esac
+			shift
+		done
+	#
+	# Parse arguments / files
+	#
 		for file in "${@}"
 		do
 			if [[ -f "$file" ]]
-			then	title "$file"
+			then	$bShowTitle && title "$file"
 				while $READ -r line;do
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
-					printe "${tmplineb/\</${PRINTABLE_LESSER}}"
+					if $bTypewriter
+					then	typewriter $type_ivall "${tmplineb/\</${PRINTABLE_LESSER}}"
+					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"
+					fi
+					if [[ $C -eq $MAX ]]
+					then	$default_printfile_wait && wait ${default_printfile_intervall:-5}s
+						C=0
+					else	((C++))
+					fi
 				done<"$file"
-			else	title ""
+			elif  [[ ! "--" == "$file" ]]
+			then	# Asuming a string
+				status 1 "$SWARM_MSG_PHRASE_STRING"
+				return 1
+			else	# this would be piped
+				$bShowTitle && title ""
 				while $READ -r line;do
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
-					printe "${tmplineb/\</${PRINTABLE_LESSER}}"
+					if $bTypewriter
+					then	typewriter $type_ivall "${tmplineb/\</${PRINTABLE_LESSER}}"
+					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"
+					fi
+					if [[ $C -eq $MAX ]]
+					then	$default_printfile_wait && wait ${default_printfile_intervall:-5}s
+						C=0
+					else	((C++))
+					fi
 				done
 			fi
 		done

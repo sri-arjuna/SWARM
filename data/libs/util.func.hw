@@ -130,37 +130,49 @@ swarm.sysinfo.hw.screen() {
 # Prints connected screens/monitor/display
 # 1 per line
 	if ! $isGUI
-	then 	#{ $ECHO "$SWARM_MSG_PHRASE_SSHSESSION" ; return 1 ; }
-		$PRINTF '%s\n' "$TERM"
-		return 0
+	then 	$PRINTF '%s\n' "$TERM"
+	else	# the space makes the difference!
+		LC_ALL=C ${XRANDR:-xrandr} | ${AWK:-awk} '/ connected/ {print $1}'
 	fi
-	# the space makes the difference!
-	LC_ALL=C ${XRANDR} | $AWK '/ connected/ {print $1}'
+}
+swarm.sysinfo.hw.screen.driver() {
+# Prints wether the screen driver is X11 or Wayland
+#
+	local out=""
+	if [[ -n "$WAYLAND_DISPLAY" ]]
+	then	out="Wayland"
+	else	out="X11"
+	fi
+	$ECHO "$out"
 }
 swarm.sysinfo.hw.screen.list() {
 # Prints connected screens/monitor/display
 # 1 per line
-	if ! $isGUI
-	then	$isSSH && \
-			$ECHO "$SSH_TTY" || \
-			$ECHO "$SWARM_MSG_PHRASE_TERMINAL"
-		#SWARM_MSG_PHRASE_SSHSESSION
-		return 1
+	if $isGUI
+	then	# the (non!) space makes the difference! (dis(-)connected)
+		LC_ALL=C ${XRANDR:-xrandr} | ${AWK:-awk} '/connected/ {print $1}' | uniq
+	elif $isSSH
+	then	$ECHO "$SSH_TTY"
+	else	$ECHO "$SWARM_MSG_PHRASE_TERMINAL"
 	fi
-	# the space makes the difference! (dis(-)connected)
-	LC_ALL=C ${XRANDR} | $AWK '/connected/ {print $1}'
 	return $?
 }
 swarm.sysinfo.hw.screen.res() {
 # Prints the screens resolution
 #
-	if ! $isGUI
-	then 	$PRINTF '%sx%s' "$COLUMNS" "$LINES"
-	else	[[ "${XRANDR/swam.util.xrandr}" ]] && \
-			LC_ALL=C ${XRANDR} | $AWK '/\*/ {print $1}' || \
-			xdpyinfo | $AWK '/dimension/ {print $2}'
+	if $isGUI
+	then	# It is a GUI, but is it X11 or wayland?
+		if [[ "X11" == "$(swarm.sysinfo.hw.screen.driver)" ]]
+		then	# TODO , not quite sure what I checked here exactly...
+			[[ "${XRANDR/swam.util.xrandr}" ]] && \
+				LC_ALL=C ${XRANDR} | $AWK '/\*/ {print $1}' || \
+				xdpyinfo | $AWK '/dimension/ {print $2}'
+		else	$ECHO "${WAYLAND_DISPLAY:-Wayland}"
+		fi
+	else	# Its console or remote
+		$PRINTF '%sx%s' "$COLUMNS" "$LINES"
 	fi
-	return 0
+	return $?
 }
 swarm.sysinfo.net() {
 # Prints the name of the active internet device
@@ -315,12 +327,14 @@ swarm.sysinfo.os.user.local() { #
 #
 	$LS "$HOME/.."
 }
-swarm.sysinfo.os.user.loged() {
+swarm.sysinfo.os.user.loged() { # [-u]
 # Shows users that are currently loged in
 #
-	users
+	if [[ "-u" == "$1" ]]
+	then	$PRINTF '%s\n' $(users) | uniq
+	else	users
+	fi
 }
-
 swarm.sysinfo.hw.audio() { #
 # Prints audio information found by lspci
 #

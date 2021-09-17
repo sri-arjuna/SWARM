@@ -544,3 +544,29 @@ swarm.str.humanreadable() { # [-p NUM] [-B] [--reverse] BYTES
 	# Hope this works
 	numfmt $mode $opts "$1" 2>/dev/zero || numfmt ${mode/to/from} $mode $opts "$1"
 }
+swarm.date.date2stamp () { # "1970-01-01 15:30:45"
+# Expects "DATE TIME", just "DATE", or just "TIME"
+# Converts to seconds
+	local var=$($ECHO "$1" | $SED s/'\.'/'\-'/g )
+	$ECHO $($DATE --utc --date "$var" +%s)
+}
+swarm.date.stamp2date (){  # 1569942045
+# Expects SECONDS
+# Converts to DATE TIME
+	local var=$($ECHO "$1" | $SED s/'\.'/'\-'/g )
+	$ECHO $($DATE --utc --date "1970-01-01 $var sec" "+%F %T")
+}
+swarm.date.diff (){ # [-s] "1970-01-01 00:00:00" "1970-01-01 15:30:45"
+# Calculates time difference between STRING1 and STRING2
+# Prints SECONDS and TIME (HH:MM:SS)
+	local bShowSecs=false
+	[[ "-s" == "$1" ]] && bShowSecs=true && shift
+	local dte1=$(swarm.date.date2stamp "$1")
+	local dte2=$(swarm.date.date2stamp "$2")
+	local diffSec=$((dte2-dte1))
+	if $bShowSecs
+	then	$ECHO "$diffSec"
+	else	swarm.str.seconds2time $diffSec
+		$ECHO
+	fi
+}

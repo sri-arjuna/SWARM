@@ -162,9 +162,13 @@
 #
 	# Need to get these updating them self upon call
 	# Use these to set the date variable: `
-	export DATE_TODAY="$DATE +%F"
-	export DATE_TIME="$DATE +%T"
-	export DATE_TIME_LOG="$DATE +%T.%N"
+	swarm.date.today() { $DATE +%F ; }
+	swarm.date.time() { $DATE +%T ; }
+	swarm.date.log() { $DATE +%T.%N ; }
+	swarm.date.log_long() { $DATE +%F.%T.%N ; }
+	export DATE_TODAY="swarm.date.today"
+	export DATE_TIME="swarm.date.time"
+	export DATE_TIME_LOG="swarm.date.log"
 #
 # Get proper SWARM root dir
 #

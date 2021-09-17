@@ -477,11 +477,99 @@
 		echo "$SWARM_USER_DIR_SCRIPTS/$prj_exec"
 	}
 #
+# Configuration handler
+#
+	swarm.eu.show.config() { #
+	# Shows the configuration menu for SWARM
+	#
+		local tFile
+		tFile=""
+		while true
+		do
+			clear
+			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "" "$($DATE_TODAY) / $($DATE_TIME)"
+			if [[ -z "$1" ]]
+			then
+				title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
+				printe "$SWARM_MSG_PHRASE_SELECT_FILE"
+				#shellcheck disable=SC2046
+				tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") )
+			else	tFile="${tFile:-$1}"
+			fi
+			# If the selected option is 'back' quit the Loop
+			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break
+
+			# Everything else should be a valid option (if not, pick is buggy)
+			case "${tFile,,}" in
+			rc)	cfg.edit "$SWARMRC"
+				[[ -n "$1" ]] && return
+				;;
+			*"settings"*)
+				# Copy the original again if it no longer exists
+				if [[ ! -f "$SWARM_USER_CONF" ]]
+				then	# The file does not exist, lets make sure the path does
+					swarm.util.mkdir "$SWARM_USER_DIR_CONF"
+					swarm.util.cp "$SWARM_DIR_CONF/settings.conf" "$SWARM_USER_CONF"
+				fi
+				# Edit the file
+				cfg.edit -T "${SWARM_MSG_WORD_SETTINGS}" \
+					--conf-header "test" \
+					--option "useSudo" \
+						--values "true false" \
+						--default true \
+					--option "DD_BS" \
+					 	--values "1M 4M 8M 16M 32M 128M 256M" \
+						--default "4M" \
+					--option "TAR_EXT" \
+						--values "tar.bz2 tar.gz tar.xz" \
+						--default "tar.gz" \
+					"$SWARM_USER_CONF"
+				[[ -n "$1" ]] && return
+				;;
+			*)	[[ -f "$SWARM_USER_DIR_CONF/$tFile" ]] && \
+						cfg.edit "$SWARM_USER_DIR_CONF/$tFile" || \
+						status 1 "$SWARM_MSG_PHRASE_FILENOTFOUND: $tFile"
+				[[ -n "$1" ]] && return
+				;;
+			esac
+		done
+	}
+#
+# Manpage handler
+#
+	swarm.help.manpage() { # FUNCNAME
+	# Opens the manpage according to passed FUNCNAME
+	#
+		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
+		if [[ -f "$1" ]]
+		then	# Passed argument exists
+			tManpage="$1"
+		elif [[ -f "$tDir/${1}.1" ]]
+		then	# default handling
+			tManpage="$tDir/${1}.1"
+		elif [[ -z "$1" ]]
+		then	# Default error
+			#shellcheck disable=SC2128
+			swarm.help.usage "$FUNCNAME"
+			return 1
+		else	# Lets use fallback language : english
+			tdir="$SWARM_DIR_ROOT/docs/en_GB"
+			if [[ -f "$tdir/${1}.1" ]]
+			then	tManpage="$tDir/${1}.1"
+			else
+				swarm.help.usage "$1"
+				return 1
+			fi
+		fi
+		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
+	}
+#
 # Usage Handler
 #
 	swarm.help.usage() { # FUNCNAME
 	# Returns the 'usage help screen' according to passed FUNCNAME
-	#
+	# The strings are in SWARMDIR/data/lang/en_GB/strings_usage.lang
 		#shellcheck disable=SC2128
 		swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local out=""
@@ -667,6 +755,27 @@
 		"asRoot")
 			out="$SWARM_MSG_ASROOT_USAGE"
 			;;
+		"swarm.date.date2stamp")
+			out="$SWARM_MSG_DATE_DATE2STAMP_USAGE"
+			;;
+		"swarm.date.stamp2date")
+			out="$SWARM_MSG_DATE_STAMP2DATE_USAGE"
+			;;
+		"swarm.date.diff")
+			out="$SWARM_MSG_DATE_DIFF_USAGE"
+			;;
+		"swarm.date.today")
+			out="$SWARM_MSG_DATE_TODAY_USAGE"
+			;;
+		"swarm.date.time")
+			out="$SWARM_MSG_DATE_TIME_USAGE"
+			;;
+		"swarm.date.log")
+			out="$SWARM_MSG_DATE_LOG_USAGE"
+			;;
+		"swarm.date.log_long")
+			out="$SWARM_MSG_DATE_LOGLONG_USAGE"
+			;;
 		"")
 			out="$"
 			;;
@@ -676,92 +785,4 @@
 	# Output
 		$PRINTF '%s\n' "$out" >&1
 		unset out
-	}
-#
-# Manpage handler
-#
-	swarm.help.manpage() { # FUNCNAME
-	# Opens the manpage according to passed FUNCNAME
-	#
-		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
-		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
-		if [[ -f "$1" ]]
-		then	# Passed argument exists
-			tManpage="$1"
-		elif [[ -f "$tDir/${1}.1" ]]
-		then	# default handling
-			tManpage="$tDir/${1}.1"
-		elif [[ -z "$1" ]]
-		then	# Default error
-			#shellcheck disable=SC2128
-			swarm.help.usage "$FUNCNAME"
-			return 1
-		else	# Lets use fallback language : english
-			tdir="$SWARM_DIR_ROOT/docs/en_GB"
-			if [[ -f "$tdir/${1}.1" ]]
-			then	tManpage="$tDir/${1}.1"
-			else
-				swarm.help.usage "$1"
-				return 1
-			fi
-		fi
-		man "$tManpage" || status $? "$SWARM_MSG_STR_FILE_NOT_FOUND" "$1"
-	}
-#
-# Configuration handler
-#
-	swarm.eu.show.config() { #
-	# Shows the configuration menu for SWARM
-	#
-		local tFile
-		tFile=""
-		while true
-		do
-			clear
-			header "SWARM $SWARM_MSG_WORD_CONFIGURATION" "" "$($DATE_TODAY) / $($DATE_TIME)"
-			if [[ -z "$1" ]]
-			then
-				title "$SWARM_MSG_WORD_CONFIGURE : SWARM"
-				printe "$SWARM_MSG_PHRASE_SELECT_FILE"
-				#shellcheck disable=SC2046
-				tFile=$(pick -m "RC" $(swarm.list.files "$SWARM_USER_DIR_CONF/") )
-			else	tFile="${tFile:-$1}"
-			fi
-			# If the selected option is 'back' quit the Loop
-			[[ "$SWARM_MSG_WORD_BACK" == "$tFile" ]] && break
-
-			# Everything else should be a valid option (if not, pick is buggy)
-			case "${tFile,,}" in
-			rc)	cfg.edit "$SWARMRC"
-				[[ -n "$1" ]] && return
-				;;
-			*"settings"*)
-				# Copy the original again if it no longer exists
-				if [[ ! -f "$SWARM_USER_CONF" ]]
-				then	# The file does not exist, lets make sure the path does
-					swarm.util.mkdir "$SWARM_USER_DIR_CONF"
-					swarm.util.cp "$SWARM_DIR_CONF/settings.conf" "$SWARM_USER_CONF"
-				fi
-				# Edit the file
-				cfg.edit -T "${SWARM_MSG_WORD_SETTINGS}" \
-					--conf-header "test" \
-					--option "useSudo" \
-						--values "true false" \
-						--default true \
-					--option "DD_BS" \
-					 	--values "1M 4M 8M 16M 32M 128M 256M" \
-						--default "4M" \
-					--option "TAR_EXT" \
-						--values "tar.bz2 tar.gz tar.xz" \
-						--default "tar.gz" \
-					"$SWARM_USER_CONF"
-				[[ -n "$1" ]] && return
-				;;
-			*)	[[ -f "$SWARM_USER_DIR_CONF/$tFile" ]] && \
-						cfg.edit "$SWARM_USER_DIR_CONF/$tFile" || \
-						status 1 "$SWARM_MSG_PHRASE_FILENOTFOUND: $tFile"
-				[[ -n "$1" ]] && return
-				;;
-			esac
-		done
 	}

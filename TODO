@@ -1,35 +1,20 @@
+Statement
+---------
+Framework core functions were written from scratch, again,
+wheres most functions have been migrated from its initial form TUI.
+Due to this, some issues are to be expected in the early public phases
+
+
 Checklist upon adding new functions:
+------------------------------------
 1. Add english usage string in ./data/lang/en_GB/usage.conf
-2. Verify 'function - usage' uses string from file
+2. Verify 'function - usage' uses string from file ()
 3. Put english manpage in ./docs/en_GB
 
 
-
-Todo
-- core.conf SWARM_MSG_SU_NFOUND check name & occourences.. phrase?!?!
-[sea@Workstation SWARM]$ 2 grep eval_gettext data/*/*
-grep: data/lang/en_GB: Ist ein Verzeichnis
-data/libs/util.func.swarm:      help_text="$(eval_gettext '
-
-- [sea@Workstation SWARM]$ 2 grep TUI data/*/*
-data/conf/swarm.conf:#  You'll find the user.conf template in $TUI_DIR_SYSTEM/conf.home
-grep: data/lang/en_GB: Ist ein Verzeichnis
-data/libs/util.commands:                # Adjust fixer according to X or TTY, used to be required by TUI
-data/libs/util.func.download:#  TUI -> SWARM: 2021.01.03
-data/libs/util.func.swarm:  TUI - Homepage: <https://savannah.nongnu.org/projects/tui>
-data/libs/util.func.swarm:              TUI, Version $TUI_VERSION
-data/libs/util.func.swarm:      THE_MEGA_CONFIG="$TUI_DIR_TEMP/$ME_CONFIGS.cfg.tmp"
-
-
-TODO MANPAGE:
--------------
-* <all done>
-
-
-Missing: Small Functions
-----------------------
-* swarm.str.dirlist *dirtree
-* the list move
+Todo - PRE-release
+------------------
+*
 
 
 1.0 Blockers
@@ -37,16 +22,11 @@ Missing: Small Functions
 * swarm - todo
 
 
-KNOWN ISSUES
-------------
-swarm.str.usb			linux works, BSD/arm not so sure
-yesno ??			fix empty line in ssh session?
-printfile			leading spaces missing / possible performance ??
-
-
-
-Post 1.0-XX build?
+TODO - POST-release
 -------------------
+* swarm.util.dd ??
+* cfg.edit improvements
+* swarm / project browser (give people time to get used to SWARM on a per-script level)
 * cfg.set -a(ppend)?
 * swarm.str.usb -> BSD ???
 * download : certificates?
@@ -54,42 +34,19 @@ Post 1.0-XX build?
 * add bar dir/item [x/Y] if cp entrie is a dir // same with mv
 
 
-Statement
----------
-Framework core functions were written from scratch, again,
-wheres most functions have been migrated from its initial form TUI.
+Missing: Small Functions
+----------------------
+* the list move
+* swarm.str.dirlist *dirtree
 
-Due to this, some issues are to be expected in the early public phases
+
+KNOWN ISSUES
+------------
+swarm.str.usb			linux works, BSD/arm not so sure
+yesno ??			fix empty line in ssh session?
 
 
 Shellcheck recheck:
 -------------------
 * SC2162: read -r // gibt support für \.. will ich das?
 * undo unset quoting // # shellcheck disable=SC2184
-
-
-
-ROADMAP:
---------
-
-    -- = todo
-    ++ = done
-    ______
-    0.8
-    ++ bar
-    ++ small functions
-    0.8.5
-    ++ cfg.edit RAW/wip
-    ++ rework swarm.util.'file stuff'
-    ++ keep updating: docs/*
-    0.9
-    ++ cfg.edit
-    -+ additions & fixes
-    0.9.5
-    ++ swarm.os.install - finalize
-    0.9.6
-    ++ asRoot
-    0.9.8
-    -- swarm / WIP
-    1.0
-    -- final bug fixes

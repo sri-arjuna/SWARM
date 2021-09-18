@@ -976,10 +976,36 @@
 		fi
 	# Variables
 		local RETFILE RET
-		RET=1
+		local RET=1
 	# Check arguments, exit on missing
-		[[ "$1" == "-r" ]] && { RETFILE="$2" ; shift 2 ; }
-		[[ -z "$1" ]] && { swarm.show.usage "${FUNCNAME[1]}" ;return 1 ; }
+		while :
+		do
+			case "$1" in
+			"-r")	# Wants a RETFILE
+				if [[ -n "$2" ]]
+				then	# a filename is passed, but do not overwrite existing files
+				 	RETFILE=$(swarm.str.genfilename "$2")
+					if $TOUCH "$RETFILE"
+					then	shift
+					else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $RETFILE"
+						return 1
+					fi
+				else	# Missing argument
+					swarm.show.usage "${FUNCNAME[1]}"
+					return 1
+				fi
+				;;
+			*)
+				break
+				;;
+			esac
+			shift
+		done
+	# If the arg list is empty now, we are missing arguments
+		if [[ -z "$1" ]]
+		then	swarm.show.usage "${FUNCNAME[1]}"
+			return 1
+		fi
 	# Call it properly
 		if $useSudo
 		then	# Easy

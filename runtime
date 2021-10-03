@@ -89,7 +89,6 @@
 	SWARM[ROOTDIR]=""
 	# Language must be pre-set up until the basic language file was loaded
 	SWARM[LANG]="en_GB"
-	export SWARM_CODE=$$
 	# This is just a temporary setting in case it fails
 	SWARM_LOG_DIR=/tmp
 	SWARM_CRASH=${SWARM_LOG_DIR}/swarm-crash.log
@@ -169,6 +168,8 @@
 	export DATE_TODAY="swarm.date.today"
 	export DATE_TIME="swarm.date.time"
 	export DATE_TIME_LOG="swarm.date.log"
+	swarm.code() { $PRINTF '%s\n' "$$_$($DATE +'%Y.%m.%d_%H.%M.%N')" ; }
+	export SWARM_CODE="$(swarm.code)"
 #
 # Get proper SWARM root dir
 #

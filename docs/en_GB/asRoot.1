@@ -14,6 +14,11 @@ The Enduser can use 'useSudo=\fBtrue\fP|\fBfalse\fP' in \fI$SWARM_USER_DIR_CONF/
 .PP
 .SH OPTIONS
 .TP
+\fB-b\fP
+Run the the passed command in the background.
+.RE
+		Script authors should make sure that this has been properly tested for their scripts.
+.TP
 \fB-l\fP 	\fILOGFILE\fP
 Saves the errors and other messages to this file.
 .RE
@@ -26,14 +31,22 @@ Saves the return value of passed COMMAND in \fIFILE_RETURN_VALUE\fP.
 .RE
 		This is only required if you want a specific file/name to be used - SWARM handles this on its own.
 .TP
+\fB-o\fP 	\fISAVE_OUTPUT\fP
+Saves \fBstdout\fP to \fISAVE_OUTPUT\fP instead of print to enduser.
+.TP
 \fB-m1\fP 	MSG
 Prints "MSG" before asking for a password (su/sudo)
 .TP
 \fB-m2\fP 	MSG
 Prints "MSG" while the command is (instead of the word) running.
+.RE
+		However, this message gets overwritten by the exit status / \fB-m3\fP
 .TP
 \fB-m3\fP 	MSG
 Prints "MSG" as status message when exiting.
+.TP
+\fB--skip-status\fP
+Hides the default \fBstatus\fP message.
 
 
 .SH ENVIRONMENT
@@ -56,6 +69,8 @@ This file stores the most imprtant path and command variables as well as some ba
 asRoot argument
 .PP
 asRoot other example
+.PP
+asRoot fdisk -l /dev/sda | printe -1 --
 
 .SH SEE ALSO
 \fBsu\fP(1), \fBsudo\fP(1)

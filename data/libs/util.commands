@@ -266,7 +266,7 @@
 	# Prints text and exit with passed return code
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		unset RET TXT1 TXT2
 		local doReturn=false
 	# Check for options
@@ -994,11 +994,14 @@
 		local FILE_TMP=$(swarm.str.genfilename "$SWARM_TMP_DIR/$(swarm.code).tmp~")
 		local FILE_RET="${FILE_TMP/tmp~/ret}"
 		local FILE_LOG="$SWARM_LOG"
-		local RET=1
+		local FILE_OUT=""
+		local RET=""
 		local sMSG1=""	# Pre - Run
-		local sMSG2=""	# Post - run
+		local sMSG2=""	# while - run
+		local sMSG3=""	# Post - run
 		local bBackground=false
 		local bShowStatus=true
+		local sCatchOutputBG="1>>\"$FILE_LOG\" 2>>\"$FILE_LOG\""
 	# Check arguments, exit on missing
 		while :
 		do
@@ -1009,33 +1012,20 @@
 				bShowStatus=false
 				;;
 			"-r")	# Wants a custom FILE_RET
-				#if [[ "-" != "${2:0:1}" ]] && [[ -n "$3" ]]
-				#then	# a filename is passed, but do not overwrite existing files
-				 	FILE_RET=$(swarm.str.genfilename "$2")
-					$doLog && init.log "asRoot - Set (custom) FILE_RET=$FILE_RET"
-					if $TOUCH "$FILE_RET"
-					then	shift
-					else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_RET"
-						return 1
-					fi
-				#else	# Missing argument
-				#	swarm.show.usage "${FUNCNAME[1]}"
-				#	return 1
-				#fi
+			 	FILE_RET=$(swarm.str.genfilename "$2")
+				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_RET=$FILE_RET"
+				if $TOUCH "$FILE_RET"
+				then	shift
+				else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_RET"
+					return 1
+				fi
 				;;
 			"-l")	# Wants a custom FILE_LOG
-				if [[ "-" != "${2:0:1}" ]] && [[ -n "$3" ]]
-				then	# a filename is passed
-				 	FILE_LOG="$2"
-					$doLog && init.log "asRoot - Set (custom) FILE_LOG=$FILE_LOG"
-					# Verify it exists and can be written
-					if $TOUCH "$FILE_LOG"
-					then	shift
-					else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_LOG"
-						return 1
-					fi
-				else	# Missing argument
-					swarm.show.usage "${FUNCNAME[1]}"
+				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_LOG=$FILE_LOG"
+				# Verify it exists and can be written
+				if $TOUCH "$FILE_LOG"
+				then	shift
+				else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_LOG"
 					return 1
 				fi
 				;;
@@ -1049,21 +1039,33 @@
 				sMSG2="$2"
 				shift
 				;;
+			"-m3")
+				# This can be anything
+				sMSG3="$2"
+				shift
+				;;
+			"-o")
+				$TOUCH "$2"
+				sCatchOutputBG="1>\"$2\" 2>>\"$FILE_LOG\""
+				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_OUT == $2"
+				FILE_OUT="$2"
+				shift
+				;;
 			*)
 				break
 				;;
 			esac
 			shift
 		done
-		#$doLog && init.log "asRoot - Using files: FILE_LOG=$FILE_LOG && FILE_RET=$FILE_RET (uid=$UID) and execute: $FILE_TMP"
-		#$doLog && init.log "Filecontent: $(<$FILE_TMP)"
+		$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: CMD == ${@}"
 	# If the arg list is empty now, we are missing arguments
 		if [[ -z "$1" ]]
 		then	swarm.show.usage "${FUNCNAME[1]}"
 			return 1
 		fi
-	# Call it properly
+	# Show prior message if applicable
 		[[ -n "$sMSG1" ]] && printe "$sMSG1"
+	# Call it properly
 		if $bBackground
 		then
 			local sCMD="#!/usr/bin/env bash
@@ -1072,52 +1074,62 @@
 	source \$SWARMDIR/runtime
 # Prepare command
 	(
-		init.log \"RET=$FILE_RET (\$FILE_RET) LOG=$FILE_LOG (\$FILE_LOG) \"
-		asRoot $@ 1>>$FILE_LOG
+		$@ $sCatchOutputBG
 		RET=\$?
 		$ECHO \$RET >\"$FILE_RET\"
 		exit \$RET
 	) &
 	PID=\$!
 # Do the loop
-	bar -C \"Running: $@\"
+	bar -C
 	while $PS -p \$PID >/dev/zero
 	do
-		bar \"Running: $@\"
+		bar \"${sMSG2:-${SWARM_MSG_WORD_RUNNING}: ${@}}\"
 		sleep 0.2
 	done
+	exit \$(<$FILE_RET) #\$RET
 "
 			$ECHO "$sCMD" > "$FILE_TMP"
-			touch "$FILE_RET"
-			chmod 777 "$FILE_TMP" "$FILE_RET"
+			${TOUCH:-touch} "$FILE_RET"
+			${CHMOD:-chmod} 777 "$FILE_TMP" "$FILE_RET"
+			$ECHO 1 >"$FILE_RET"
 			asRoot --skip-status -l "$FILE_LOG" -r "$FILE_RET" "bash $FILE_TMP"
 			RET=$?
-			bSkipStatus=true
 		else
 			if $useSudo
-			then	# Easy
-				$SUDO ${@} #2>>"$FILE_LOG"
-				RET=$?
-			else	# Hard
-				if [[ -n "$SU" ]]
-				then	$SU - -c "${@}"
+			then	# Found SUDO
+				if [[ -z "$FILE_OUT" ]]
+				then	LC_ALL=C $SUDO ${@} 2>>"$FILE_LOG"
 					RET=$?
-				else	status 1 "$SWARM_MSG_SU_NFOUND"
-					return $?
+				else	LC_ALL=C $SUDO ${@}  >"$FILE_OUT" 2>>"$FILE_LOG"
+					RET=$?
 				fi
+				$ECHO "$RET">"$FILE_RET"
+			elif [[ -n "$SU" ]]
+			then	# Found SU
+				if [[ -z "$FILE_OUT" ]]
+				then	LC_ALL=C $SU -c "${@}" 2>>"$FILE_LOG"
+					RET=$?
+				else	LC_ALL=C $SU -c "${@}" >"$FILE_OUT" 2>>"$FILE_LOG"
+					RET=$?
+				fi
+				$ECHO "$RET">"$FILE_RET"
+			else	# Found neither SUDO nor SU
+				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: $SWARM_MSG_SU_NFOUND ($(swarm.str.bool2str -d $(<"${FILE_RET}")))"
+				status 1 "$SWARM_MSG_SU_NFOUND"
+				return $?
 			fi
 		fi
-	# Save value if requested
-		#[[ -n "$FILE_RET" ]] && $ECHO "$RET" > "$FILE_RET"
-		RET=${RET:-$(<"$FILE_RET")}
-		RET=${RET:-1}
-		#cat $FILE_RET
+	# Get value if requested
+		RET=$(<"$FILE_RET")
 	# Show and exit with RET code
 		if ${bShowStatus}
-		then	# Show either of these
-			if [[ -n "$sMSG2" ]]
-			then	status -c $RET "$sMSG2"
+		then	# Show either of these, has to be different because of additional field
+			if [[ -n "$sMSG3" ]]
+			then	status -c $RET "$sMSG3"
 			else	status -c $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
 			fi
+			$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: EXIT with ${RET:-$(<"${FILE_RET}")} ($(swarm.str.bool2str -d $(<"${FILE_RET}")))"
 		fi
+		return ${RET:-1}
 	}

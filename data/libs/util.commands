@@ -983,26 +983,55 @@
 	# Returns with 1 if command has failed
 		# Check wether we shall and/or can use sudo - or not
 		if [[ -z "$useSudo" ]]
-		then	[[ -n "$SUDO" ]] && \
+		then	# Prefer sudo for lazy endusers and better logging for admins
+			[[ -n "$SUDO" ]] && \
 				useSudo=${useSudo:-true} || \
 				useSudo=${useSudo:-false}
 			# Save for later
 			cfg.set -v "$SWARM_USER_CONF" "useSudo" "$useSudo"
 		fi
-	# Variables
-		local RETFILE RET
+	# Variables / Defaults
+		local FILE_TMP=$(swarm.str.genfilename "$SWARM_TMP_DIR/$(swarm.code).tmp~")
+		local FILE_RET="${FILE_TMP/tmp~/ret}"
+		local FILE_LOG="$SWARM_LOG"
 		local RET=1
+		local sMSG1=""	# Pre - Run
+		local sMSG2=""	# Post - run
+		local bBackground=false
+		local bShowStatus=true
 	# Check arguments, exit on missing
 		while :
 		do
 			case "$1" in
-			"-r")	# Wants a RETFILE
-				if [[ -n "$2" ]]
-				then	# a filename is passed, but do not overwrite existing files
-				 	RETFILE=$(swarm.str.genfilename "$2")
-					if $TOUCH "$RETFILE"
+			"-b")	bBackground=true
+				;;
+			"--skip-status")
+				bShowStatus=false
+				;;
+			"-r")	# Wants a custom FILE_RET
+				#if [[ "-" != "${2:0:1}" ]] && [[ -n "$3" ]]
+				#then	# a filename is passed, but do not overwrite existing files
+				 	FILE_RET=$(swarm.str.genfilename "$2")
+					$doLog && init.log "asRoot - Set (custom) FILE_RET=$FILE_RET"
+					if $TOUCH "$FILE_RET"
 					then	shift
-					else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $RETFILE"
+					else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_RET"
+						return 1
+					fi
+				#else	# Missing argument
+				#	swarm.show.usage "${FUNCNAME[1]}"
+				#	return 1
+				#fi
+				;;
+			"-l")	# Wants a custom FILE_LOG
+				if [[ "-" != "${2:0:1}" ]] && [[ -n "$3" ]]
+				then	# a filename is passed
+				 	FILE_LOG="$2"
+					$doLog && init.log "asRoot - Set (custom) FILE_LOG=$FILE_LOG"
+					# Verify it exists and can be written
+					if $TOUCH "$FILE_LOG"
+					then	shift
+					else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_LOG"
 						return 1
 					fi
 				else	# Missing argument
@@ -1010,32 +1039,85 @@
 					return 1
 				fi
 				;;
+			"-m1")
+				# This can be anything
+				sMSG1="$2"
+				shift
+				;;
+			"-m2")
+				# This can be anything
+				sMSG2="$2"
+				shift
+				;;
 			*)
 				break
 				;;
 			esac
 			shift
 		done
+		#$doLog && init.log "asRoot - Using files: FILE_LOG=$FILE_LOG && FILE_RET=$FILE_RET (uid=$UID) and execute: $FILE_TMP"
+		#$doLog && init.log "Filecontent: $(<$FILE_TMP)"
 	# If the arg list is empty now, we are missing arguments
 		if [[ -z "$1" ]]
 		then	swarm.show.usage "${FUNCNAME[1]}"
 			return 1
 		fi
 	# Call it properly
-		if $useSudo
-		then	# Easy
-			$SUDO "${@}"
+		[[ -n "$sMSG1" ]] && printe "$sMSG1"
+		if $bBackground
+		then
+			local sCMD="#!/usr/bin/env bash
+# Load SWARM environment
+	SWARMDIR=$SWARM_DIR_ROOT
+	source \$SWARMDIR/runtime
+# Prepare command
+	(
+		init.log \"RET=$FILE_RET (\$FILE_RET) LOG=$FILE_LOG (\$FILE_LOG) \"
+		asRoot $@ 1>>$FILE_LOG
+		RET=\$?
+		$ECHO \$RET >\"$FILE_RET\"
+		exit \$RET
+	) &
+	PID=\$!
+# Do the loop
+	bar -C \"Running: $@\"
+	while $PS -p \$PID >/dev/zero
+	do
+		bar \"Running: $@\"
+		sleep 0.2
+	done
+"
+			$ECHO "$sCMD" > "$FILE_TMP"
+			touch "$FILE_RET"
+			chmod 777 "$FILE_TMP" "$FILE_RET"
+			asRoot --skip-status -l "$FILE_LOG" -r "$FILE_RET" "bash $FILE_TMP"
 			RET=$?
-		else	# Hard
-			if [[ -n "$SU" ]]
-			then	$SU -c "${@}"
+			bSkipStatus=true
+		else
+			if $useSudo
+			then	# Easy
+				$SUDO ${@} #2>>"$FILE_LOG"
 				RET=$?
-			else	status 1 "$SWARM_MSG_SU_NFOUND"
-				return $?
+			else	# Hard
+				if [[ -n "$SU" ]]
+				then	$SU - -c "${@}"
+					RET=$?
+				else	status 1 "$SWARM_MSG_SU_NFOUND"
+					return $?
+				fi
 			fi
 		fi
 	# Save value if requested
-		[[ -n "$RETFILE" ]] && $ECHO "$RET" > "$RETFILE"
+		#[[ -n "$FILE_RET" ]] && $ECHO "$RET" > "$FILE_RET"
+		RET=${RET:-$(<"$FILE_RET")}
+		RET=${RET:-1}
+		#cat $FILE_RET
 	# Show and exit with RET code
-		status $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
+		if ${bShowStatus}
+		then	# Show either of these
+			if [[ -n "$sMSG2" ]]
+			then	status -c $RET "$sMSG2"
+			else	status -c $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
+			fi
+		fi
 	}

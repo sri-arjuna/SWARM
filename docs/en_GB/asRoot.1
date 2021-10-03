@@ -14,11 +14,27 @@ The Enduser can use 'useSudo=\fBtrue\fP|\fBfalse\fP' in \fI$SWARM_USER_DIR_CONF/
 .PP
 .SH OPTIONS
 .TP
+\fB-l\fP 	\fILOGFILE\fP
+Saves the errors and other messages to this file.
+.RE
+		This is only required if you want a specific file/name to be used - SWARM handles this on its own.
+.TP
 \fB-r\fP 	\fIFILE_RETURN_VALUE\fP
 Saves the return value of passed COMMAND in \fIFILE_RETURN_VALUE\fP.
+.RE
+		This is used internaly to report back the exit status of the passed command.
+.RE
+		This is only required if you want a specific file/name to be used - SWARM handles this on its own.
 .TP
-\fB-m\fP 	MSG
+\fB-m1\fP 	MSG
 Prints "MSG" before asking for a password (su/sudo)
+.TP
+\fB-m2\fP 	MSG
+Prints "MSG" while the command is (instead of the word) running.
+.TP
+\fB-m3\fP 	MSG
+Prints "MSG" as status message when exiting.
+
 
 .SH ENVIRONMENT
 .TP

@@ -14,7 +14,7 @@ Checklist upon adding new functions:
 
 Todo - PRE-release
 ------------------
-*
+* Fix status -C for swarm.util.rm
 
 
 1.0 Blockers

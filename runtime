@@ -253,11 +253,9 @@
 		source "$thisCFG"
 		$PRINTF "."
 	done
-
 #
 # SWARM Environment checks
 #
-
 	for this_lib in "${SWARM_DIR_LIBS}"/*
 	do
 		# Skip if core.env
@@ -558,6 +556,20 @@
 					printe "$ls_entry:" "$(${ECHO:-echo} $($ls_entry))"
 				done
 				[[ -n "$2" ]] || (title "$SWARM_MSG_WORD_INFORMATION"; status $RET_INFO "$SWARM_MSG_SYSINFO_INFO" ; status $RET_INFO "${SWARM_MSG_WORD_OPTIONS}: box, hw, net, os" )
+				;;
+			clear)
+				list=($($LS $SWARM_TMP_DIR))
+				count=${#list[@]}
+				count=$(( count - 1 ))
+				c=0
+				for item in ${list[*]}
+				do
+					bar -C -c $c -m $count "[$c/$count] $SWARM_MSG_WORD_REMOVE: ${item/$SWARM_TMP_DIR}"
+					((c++))
+					$RM "$SWARM_TMP_DIR/$item"
+					sleep 0.001
+				done
+				status -c $? "All done"
 				;;
 			esac
 		fi

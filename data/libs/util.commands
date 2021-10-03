@@ -63,7 +63,7 @@
 		local bClear=false	# Do not print \n but return to first (left) field
 		local bPipe=false	# Go for pipe?
 		local sPipeOpts=""	# Pass pipe options
-		# Get args
+	# Get args
 		while :
 		do
 			case "$1" in
@@ -88,7 +88,6 @@
 			esac
 			shift
 		done
-		#header "Remaining:: ${@}"
 	# Get arg number if not forced yet
 		#[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
 		[[ "normal" == "$MODE" ]] && MODE=${#@}
@@ -96,24 +95,20 @@
 		if $bPipe
 		then	# To pipe, call itself without the pipe arg
 			case "$MODE" in
-			"2")
-				# Read pipe, expect 2 lines
+			"2")	# Read pipe, expect 2 lines
 				while $READ -r LEFT
 				do
 					$READ -r RIGHT
-					L=$LEFT
 					printe "$LEFT" "$RIGHT"
 				done
 				;;
-			"1")
-				# Read pipe, expect 1 lines
+			"1")	# Read pipe, expect 1 lines
 				while $READ -r LEFT
 				do
 					printe "$LEFT"
 				done
 				;;
-			*)
-				# Read pipe, expect 3 lines (default)
+			*)	# Read pipe, expect 3 lines (default)
 				while $READ -r LEFT
 				do
 					$READ -r CENTER; $READ -r RIGHT

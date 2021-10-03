@@ -41,7 +41,7 @@
 	# This prints a single centered string on a line
 	# It has blue borders and fills the inner line with white (Default-{front,back})
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		if [[ "--" == "$1" ]]
 		then
 			while $READ -r line;do
@@ -54,36 +54,56 @@
 			$PRINTF "$posEND\n"
 		fi
 	}
-	printe() { # [-|--] STR1 STR2 STR3
+	printe() { # [-c] [-N] [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, it requires 3 strings to use the center
 	# For piping, it expects 3 lines, each representing 1 variable
-		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
-		#set -x
-		local MODE="none"
+		# Define local vars
+		local MODE="normal"	# Equals no STR / emptyline = dynamic
+		local bNewline=true	# Print \n, only used to
+		local bClear=false	# Do not print \n but return to first (left) field
+		local bPipe=false	# Go for pipe?
+		local sPipeOpts=""	# Pass pipe options
 		# Get args
-		case "$1" in
-		"-1"|"-2")	MODE="${1/-}"
-				shift
+		while :
+		do
+			case "$1" in
+			"-c")
+				bClear=true
+				sPipeOpts+=" $1"
 				;;
-		*)		MODE="normal"
+			"-N")
+				bNewline=false
+				sPipeOpts+=" $1"
 				;;
-		esac
-		# Get arg number if not forced yet
-		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
-		# Get pipe?
-		case "$1" in
-		"--"|"-")
+			"-1"|"-2"|"-3")
+				MODE="${1/-}"
+				sPipeOpts+=" $1"
+				;;
+			"-"|"--")
+				bPipe=true
+				;;
+			*)
+				break
+				;;
+			esac
 			shift
+		done
+		#header "Remaining:: ${@}"
+	# Get arg number if not forced yet
+		#[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
+		[[ "normal" == "$MODE" ]] && MODE=${#@}
+	# Pipe if applicable
+		if $bPipe
+		then	# To pipe, call itself without the pipe arg
 			case "$MODE" in
 			"2")
 				# Read pipe, expect 2 lines
 				while $READ -r LEFT
 				do
 					$READ -r RIGHT
-					printe "$LEFT" "" "$RIGHT"
+					L=$LEFT
+					printe "$LEFT" "$RIGHT"
 				done
-				return 0
 				;;
 			"1")
 				# Read pipe, expect 1 lines
@@ -91,7 +111,6 @@
 				do
 					printe "$LEFT"
 				done
-				return 0
 				;;
 			*)
 				# Read pipe, expect 3 lines (default)
@@ -100,12 +119,13 @@
 					$READ -r CENTER; $READ -r RIGHT
 					printe "$LEFT" "$CENTER" "$RIGHT"
 				done
-				return 0
 				;;
 			esac
-			;;
-		esac
-		#set +x
+			return 0
+		fi
+	#
+	# Do the output
+	#
 		case "$MODE" in
 			"0")
 				swarm.print.border -e
@@ -124,7 +144,7 @@
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		$PRINTF "$posEND"
+		$bNewline || $PRINTF "$posEND\n"
 	}
 	printl() { # [-|--] STR1 STR2 STR3
 	# Simply prints the strings as passed, stays on the same line

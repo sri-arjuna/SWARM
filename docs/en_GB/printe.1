@@ -5,7 +5,7 @@
 printe - Display up to three strings per line, ending with a NL
 
 .SH SYNOPSYS
-printe [-|--] [-1 -2] [str1 [str2 [str3]]]
+printe [-c] [-N] [-1|-2|-3] [-|--] [str1 [str2 [str3]]]
 
 .SH DESCRIPTION
 This is the function that should be used the most to display any data to endusers. By default it accepts up to 3 strings per output line, this can be changed via options. To use the center, you must provide 3 strings.
@@ -18,22 +18,24 @@ This is the function that should be used the most to display any data to enduser
 
 .SH OPTIONS
 .TP
---			Recieve strings from pipe
+-c			Clears the line before printing
+.TP
+-N			No Newline at the end of line
 .TP
 -1			Force left aligned text only
 .TP
 -2			Force left & right aligned text only
 .TP
--n			Prints a tailing newline character.
-.TP
 --left		Default behaviour if only STRING1 (left) is pased.
-		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+		This will make the cursor stay on line (\fB-N\fP).
 .TP
 --center  	Prints STRING1 (left) in the center of the line.
-		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+		This will make the cursor stay on line (\fB-N\fP).
 .TP
 --right		Prints STRING1 (left) on the right side.
-		This will make the cursor stay on line, unless you pass \fB-n\fP as well.
+		This will make the cursor stay on line (\fB-N\fP).
+.TP
+-|--			Recieve strings from pipe
 
 .SH EXAMPLE
 .P
@@ -45,10 +47,11 @@ printe "left side" "in the center" "on the right side"
 .P
 printe --center "center string"
 .RE
-printe -n --right "right string"
+printe -c --right "right string"
 .P
 grep PATTERN FILE | printe -2 --
-
+.P
+sudo fdisk /dev/sda -l | printe -1 --
 
 
 .SH SEE ALSO

@@ -530,13 +530,18 @@
 			theme)
 				swarm.clear
 				if [[ -n "$2" ]]
-				then	swarm.update.theme "$2"
-					cfg.set -v "$SWARMRC" "SWARM_THEME" "$2"
-					exit 0
+				then	if swarm.update.theme "$2"
+					then	cfg.set -v "$SWARMRC" "SWARM_THEME" "$2"
+						status $? "$SWARM_MSG_INIT_THEME ($2)"
+						init.log "$SWARM_MSG_INIT_THEME ($2)"
+					fi
 				else	newtheme=$(pick -m $(swarm.list.theme))
-					swarm.update.theme "$newtheme"
-					cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
-					exit 0
+					if swarm.update.theme "$newtheme"
+					then	cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
+						status $? "$SWARM_MSG_INIT_THEME ($newtheme)"
+						init.log "$SWARM_MSG_INIT_THEME ($newtheme)"
+					fi
+					exit $?
 				fi
 				;;
 			sysinfo)

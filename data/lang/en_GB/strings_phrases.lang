@@ -20,3 +20,4 @@
 	SWARM_MSG_PHRASE_TERMINAL="This is a terminal (TTY #${XDG_VTNR}) session."
 	SWARM_MSG_PHRASE_TW_STRING="Please use the functions 'printe' or 'typewriter' to display strings."
 	SWARM_MSG_PHRASE_TW_FILE="If you want to print a file, please use printfile with the -t option."
+	SWARM_MSG_PHRASE_ERROR_LOADING="There was an error loading a file."

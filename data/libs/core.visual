@@ -18,13 +18,11 @@
 		[[ -z "$COLUMNS" ]] && export COLUMNS="$(${TPUT:-\tput} cols)"
 		# shellcheck disable=SC2155
 		[[ -z "$LINES" ]] && export LINES="$(${TPUT:-\tput} lines)"
-
-		# Set basic values
+	# Set basic values
 		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
 		BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"	# Do not export just yet
 	#	export clrFRONT="${SWARM_THEME_DATA[color-front]}"
 	#	export clrBACK="${SWARM_THEME_DATA[color-back]}"
-	#	echo "ABC ${clrFRONT}${clrBACK}--ABC---${SWARM_COLOR_RESET}"
 		export BAR="${SWARM_THEME_DATA[bar]}"
 		export BAR_HALF="${SWARM_THEME_DATA[bar-half]}"
 		export BAR_EMPTY="${SWARM_THEME_DATA[bar-empty]}"
@@ -32,32 +30,29 @@
 	#	export TITLE_RIGH="${SWARM_THEME_DATA[title-right]}"
 	#	export HEADER_LEFT="${SWARM_THEME_DATA[header-left]}"
 	#	export HEADER_RIGHT="${SWARM_THEME_DATA[header-right]}"
-		# Check if border-right was set:
+	# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
 				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
-		# Now we can export it for sure
+	# Now we can export it for sure
 		export BORDER_RIGHT
-		# Get some numbers
+	# Get some numbers
 		export lenLeft="${#BORDER_LEFT}"
 		export lenRight="${#BORDER_RIGHT}"
 	#	export lenClrFont=${#clrFRONT}
 	#	export lenClrBack=${#clrBACK}
 		export identRight=$(( lenRight + ${#clrCL}  ))
 		#export identRight=$(( lenRight + 4 ))
-
-		# Pre-Calculate positions
+	# Pre-Calculate positions
 		export numHALF=$(( COLUMNS / 2 ))
 		export numEND=$(( numHALF * 2 ))
 		export posEND="\33[${numEND}G"
 		# swarm.print.border still needs extra handling for posLEFT
 		export posLEFT="\33[$(( lenLeft + 2 ))G"
-
-		# Set colors
+	# Set colors
 		[[ none == "${SWARM_THEME_DATA[color-front]}" ]] || c_front=$(swarm.color.fg "${SWARM_THEME_DATA[color-front]}")
 		[[ none == "${SWARM_THEME_DATA[color-back]}" ]] || c_back=$(swarm.color.bg "${SWARM_THEME_DATA[color-back]}")
 		export c_front c_back
-
-		# If user wants extended logs, he shall have it
+	# If user wants extended logs, he shall have it
 		! ${isRO:-false} && ${doLogExt:-false} && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
 	}
 	#export -f swarm.update.geometry
@@ -77,10 +72,12 @@
 		# Lets start fresh
 		declare -Ag SWARM_THEME_DATA
 		local ret=false
+		local found_full=""
+		local this_theme=""
 		# shellcheck disable=SC2015
 		${isRoot:-false} && \
-			local this_theme="${1:-default-red}" || \
-			local this_theme="${1:-default-blue}"
+			this_theme="${1:-default-red}" || \
+			this_theme="${1:-default}"
 		# Always use the user themes first
 		# in case someone wants to pseudo-overwrite the default themes
 		for there in "$SWARM_USER_DIR_BASE/themes" "$SWARM_DIR_THEMES"
@@ -89,42 +86,45 @@
 			if [[ -d "$there" ]]
 			then	if [[ -f "$there/$this_theme" ]]
 				then	# shellcheck disable=SC1090
-					source "$there/$this_theme" || init.log "$there/$this_theme : $SWARM_MSG_PHRASE_FILENOTFOUND"
-					ret=$?
+					if source "$there/$this_theme"
+					then	ret=$?
+						found_full="$there/$this_theme"
+						swarm.update.geometry
+						break	# No need to parse more
+					else 	init.log "$there/$this_theme : $SWARM_MSG_PHRASE_ERROR_LOADING"
+					fi
 				fi
 			fi
 		done
 
-		# Check if something went wrong
+		# Check if the theme was found
 		if [[ $ret != 0 ]]
 		then	# The theme could not be Found
 			# Lets fallback to default
 			# shellcheck disable=SC1090
 			${isRoot:-false} && \
-				local this_theme="default-red" || \
-				local this_theme="default-blue"
+				this_theme="default-red" || \
+				this_theme="default"
 			source "$SWARM_DIR_THEMES/$this_theme"
-			status $? "$SWARM_MSG_INIT_THEME"
-			init.log.msg "$SWARM_MSG_INIT_THEME : $1 / $this_theme"
+			swarm.update.geometry
+			status 1 "${SWARM_MSG_INIT_THEME_FAIL} ($1)"
+			ret=1
 		fi
 		# Export the values now
 		export SWARM_THEME_DATA
 		# Now, return
-		return $ret
+		return ${ret/false/1}
 	}
-	#shellcheck disable=SC2120
 	swarm.list.theme() {
 	# Lists all themes available
 	# Includes SWARM_USER_DIR_BASE/themes and SWARM_DIR_THEMES alike
-		# shellcheck disable=SC2128
-		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local d f
 		for d in "$SWARM_USER_DIR_BASE/themes/" "$SWARM_DIR_THEMES/"
 		do
 			# Check if path exists and handle each file for its own
 			if [[ -d "$d" ]]
 			then	# It exists, lets parse it
-				for f in "$d"/* #$($LS "$d")
+				for f in "$d"/*
 				do
 					# Output only if it really is a file
 					[[ -f "$f" ]] && $PRINTF '%s\n' "${f##*/}"
@@ -135,12 +135,9 @@
 			fi
 		done
 	}
-	#shellcheck disable=SC2120
 	swarm.init.theme () { #
 	# Initiate the theme for the first time
 	# This is only a wrapper for the initial loading.
-		# shellcheck disable=SC2128
-		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.update.theme "${SWARM_THEME:-default-red}"
 	}
 #

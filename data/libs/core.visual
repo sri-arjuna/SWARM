@@ -256,7 +256,7 @@
 			fi
 			if [[ none == "${SWARM_THEME_DATA[color-front]}" ]] || [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
 			then 	filler_num=$(( numEND - $(( ${#this_left} * 2 )) ))
-			else	filler_num=$(( numEND - $(( ${#this_left} * 2 )) + 2 ))
+			else	filler_num=$(( numEND - $(( ${#this_left} * 2 )) + 1 ))
 			fi
 			;;
 		t)	MODE="title"
@@ -268,7 +268,7 @@
 			fi
 			if [[ none == "${SWARM_THEME_DATA[color-front]}" ]] || [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
 			then 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 ))   ))
-			else 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 )) + 2 ))
+			else 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 )) + 1 ))
 			fi
 			;;
 		c)	$PRINTF "\e[2K"	;;
@@ -292,6 +292,7 @@
 			pos_cor_num=0
 			;;
 		"title")
+			#filler_num=$(( filler_num - 1))
 			filler_str=$($PRINTF "%*s" ${filler_num}|$SED s," ","$this_filler",g)
 			# shellcheck disable=SC2154
 			PRINT_LEFT_IN="${c_invert}$filler_str" #$c_reset"
@@ -310,7 +311,7 @@
 		else 	local posLEFT="\33[$(( ${#this_left} - 2 ))G"
 		fi
 		if [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
-		then	#pos_cor_num=$(( pos_cor_num - 1))
+		then	PRINT_RIGHT_OUT="" #pos_cor_num=$(( pos_cor_num - 1))
 			local posRIGHT=""
 		else	local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num ))G"
 		fi

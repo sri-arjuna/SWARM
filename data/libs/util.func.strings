@@ -210,7 +210,6 @@ swarm.str.dirsize() { # [ -k -m ] DIR
 swarm.str.bool2str() { # [options] $?
 # Returns a string from a BOOL input
 #
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 	#
 	# Defaults
 	#
@@ -218,7 +217,6 @@ swarm.str.bool2str() { # [options] $?
 		local CAPS #=false
 		local mode #="yes"
 		local out=""
-		#echo " ---------- $@ ----------- "
 	#
 	# Catching Arguments
 	#
@@ -227,26 +225,20 @@ swarm.str.bool2str() { # [options] $?
 		while : #getopts "cCdoty" opt
 		do
 		 	case "${1}" in
-			"-c")	caps=true
-					shift	;;
-			"-C")	CAPS=true
-					shift	;;
-			"-d")	mode="done"
-					shift	;;
-			"-t")	mode="true"
-					shift	;;
-			"-y")	mode="yes"
-					shift	;;
-			"-o")	mode="on"
-					shift	;;
-			*)	break	;;
-		#	*)	echo opt $opt ; exit 99	;;
+			"-c")	caps=true	;;
+			"-C")	CAPS=true	;;
+			"-d")	mode="done"	;;
+			"-o")	mode="on"	;;
+			"-s")	mode="success"	;;
+			"-t")	mode="true"	;;
+			"-y")	mode="yes"	;;
+			*)	break		;;
 			esac
+			shift
 		done
 		shift $((OPTIND - 1))
 	#
-	# Display & Action
-	# This also handles translations
+	# Assign the proper strings
 	#
 		case "${mode}" in
 		"done")	case "$1" in
@@ -264,14 +256,21 @@ swarm.str.bool2str() { # [options] $?
 			1)	out="$SWARM_MSG_WORD_OFF"	;;
 			esac
 			;;
+		"success")
+			case "$1" in
+			0)	out="$SWARM_MSG_WORD_SUCCESS"	;;
+			1)	out="$SWARM_MSG_WORD_FAILURE"	;;
+			esac
+			;;
 		"yes"|*)	case "$1" in
 			0)	out="$SWARM_MSG_WORD_YES"	;;
 			1)	out="$SWARM_MSG_WORD_NO"	;;
 			esac
 			;;
 		esac
-
-		# Show the output
+	#
+	# Show the output
+	#
 		if ${CAPS:-false}
 		then	$PRINTF "${out^^}"
 		elif ${caps:-false}

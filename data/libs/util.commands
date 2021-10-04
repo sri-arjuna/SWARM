@@ -1129,7 +1129,7 @@
 			then	status -c $RET "$sMSG3"
 			else	status -c $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
 			fi
-			$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: EXIT with ${RET:-$(<"${FILE_RET}")} ($(swarm.str.bool2str -d $(<"${FILE_RET}")))"
+			$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: EXIT with ${RET:-$(<"${FILE_RET}")} ($(swarm.str.bool2str -s $(<"${FILE_RET}")))"
 		fi
 		return ${RET:-1}
 	}

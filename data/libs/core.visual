@@ -22,8 +22,9 @@
 		# Set basic values
 		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
 		BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"	# Do not export just yet
-		export clrFRONT="${SWARM_THEME_DATA[color-front]}"
-		export clrBACK="${SWARM_THEME_DATA[color-back]}"
+	#	export clrFRONT="${SWARM_THEME_DATA[color-front]}"
+	#	export clrBACK="${SWARM_THEME_DATA[color-back]}"
+	#	echo "ABC ${clrFRONT}${clrBACK}--ABC---${SWARM_COLOR_RESET}"
 		export BAR="${SWARM_THEME_DATA[bar]}"
 		export BAR_HALF="${SWARM_THEME_DATA[bar-half]}"
 		export BAR_EMPTY="${SWARM_THEME_DATA[bar-empty]}"
@@ -39,8 +40,8 @@
 		# Get some numbers
 		export lenLeft="${#BORDER_LEFT}"
 		export lenRight="${#BORDER_RIGHT}"
-		export lenClrFont=${#clrFRONT}
-		export lenClrBack=${#clrBACK}
+	#	export lenClrFont=${#clrFRONT}
+	#	export lenClrBack=${#clrBACK}
 		export identRight=$(( lenRight + ${#clrCL}  ))
 		#export identRight=$(( lenRight + 4 ))
 
@@ -52,8 +53,8 @@
 		export posLEFT="\33[$(( lenLeft + 2 ))G"
 
 		# Set colors
-		c_front=$(swarm.color.fg "${SWARM_THEME_DATA[color-front]}")
-		c_back=$(swarm.color.bg "${SWARM_THEME_DATA[color-back]}")
+		[[ none == "${SWARM_THEME_DATA[color-front]}" ]] || c_front=$(swarm.color.fg "${SWARM_THEME_DATA[color-front]}")
+		[[ none == "${SWARM_THEME_DATA[color-back]}" ]] || c_back=$(swarm.color.bg "${SWARM_THEME_DATA[color-back]}")
 		export c_front c_back
 
 		# If user wants extended logs, he shall have it
@@ -67,7 +68,7 @@
 	# This loads the provided THEME_NAME
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# This an assigned array containg the theme related data
 		# Lets make sure each theme gets loaded into clear memory
 		unset SWARM_THEME_DATA[@]	# Use terminal / console / vtr default settings as base
@@ -116,7 +117,7 @@
 	# Lists all themes available
 	# Includes SWARM_USER_DIR_BASE/themes and SWARM_DIR_THEMES alike
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local d f
 		for d in "$SWARM_USER_DIR_BASE/themes/" "$SWARM_DIR_THEMES/"
 		do
@@ -139,7 +140,7 @@
 	# Initiate the theme for the first time
 	# This is only a wrapper for the initial loading.
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.update.theme "${SWARM_THEME:-default-red}"
 	}
 #
@@ -155,7 +156,7 @@
 	# Simply lists the color names that can be used in SWARM
 	# Reads from the colors.conf file of SWARM if the variables are not found in memory.
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2154
 		if [[ -z "$cb_black" ]]
 		then	# The variables are empty
@@ -182,7 +183,7 @@
 	# Returns the color code of provided COLORNAME
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local str=cb_${1:-blue}
 		eval "$PRINTF" \$"${str}"
 	}
@@ -190,7 +191,7 @@
 	# Returns the color code of provided COLORNAME
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local str=cf_${1:-white}
 		eval "$PRINTF" \$"${str}"
 	}
@@ -198,7 +199,7 @@
 	# Returns the positioncode for passed NUM location
 	# Returns number 0 if no argument is passed
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\33[${1:-0}G"
 	}
@@ -206,7 +207,7 @@
 	# Returns STR with wrapped code for BOLD
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[1m${@}\033[0m"
 	}
@@ -214,7 +215,7 @@
 	# Returns STR with wrapped code to blink
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[5m${@}\033[0m"
 	}
@@ -222,7 +223,7 @@
 	# Returns STR with wrapped code for STROKE
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[9m${@}\033[0m"
 	}
@@ -230,7 +231,7 @@
 	# Returns STR with wrapped code for UNDERLINE
 	#
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# shellcheck disable=SC2145
 		$PRINTF "\033[4m${@}\033[0m"
 	}
@@ -245,6 +246,9 @@
 		local this_left="$BORDER_LEFT"
 		local this_right="$BORDER_RIGHT"
 		local this_filler=" "
+		local filler_num=""
+		local filler_str=""
+
 		case "${1/-}" in
 		h)	MODE="header"
 			if [[ -n "${SWARM_THEME_DATA[header-left]}" ]]
@@ -253,6 +257,10 @@
 				this_right="${SWARM_THEME_DATA[header-right]}"
 				[[ -n "${SWARM_THEME_DATA[filler]}" ]] && this_filler="${SWARM_THEME_DATA[filler]}"
 			fi
+			if [[ none == "${SWARM_THEME_DATA[color-front]}" ]] || [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
+			then 	filler_num=$(( numEND - $(( ${#this_left} * 2 )) ))
+			else	filler_num=$(( numEND - $(( ${#this_left} * 2 )) + 2 ))
+			fi
 			;;
 		t)	MODE="title"
 			if [[ -n "${SWARM_THEME_DATA[title-left]}" ]]
@@ -260,6 +268,10 @@
 				this_left="${SWARM_THEME_DATA[title-left]}"
 				this_right="${SWARM_THEME_DATA[title-right]}"
 				[[ -n "${SWARM_THEME_DATA[filler]}" ]] && this_filler="${SWARM_THEME_DATA[filler]}"
+			fi
+			if [[ none == "${SWARM_THEME_DATA[color-front]}" ]] || [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
+			then 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 ))   ))
+			else 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 )) + 2 ))
 			fi
 			;;
 		c)	$PRINTF "\e[2K"	;;
@@ -276,19 +288,13 @@
 			pos_cor_num=0
 			;;
 		"header")
-			local filler_num=""
-			filler_num=$(( numEND - $(( ${#this_left} * 2 )) + 2 ))
-			local filler_str=""
 			filler_str=$($PRINTF "%*s" ${filler_num}|$SED s," ","$this_filler",g)
-			PRINT_LEFT_IN="$filler_str" #$c_reset"
+			PRINT_LEFT_IN="$filler_str"
 			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
-			PRINT_RIGHT_IN="" #${c_front}${c_back}"
+			PRINT_RIGHT_IN=""
 			pos_cor_num=0
 			;;
 		"title")
-			local filler_num=""
-			filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 )) + 2 ))
-			local filler_str=""
 			filler_str=$($PRINTF "%*s" ${filler_num}|$SED s," ","$this_filler",g)
 			# shellcheck disable=SC2154
 			PRINT_LEFT_IN="${c_invert}$filler_str" #$c_reset"
@@ -298,10 +304,19 @@
 			;;
 		*)	pos_cor_num=0 ;;
 		esac
+	# Special if no colors
 	# Get some numbers
 		local identRight=$(( lenRight + ${#clrCL}  ))
-		local posLEFT="\33[$(( ${#this_left} - 2 ))G"
-		local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num ))G"
+		if [[ none == "${SWARM_THEME_DATA[color-front]}" ]]
+		then 	PRINT_LEFT_OUT="" #pos_cor_num=$(( pos_cor_num - 1))
+			local posLEFT=""
+		else 	local posLEFT="\33[$(( ${#this_left} - 2 ))G"
+		fi
+		if [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
+		then	#pos_cor_num=$(( pos_cor_num - 1))
+			local posRIGHT=""
+		else	local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num ))G"
+		fi
 	# Well, left aligned it works. isnt too hard
 		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${this_left}${PRINT_LEFT_IN}" >&2
 	# The right side is much more challenging
@@ -500,7 +515,7 @@
 	# Returns the string to be printed according to ERRNUM
 	# This already takes care of terminal only or GUI visuals
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Colors
 		#

@@ -15,7 +15,7 @@
 #	.usb
 #		.devices
 #		.names
-#	.cpu		(Nam
+#	.cpu
 #		.core
 #		.threads
 #		.hz
@@ -48,48 +48,82 @@ swarm.sysinfo.box.cpu() { #
 swarm.sysinfo.box.cpu.sockets() {
 # Prints the amount of cpu sockets on the platine
 #
-	LC_ALL=C lscpu | $AWK -F ":" '/^Socket/ {print $2}'
+	if ! LC_ALL=C lscpu | $AWK -F ":" '/^Socket/ {print $2}'
+	then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
+	fi
 }
 swarm.sysinfo.box.cpu.cores() {
 # Prints the amount of cores per cpu
 #
-	LC_ALL=C lscpu | $AWK -F ":" '/^Core/ {print $2}'
+	if ! LC_ALL=C lscpu | $AWK -F ":" '/^Core/ {print $2}'
+	then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
+	fi
 }
 swarm.sysinfo.box.cpu.threads() {
 # Prints the amount of threads per core
 #
-	LC_ALL=C lscpu | $AWK -F ":" '/^Thread/ {print $2}'
+	if ! LC_ALL=C lscpu | $AWK -F ":" '/^Thread/ {print $2}'
+	then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
+	fi
+}
+swarm.sysinfo.box.cpu.threads.total() { #
+#
+#
+	$PRINTF '%s\n' $(( $(swarm.sysinfo.box.cpu.threads) * $(swarm.sysinfo.box.cpu.cores)  ))
 }
 swarm.sysinfo.box.cpu.mhz() {
 # Prints either the 'fix' mhz
 # or the range of valid values.
-	LC_ALL=C lscpu | $AWK -F ":" '/[Mm][hH]z/ {print $1" "$2}' | $SED s,"CPU ","",g
+	if ! LC_ALL=C lscpu | $AWK -F ":" '/[Mm][hH]z/ {print $1" "$2}' | $SED s,"CPU ","",g
+	then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
+	fi
 }
 swarm.sysinfo.box.cpu.vendor() {
 # Prints either the 'fix' mhz
 # or the range of valid values.
-	LC_ALL=C lscpu | $AWK -F ":" '/^Vendor/ {print $2}'
+	if ! LC_ALL=C lscpu | $AWK -F ":" '/^Vendor/ {print $2}'
+	then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
+	fi
 }
 swarm.sysinfo.box.cpu.mips() { #
 #
 #
-	LC_ALL=C lscpu | $AWK -F ":" '/^BogoMIPS/ {print $2}'
+	if ! LC_ALL=C lscpu | $AWK -F ":" '/^BogoMIPS/ {print $2}'
+	then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
+	fi
 }
 _swarm.sysinfo.list_input() {
+# Internal function to parse bus for input devices
 #
+	$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g
+}
+swarm.sysinfo.box.webcam() {
+# Usualy on USB
 #
-	$AWK -F '="' '/Name/ {print $2}' "/proc/bus/input/devices" | $SED s,'"','',g # | \
-	return
+	if ! lsusb 2>/dev/zero | while read _ _ _ _ _ _ Name;do echo $Name;done | $AWK '/cam/ {print}'
+	then
+		$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} usbutils"
+	fi
 }
 swarm.sysinfo.box.keyboard() {
 # Prints connected keyboards
 # 1 per line
-	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e key -e touchpad | uniq
+	if ! lsusb 2>/dev/zero | while read _ _ _ _ _ _ Name;do echo $Name;done | $AWK '/[kK]eyb/ {print}'
+	then
+		if ! LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e key -e touchpad | uniq
+		then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} usbutils"
+		fi
+	fi
 }
 swarm.sysinfo.box.mouse() {
 # Prints connected mice
 # 1 per line
-	LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mouse -e track | uniq | $SED s,"Dell Dell","Dell",
+	if ! lsusb 2>/dev/zero | while read _ _ _ _ _ _ Name;do echo $Name;done | $AWK '/[mM][oi][cs]e/ {print}'
+	then
+		if ! LC_ALL=C _swarm.sysinfo.list_input | $GREP -i -e mouse -e track -e mice | uniq | $SED s,"Dell Dell","Dell",
+		then 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} usbutils"
+		fi
+	fi
 }
 swarm.sysinfo.hw.video() {
 # Prints connected video
@@ -102,8 +136,8 @@ swarm.sysinfo.hw.video.drivers() { #
 	{
 		# TODO use dynamic FD to lesser hw usage
 		$AWK  '/i[89]/ {print $18}' /proc/bus/pci/devices
-		$AWK  '/nouv/ {print $18}' /proc/bus/pci/devices
-		$AWK  '/radeon/ {print $18}' /proc/bus/pci/devices
+		$AWK  '/[Nn]ouv/ {print $18}' /proc/bus/pci/devices
+		$AWK  '/[Rr]adeon/ {print $18}' /proc/bus/pci/devices
 		# These 2 below are just blind shots
 		$AWK  '/[nN][vV][iI][dD][iI][aA]/ {print $18}' /proc/bus/pci/devices
 		$AWK  '/[aA][tT][iI]/ {print $18}' /proc/bus/pci/devices
@@ -177,8 +211,11 @@ swarm.sysinfo.hw.screen.res() {
 swarm.sysinfo.net() {
 # Prints the name of the active internet device
 # 1 per line
-	swarm.util.which ip >/dev/zero || return 1
-	LC_ALL=C ip addr | $GREP -v "NO-CARRIER" | $AWK -F ":" '/BROADCAST/ {print $2}'
+	if swarm.util.which ip >/dev/zero
+	then	LC_ALL=C ip addr | $GREP -v "NO-CARRIER" | $AWK -F ":" '/BROADCAST/ {print $2}'
+	else
+		$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} iproute2"
+	fi
 }
 swarm.sysinfo.net.wifi() {
 # Returns true and the name of the wifi if available
@@ -188,38 +225,47 @@ swarm.sysinfo.net.wifi() {
 swarm.sysinfo.net.wifi.driver() {
 # Returns the driver for wireless
 #
-	LC_ALL=C lspci|$AWK -F: '/Wireless/ {print $3}'
+	if ! LC_ALL=C lspci|$AWK -F: '/Wireless/ {print $3}'
+	then
+		$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} pciutils"
+	fi
 }
 swarm.sysinfo.net.list() {
 # Prints available network device names
 #
-	$LS -1 /sys/class/net
-	#swarm.util.which ip >/dev/zero || return 1
-	#LC_ALL=C ip addr | $AWK -F ":" '/^[1-9]/ {print $2}'
+
+	if swarm.util.which ip >/dev/zero # || return 1
+	then 	LC_ALL=C ip addr | $AWK -F ":" '/^[1-9]/ {print $2}'
+	else	$LS -1 /sys/class/net || $PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} iproute2"
+	fi
 }
 swarm.sysinfo.net.ip4() {
 # Prints the IPv4 adress
 #
-	swarm.util.which ip >/dev/zero || return 1
-	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet6" | $AWK '{print $2}'
+	if swarm.util.which ip >/dev/zero #|| return 1
+	then	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet6" | $AWK '{print $2}'
+	else 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} iproute2"
+	fi
 }
 swarm.sysinfo.net.gateway() {
 # Prints the IPv4 gateway
 #
-	swarm.util.which ip >/dev/zero || return 1
-	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet6" | $AWK '{print $4}'
+	if swarm.util.which ip >/dev/zero #|| return 1
+	then	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet6" | $AWK '{print $4}'
+	else 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} iproute2"
+	fi
 }
 swarm.sysinfo.net.ip6() {
 # Prints the IPv6 adress
 #
-	swarm.util.which ip >/dev/zero || return 1
-	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet " | $AWK '{print $2}'
+	if swarm.util.which ip >/dev/zero #|| return 1
+	then	LC_ALL=C ip addr | $GREP inet | $GREP  -ve 127\.0 -ve " ::" -ve "inet " | $AWK '{print $2}'
+	else 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} iproute2"
+	fi
 }
 swarm.sysinfo.net.ip_ext() { # [-v]
 # Prints the external IPv4 adress
 #
-	return
-
 	local failsafe=0 data beVerbose=false ret=1
 	[[ "$1" == "-v" ]] && { beVerbose=true ; shift ;}
 	if swarm.util.which dig &>/dev/zero
@@ -255,10 +301,13 @@ swarm.sysinfo.box.name() {
 swarm.sysinfo.box.type() {
 # Prints the wether the system is VM or physical
 #
-	vserver=$(LC_ALL=C lscpu | $GREP Hypervisor | $WC -l) || return 1
-	if [ $vserver -gt 0 ]
-	then 	$ECHO "VM"
-	else 	$ECHO "Physical"
+	if vserver=$(LC_ALL=C lscpu | $GREP Hypervisor | $WC -l) || return 1
+	then
+		if [ $vserver -gt 0 ]
+		then 	$ECHO "VM"
+		else 	$ECHO "Physical"
+		fi
+	else 	$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} util-linux"
 	fi
 }
 swarm.sysinfo.net.ssh() {
@@ -314,8 +363,10 @@ swarm.sysinfo.box.ram.free() { #
 # Prints the free ram
 #
 	local input_k size
-	input_k=$($AWK '/MemAvailable/ {print $2}' /proc/meminfo)
-	$ECHO $(( input_k * 1024 ))
+	if input_k=$($AWK '/MemAvailable/ {print $2}' /proc/meminfo)
+	then	$ECHO $(( input_k * 1024 ))
+	else 	$ECHO "$SWARM_MSG_WORD_UNKOWN"
+	fi
 }
 swarm.sysinfo.box.ram.used() { #
 # Prints how much ram is used
@@ -325,7 +376,17 @@ swarm.sysinfo.box.ram.used() { #
 swarm.sysinfo.os.user.local() { #
 # Shows local users (that have a home directory)
 #
-	$LS "$HOME/.."
+	if $isRoot
+	then	for item in $(<"$SWARM_DIR_LIST/os.dir.home.users")
+		do
+			if [[ -d "$item" ]]
+			then	$PRINTF "root "
+			 	$LS "$item"
+				return
+			fi
+		done
+	else 	$LS "$HOME/.."
+	fi
 }
 swarm.sysinfo.os.user.loged() { # [-u]
 # Shows users that are currently loged in
@@ -341,19 +402,25 @@ swarm.sysinfo.hw.audio() { #
 	#lspci | $GREP -i audio | swarm.str.split --
 	#lspci -vvv | grep -A10 -i audio | grep -i -e audio -e subs
 	#lspci -vvv | grep -A1 -i audio  | printe -1 --right -n -- ; printf "\n"
-	LC_ALL=C raw=$(lspci -vvv | $GREP -A1 -i audio | $GREP -v "\-\-" ) || { init.log.msg "$SWARM_MSG_PHRASE_FILENOTFOUND: lspci" ; return 1 ; }
-	$AWK -F: '/Audio device/ {print $3}' <<< "$raw" | uniq
-	$AWK -F: '/Subsystem/ {print $2}' <<< "$raw" | uniq
+	if LC_ALL=C raw=$(lspci -vvv | $GREP -A1 -i audio | $GREP -v "\-\-" ) #|| { init.log.msg "$SWARM_MSG_PHRASE_FILENOTFOUND: lspci" ; return 1 ; }
+	then	$AWK -F: '/Audio device/ {print $3}' <<< "$raw" | uniq
+		$AWK -F: '/Subsystem/ {print $2}' <<< "$raw" | uniq
+	else
+		$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} pciutils"
+	fi
 }
 swarm.sysinfo.hw.audio.driver() { #
 # Prints a list of know audio drivers
 #
-	$AWK '/snd/  {print $18}' /proc/bus/pci/devices | uniq
-
+	if ! $AWK '/snd/  {print $18}' /proc/bus/pci/devices | uniq
+	then	$ECHO "$SWARM_MSG_WORD_UNKOWN"
+	fi
 }
 _swarm.sysinfo.() {
 # Prints the IPv6 adress
 #
-	swarm.util.which ip >/dev/zero || return 1
-	LC_ALL=C
+	if ! LC_ALL=C swarm.util.which ip >/dev/zero # || return 1
+	then
+		$PRINTF '%s' "${SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG} iproute2"
+	fi
 }

@@ -21,3 +21,6 @@
 	SWARM_MSG_PHRASE_TW_STRING="Please use the functions 'printe' or 'typewriter' to display strings."
 	SWARM_MSG_PHRASE_TW_FILE="If you want to print a file, please use printfile with the -t option."
 	SWARM_MSG_PHRASE_ERROR_LOADING="There was an error loading a file."
+	SWARM_MSG_PHRASE_OS_INSTALL="Are you sure you want to install:"
+	SWARM_MSG_PHRASE_OS_PLEASE_INSTALL_PKG="Please install the following package::"
+	SWARM_MSG_PHRASE_PLEASE_CHECK_LOG="Please check the 'SWARM/runtime log' for more details."

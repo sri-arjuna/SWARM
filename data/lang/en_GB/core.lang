@@ -59,7 +59,9 @@ Prints a list of strings that are translated/able by SWARM.
 $0 demo
 Useses several commands of SWARM and prints its source code.
 $0 log$(swarm.str.num2uni 2502)crash
-Prints the general logfile or the last crash report."
+Prints the general logfile or the last crash report.
+$0 theme [name]
+If you do not like the default theme, you can always change it here."
 #
 # SWARM Runtime Help Menu
 #

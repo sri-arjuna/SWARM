@@ -22,6 +22,6 @@
 #
 	SWARM_THEME_DATA[read]="\076\076"
 	SWARM_THEME_DATA[select]="${SWARM_THEME_DATA[read]}"
-	SWARM_THEME_DATA[bar]="="
+	SWARM_THEME_DATA[bar]=":"
+	SWARM_THEME_DATA[bar-half]="·"
 	SWARM_THEME_DATA[bar-empty]=" "
-

@@ -25,7 +25,12 @@
 		export clrFRONT="${SWARM_THEME_DATA[color-front]}"
 		export clrBACK="${SWARM_THEME_DATA[color-back]}"
 		export BAR="${SWARM_THEME_DATA[bar]}"
+		export BAR_HALF="${SWARM_THEME_DATA[bar-half]}"
 		export BAR_EMPTY="${SWARM_THEME_DATA[bar-empty]}"
+	#	export TITLE_LEFT="${SWARM_THEME_DATA[title-left]}"
+	#	export TITLE_RIGH="${SWARM_THEME_DATA[title-right]}"
+	#	export HEADER_LEFT="${SWARM_THEME_DATA[header-left]}"
+	#	export HEADER_RIGHT="${SWARM_THEME_DATA[header-right]}"
 		# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
 				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
@@ -237,9 +242,26 @@
 		[[ ${COLUMNS} -lt $SWARM_SKIP_THEME_WIDTH ]] && return 1
 	# Get args
 		local MODE="" #name=""
+		local this_left="$BORDER_LEFT"
+		local this_right="$BORDER_RIGHT"
+		local this_filler=" "
 		case "${1/-}" in
-		h)	MODE="header"	;;
-		t)	MODE="title"	;;
+		h)	MODE="header"
+			if [[ -n "${SWARM_THEME_DATA[header-left]}" ]]
+			then	# This theme has special borders
+				this_left="${SWARM_THEME_DATA[header-left]}"
+				this_right="${SWARM_THEME_DATA[header-right]}"
+				[[ -n "${SWARM_THEME_DATA[filler]}" ]] && this_filler="${SWARM_THEME_DATA[filler]}"
+			fi
+			;;
+		t)	MODE="title"
+			if [[ -n "${SWARM_THEME_DATA[title-left]}" ]]
+			then	# This theme has special borders
+				this_left="${SWARM_THEME_DATA[title-left]}"
+				this_right="${SWARM_THEME_DATA[title-right]}"
+				[[ -n "${SWARM_THEME_DATA[filler]}" ]] && this_filler="${SWARM_THEME_DATA[filler]}"
+			fi
+			;;
 		c)	$PRINTF "\e[2K"	;;
 		*)	MODE="basic"	;;
 		esac
@@ -255,9 +277,9 @@
 			;;
 		"header")
 			local filler_num=""
-			filler_num=$(( numEND - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+			filler_num=$(( numEND - $(( ${#this_left} * 2 )) + 2 ))
 			local filler_str=""
-			filler_str=$($PRINTF "%*s" ${filler_num})
+			filler_str=$($PRINTF "%*s" ${filler_num}|$SED s," ","$this_filler",g)
 			PRINT_LEFT_IN="$filler_str" #$c_reset"
 			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
 			PRINT_RIGHT_IN="" #${c_front}${c_back}"
@@ -265,9 +287,9 @@
 			;;
 		"title")
 			local filler_num=""
-			filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#BORDER_RIGHT} * 2 )) + 2 ))
+			filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 )) + 2 ))
 			local filler_str=""
-			filler_str=$($PRINTF "%*s" ${filler_num})
+			filler_str=$($PRINTF "%*s" ${filler_num}|$SED s," ","$this_filler",g)
 			# shellcheck disable=SC2154
 			PRINT_LEFT_IN="${c_invert}$filler_str" #$c_reset"
 			PRINT_LEFT_OUT="${clrCL}${c_front}${c_back}"
@@ -278,12 +300,12 @@
 		esac
 	# Get some numbers
 		local identRight=$(( lenRight + ${#clrCL}  ))
-		local posLEFT="\33[$(( ${#BORDER_LEFT} - 2 ))G"
+		local posLEFT="\33[$(( ${#this_left} - 2 ))G"
 		local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num ))G"
 	# Well, left aligned it works. isnt too hard
-		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${BORDER_LEFT}${PRINT_LEFT_IN}" >&2
+		$PRINTF "\r${PRINT_LEFT_OUT}${posLEFT}${this_left}${PRINT_LEFT_IN}" >&2
 	# The right side is much more challenging
-		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${BORDER_RIGHT}${PRINT_RIGHT_OUT}${c_reset}" >&2
+		$PRINTF "${posRIGHT}${PRINT_RIGHT_IN}${this_right}${PRINT_RIGHT_OUT}${c_reset}" >&2
 		$PRINTF "${posEND}"
 	}
 	swarm.print.text() { # [-h -t] [ LEFT ] [ CENTER ] [ RIGHT]

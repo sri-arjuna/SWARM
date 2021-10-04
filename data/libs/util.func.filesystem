@@ -254,7 +254,7 @@ swarm.util.cd() { # DIR
 		if [[ "/" == "${1:0:1}" ]]
 		then	# It does have a leading /
 			printe "$SWARM_MSG_WORD_PASSED:" "$1"
-			printe "$SWARN_MSG_WORD_EXPECTED:" "$1"
+			printe "$SWARM_MSG_WORD_EXPECTED:" "$1"
 			if yesno "$SWARM_MSG_WORD_CREATE: $1"
 			then 	if swarm.util.mkdir "$1"
 				then	swarm.util.cd "$1"
@@ -267,7 +267,7 @@ swarm.util.cd() { # DIR
 		else	# It is expecting a sub dir
 			printe "$SWARM_MSG_WORD_PASSED:" "$1"
 			printe "$SWARM_MSG_WORD_CURRENT $SWARM_MSG_WORD_DIR:" "$PWD"
-			printe "$SWARN_MSG_WORD_EXPECTED:" "$PWD/$1"
+			printe "$SWARM_MSG_WORD_EXPECTED:" "$PWD/$1"
 			if yesno "$SWARM_MSG_WORD_CREATE: $PWD/$1"
 			then 	yesno "Are you sure, because 'isDir' should not be used to create directories! ALPHA-COMMENT // TODO" || return 1
 				if swarm.util.mkdir "$PWD/$1"

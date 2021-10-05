@@ -1,4 +1,5 @@
 This is for non-lawyers to read.
+Say, everything written here is to be considered/understood in my (SEA, the author of SWARM) favor, and not how a layer may turn/interpretate it.
 All terms of the GPL v2 apply.
 
 https://www.gnu.org/licenses/old-licenses/gpl-2.0
@@ -8,8 +9,8 @@ See file: [GPLv2](./GPLv2)
 Short:
 ------
 * SWARM is a BASH library, as such you may use it for anything you do in/with BASH shell.
-* Your project does NOT have to be opensource (example: if used as an ssh/telnet-endpoint/server - menu)
-* The moment you change code of SWARM, you have to (mandatory) provide updates (these changes) to the source of where you have obtained SWARM. (https:/github.com/sri-arjuna/SWARM)
+* Your project does NOT have to be available to the public or opensource (example: if used as an ssh/telnet-endpoint/server - menu)
+* The moment you change code of SWARM (like, but not limited to: bugfixes, improvements ; excluding themes, but not theme handling), you have to (mandatory) provide updates (these changes) to the source of where you have obtained SWARM. (https:/github.com/sri-arjuna/SWARM)
 
 Important:
 ----------
@@ -20,17 +21,15 @@ This said, if companies (anyone for that matter) use SWARM, I deny ANY responsib
 Because I cannot possibly know their proper environment and test for stability. Or have labs with any and every possible OS and configuration model active...
 
 SWARM comes WITHOUT any warranty or 'garantie' of any kind.
-It was written for myself as the base for another project, I had best (cross-platform-)compatibility & stability in mind as goals, while providing alot of tools/functions to ease the task of coding and to reduce overhelmed'ness for casual endusers when it comes to using the terminal.
+It was written for myself as the base for another project, I had best (cross-platform-)compatibility & stability in mind as goals, while providing alot of tools/functions to ease the task of coding and to reduce overhelmed'ness for casual script-users and endusers when it comes to using the terminal.
 
 
-* You may use SWARM within closed environments (example: Government, Military) and for commercial use.
+* You may use SWARM within closed environments (example: Government, Military) and for commercial (see "Terms for Company use") use.
 * Allthough your scripts use SWARM, your scripts do not have to be GPLv2.
 * Meaning, as long you leave SWARM 'as is' you can do whatever you want with it.
 * But the moment you change ANYTHING of SWARMs code, you must provide these changes publicly.
 * A good place to send code pull requests are at: https:/github.com/sri-arjuna/SWARM
 * If you use SWARM within any kind of company, I do ask you to review the code as good as possible and send me any bugfixes you were able to fix.
-
-
 
 
 Terms for Company use:
@@ -44,19 +43,27 @@ that at least one person occasionaly spends 1-2 hours looking at the known issue
 Of course, if they stumble upon something they could improve in regards of performance, stability or security,
 that is very welcome too!
 
+In addition, companies and professionals who use SWARM commercialy are asked to
+please support me on [Patreon](https://www.patreon.com/script_tools?fan_landing=true).
+This applies explicitly and specificly if you are not willing to invest time to help to improve SWARM.
+However, this does NOT imply or grant any additional support, you may ask though.
+
 
 Statement:
 ----------
 However, to 'repeat' the GPLv2 - I deny any responsiblity,
-for any possible damange, like - but not limited to - data loss,
-unusable system, growing grey hairs, or any variation that may occour.
+for any possible damange, like - but not limited to - data and any involved money/profit loss,
+unusable system/s, growing grey hairs, or any variation thereof that may occour.
 
 Using FOSS is risky if you are not willing to invest something back into it.
 See the Heartbleed incident, 1 person can not possible cover every security issue there is.
 And this is the precice reason why 'a company' must spend some resources to help fixing bugs
 and security issues in and for SWARM - if they want to use it.
 
-Keep in mind, from 0 to SWARM, I have invested about 5 years,
+Keep in mind, from 0 to TUI (the predecessor of SWARM), I have invested about 5 years,
 where I spent almost every day 6-18 hours working on 'this'.
-(5 * 365 - 30 ('offdays')) * ~12 == 21'540 hours
+(5 * (365 - 30) ('offdays')) * 12 == 21'540 hours
 So I would say, 'giving a few hours back' is a fair trade.
+On top of that comes the time required to rewrite TUI to SWARM so it is all "runtime".
+
+Thank you for reading this far!

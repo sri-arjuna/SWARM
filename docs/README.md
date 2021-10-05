@@ -8,23 +8,44 @@ it is great for scripts you carry on your usb-thumbdrive, like rescue scripts.
 
 But the biggest bonus for portable scripts is the **Shell Wrapper** part.
 Because we all know that not all distros install the same applications.
-SWARM provides functions to automaticly open available applications to _edit_, browse the _web_, use a _filemgr_ or open other _terminals_, depending wether the user runs the script in X or TTY.
-And that is on systems it was never run before, once configured, it will open your favorite applications for each given task.
+
+All this wile providing / showing a comfortable Text User Interface to the end-user!
+
+It is a very new approach - yet overdue change - to scripting.
+Yet, still works the very same way as you are used to from scripts.
+
+
+3 Layers
+--------
+
+* The internal layer covers the handling between GUI/console (in case of calling external programs (like OS/system depending), or display status, etc - the 'internal code'), which makes the following API cross-plattform-compatible (me / contributors)
+* The layer for script authors (you), the actual API / functions that SWARM provides
+* And finaly the end-user layer (the wrapper visual outputs, incl settings on themes and language)
+
+___As an example:___
+SWARM provides functions to automaticly open available applications to _edit_, browse the _web_, use a _filemgr_ or open other _terminals_, depending wether the user runs the script in X/Wayland or TTY.
+And that is on systems it was never run before, once configured (automaticly, first usage), it will open your favorite applications for each given task.
+On top of that, some systems have sudo, others have just su available, execute commands that requires root access with _asRoot_.
+
+So you as a script-writer, no longer have to worry which __editor__ is installed when a user is in a GUI session.
+Because we all know how.. dissapointing... it can be to have to edit a file in vi or nano, while your atom or sublime is open on another screen.
 
 On top of that, using SWARM will generate its output according to a configured _theme_,
 so all output the user will see is consistant to her or his preferences.
+
+Saying, interested users can switch to (or create/change a) __theme__ that matches their console/terminal settings / style.
 
 
 Features:
 ---------
 
 * Output can be aligned to: _left_, _center_ and _right_
-  Using easy to remember commans like: *header*, *title*, *printl* (for line) and *printe* (for echo)
+  Using easy to remember commans like: *header*, *title* and *printe* (as echo/printf)
 * INIT style status messages
   Using: *bar* and *status*
 * Consistend wrapper (visual & code) output for _select_ and other _read_ tasks
   Using: *pick*, *ask* and *yesno*
-* Alot more 'smaller' (and bigger) functions that can be very helpfull for your project/s.
+* Many more (135+) 'smaller' (and bigger) functions that can be very helpfull for your project/s.
 
 
 Target Audience:
@@ -35,7 +56,6 @@ Target Audience:
 * Anyone interested in scripting
 
 Basicly everyone one who wants or has to write comfortable scripts for themself, the community and/or for (their) end users.
-
 
 
 Whats the purpose?
@@ -101,36 +121,34 @@ Because BASH is pre-installed on most GNU+Linux and/or *BSD variants.
 And where it is not, it is available in the Repo.
 
 2. Why not something else?
-I did consider C, but I did not want to compile.
+I did consider C, but I did not want to compile. (see 3.)
 Also Python was considered, but with neither the C- nor Python solution
-"runtime" would have been an option.
+"runtime" would have been an option - or would have lost alot of its scripting-comfort.
 Not much else available on minimal installations.
 
 3. Why did you not want to compile?
 Just in case we get Fallout 5 in RealLife (Corona, etc) and everything falls apart,
 I wanted anyone who finds it on such a lost Vault-Tec terminal to be able to direclty
-make the changes they need.
-
-Yeah baby, Steam-Punk! :D
+make the changes they need. Thus, SWARM beeing itself all in plain-text is essential to me.
 
 
 LINKS:
 ------
 
-* [Reddit](http://www.reddit.com/r/SWARM_BASH)
 * [GitHub](http://www.github.com/sri-arjuna/SWARM)
+* [Patreon](https://www.patreon.com/script_tools?fan_landing=true)
+* [Reddit](http://www.reddit.com/r/SWARM_BASH)
 
 
 CREDITS:
 --------
 
 * FedoraForum.org ; Staff & Members
-* UNIX.com ; Staff & Members, special thanks to mod: Peasant for the name suggestion!
-* https://community.unix.com/t/blog-thread-creating-a-shell-wrapper-and-runtime-modifier-swarm/377390/48
+* UNIX.com ; Staff & Members
 
 
 Alpha Testers
 -------------
 
-* lsatenstein @ fedoraforum
-* Chubler_XL @ unix
+* lsatenstein @ fedoraforum.org
+* Chubler_XL @ unix.com

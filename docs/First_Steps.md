@@ -9,49 +9,41 @@ On some occasions it was not possible for compatibility reasons.
 For 100% single task scripts, SWARM is best placed in something like _$HOME/bin\[/SWARM\]_.
 For projects that contain multiple scripts, I recomend to place SWARM inside the project directory (or create a symlink to its location).
 
-Whatever you do, unless the script is invoked by **swarm**, the **SWARM** directory
-must be in the same directory as the executed script.
-Only this verifies proper handling.
-
 
 Basic usage:
 ------------
+
+Whatever you do, the **SWARM** directory must be in the same directory as the executed script.
+In the likes of: __$HOME/prjs/<project dir>/SWARM__
+From within your project dir, you can then call it like: _./SWARM/runtime_
+Only this verifies proper handling.
 
 Or - how to get all the stuff:
 
 When actualy using in a script, you would call it like:
 
-
     #!/usr/bin/env bash
     source ./SWARM/runtime
 
-After that you have all variables and functions of SWARM available. See __Basic Visuals__.
+However, if you need to have a more complex apporach, you can still do someting like:
 
+    SWARMDIR="/absolute/path/to/and_incl/SWARM-build68"
+    source "$SWARMDIR/runtime"
+
+After that you have all variables and functions of SWARM are available to you. See __Basic Visuals__.
 
 
 Get your first Script:
 ----------------------
 
-First we have to understand that in order to provide these functions, we have to source the runtime.
-For the best convenience, I do recomend to add _~/bin_ (or whateverplace you have your scripts stored) to your **PATH** variable via the _~/.bashrc_, this would be as simple as:
+Assuming you've done the _Pseudo installation_ as explained by the [README](./README.md) it is quite simple.
 
-    PATH+="$HOME/bin"
-
-If you now extract the SWARM tarball within _~/bin_ and if everything works well, you will have this path structure _~/bin/SWARM_.
-
-Beeing in _~/bin_ you now create files with the following content:
-
-    #!/usr/bin/env bash
-    source ./SWARM/runtime
-
-Or enter the following in a console, to get a slightly more advanced template to work with:
+Just enter the following in a console, while beeing in your _$HOME/bin_ or Project-Dir to get a slightly more advanced template to work with:
 
     SWARM/runtime new script full mytest.sh
 
-
 Here is a short overview of the most important/casual functions that are now available:
 (_Feel free to browse through_ **./runtime help** _to get to know all functions and directly read their according manpages._)
-
 
 
 Basic Visuals
@@ -61,8 +53,9 @@ These functions are used to print text or other data visualy
 * title "my title" 			; All white background with blue text, and blue borders
 * printe "left" "center" "right" 	; blue borders, next output is on a newline
 * status $? "Left" "Center"		; Prints a colored 'exit-code-string' based on $?
-* bar _[options]_ min max val ["text"]	; Prints different kind of progress / working
+* bar _[options]_ val max ["text"]	; Prints different kind of progress / working
 * printfile "file"                      ; Basicly swarm's version of cat...
+
 
 User Interactions:
 ------------------
@@ -71,7 +64,7 @@ These are wrappers that aim to simplify their original usage while maintaining t
 * yesno "Question?" 	; the 'yn' is provided by language file and is supported in code
 * pick _[-a -m]_ $LIST 	; the 'select' wrapper, ; 0 (zero) will always be 'Back' and return 4 (back)
 * press	["Text"]	; Simply ask the user to press enter to continue
-* wait NUM[h,m,s]       ; Waits given time, counting down...
+* wait NUM[h,m,s] [Text]     ; Waits given time, counting down...
 
 These are the core basics.
 Everything else provided is just for additional convenience.
@@ -128,6 +121,7 @@ Either way, here is the current output of the time I'm writing this document:
     swarm.util.echo      swarm.util.isDir     swarm.util.isRoot    swarm.util.tar
 
 Each of these functions has its own manpage, which you may directly access by following this example: **./runtime help swarm.str.genfilename**
+There is a total of about 135+ functions available for you to use!
 
 
 Most Important:

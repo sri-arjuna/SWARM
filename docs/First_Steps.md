@@ -25,7 +25,7 @@ When actualy using in a script, you would call it like:
     #!/usr/bin/env bash
     source ./SWARM/runtime
 
-However, if you need to have a more complex apporach, you can still do someting like:
+However, if you need to have a more complex approach, you can still do someting like:
 
     SWARMDIR="/absolute/path/to/and_incl/SWARM-build68"
     source "$SWARMDIR/runtime"
@@ -130,3 +130,7 @@ Most Important:
 Do **NOT** check SWARM files and think that is the way to use SWARM - it is just the way to make SWARM possible!
 
 But please **DO** check ___./runtime new___ if you want to create something new using SWARM.
+
+From here on, the only thing left todo for you as a script writer or contributor, is to read is the [MANUAL](./contribute/MANUAL.md) though, this is ment to be as reference for script-writers.
+
+As a contributor, please see the [SYNTAX](./contribute/SYNTAX.md) so the code has the same overall structure used.

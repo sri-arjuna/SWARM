@@ -567,9 +567,10 @@
 				count=${#list[@]}
 				count=$(( count - 1 ))
 				c=0
+				bar -C
 				for item in ${list[*]}
 				do
-					bar -C -c $c -m $count "[$c/$count] $SWARM_MSG_WORD_REMOVE: ${item/$SWARM_TMP_DIR}"
+					bar -c $c -m $count "[$c/$count] $SWARM_MSG_WORD_REMOVE: ${item/$SWARM_TMP_DIR}"
 					((c++))
 					$RM "$SWARM_TMP_DIR/$item"
 					sleep 0.001

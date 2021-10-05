@@ -30,6 +30,7 @@
 	SWARM_MSG_WORD_ACTION="Action"
 	SWARM_MSG_WORD_SCRIPT="Script"
 	SWARM_MSG_WORD_CUSTOM="Custom"
+	SWARM_MSG_WORD_INPUT="Input"
 	# Actions:
 	# --------
 	# English is nice as template language,

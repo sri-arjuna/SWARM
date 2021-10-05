@@ -250,13 +250,13 @@
 		else	status "$RET_FAIL" "$SWARM_MSG_WORD_FAILURE : \$isGUI = $isGUI"
 		fi
 
-		title
+		title "$SWARM_MSG_WORD_LIST"
 		printe "Contents of: /"
 		$CD / ; array=( * )
 		$CD "$OLDPWD"
 		printlist -r "${array[@]}"
 
-		title
+		title "$SWARM_MSG_WORD_USER $SWARM_MSG_WORD_INPUT"
 		yesno "Do you like using: \"$DESKTOP\" on \"$DISTRO\"?" >&1
 		status $? "Your answer was: $(swarm.str.bool2str -y $?)"
 

@@ -4,7 +4,9 @@
  	while :; do
  		case "$1" in
  		-h|-\?|--help)
- 			#swarm.help.usage "source swarm.eu.new.function main"
+ 			# The commented line is for swarm-internal functions, they require a string stored in data/lang/en_GB/strings-usage.lang
+			# And that string is assigned by the swarm.help.usage function in the file data/libs/core.help
+			#swarm.help.usage "${FUNCNAME[1]}"
                         $ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
  			return 0
  			;;
@@ -15,14 +17,19 @@
  			done
  			return 0
  			;;
+		--bool)
+			# This will simply toggle a boolean, like:
+			bThisBool=true
+			;;
 		--myvar)
-			[[ -n "$2" ]] || { echo "--myvar requires an argument" ; exit 1 ;}
+			# This will assign a passed value to according variable
+			[[ -n "$2" ]] || { $ECHO "--myvar $SWARM_MSG_WORD_REQUIRES $SWARM_MSG_WORD_ARGUMENT" ; exit 1 ;}
 			# Save the variable for later use:
 			myvar="$2"
-			# This 'removes $2'
-			# technicly it removes the current $1,
-			# because we have another shift at the end of the loop
+			# Since this represents 2 arguments, lets remove one now
+			# and the other and the end of the while-loop
 			shift
+			;;
  		*)
  			break
  			;;

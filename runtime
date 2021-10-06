@@ -570,7 +570,7 @@
 				bar -C
 				for item in ${list[*]}
 				do
-					bar -c $c -m $count "[$c/$count] $SWARM_MSG_WORD_REMOVE: ${item/$SWARM_TMP_DIR}"
+					bar -b -c $c -m $count "[$c/$count] $SWARM_MSG_WORD_REMOVE: ${item/$SWARM_TMP_DIR}"
 					((c++))
 					$RM "$SWARM_TMP_DIR/$item"
 					sleep 0.001

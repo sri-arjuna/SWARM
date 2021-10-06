@@ -15,7 +15,7 @@ func.name() { # [option] ARG
  		case "\$1" in
  		-h|-\?|--help)
  			#swarm.help.usage "${FUNCNAME[@]}"
-                        \$ECHO "\$SWARM_MSG_WORD_USAGE: \$FUNCNAME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+ 			\$ECHO "\$SWARM_MSG_WORD_USAGE: \$FUNCNAME [ \${SWARM_MSG_WORD_OPTIONS,,} ] [ \${SWARM_MSG_WORD_ARGUMENTS^^} ]"
  			return 0
  			;;
  		--)

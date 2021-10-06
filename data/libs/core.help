@@ -390,7 +390,8 @@
 		count="${#content[*]}"
 	# Selection
 		if [[ -n "$1" ]] && [[ -f "$workdir/$1" ]]
-		then 	source "$workdir/$1"
+		then 	title "$1"
+			source "$workdir/$1"
 		else
 			while true
 			do
@@ -540,7 +541,7 @@
 	swarm.help.manpage() { # FUNCNAME
 	# Opens the manpage according to passed FUNCNAME
 	#
-		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+		#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
 		if [[ -f "$1" ]]
 		then	# Passed argument exists

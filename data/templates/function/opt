@@ -1,0 +1,43 @@
+#/usr/bin/env bash
+$CAT<<-EO_SCREEN
+#
+# Catch arguments
+#
+ 	while :; do
+ 		case "$1" in
+ 		-h|-\?|--help)
+ 			# The commented line is for swarm-internal functions, they require a string stored in data/lang/en_GB/strings-usage.lang
+ 			# And that string is assigned by the swarm.help.usage function in the file data/libs/core.help
+ 			#swarm.help.usage "${FUNCNAME[1]}"
+ 			$ECHO "$SWARM_MSG_WORD_USAGE: $FUNCNAME [ ${SWARM_MSG_WORD_OPTIONS,,} ] [ ${SWARM_MSG_WORD_ARGUMENTS^^} ]"
+ 			return 0
+ 			;;
+ 		--)
+ 			# General purpose pipe support, might need adjustment!
+ 			while read line;do
+ 				${FUNCNAME[@]} "$line"
+ 			done
+ 			return 0
+ 			;;
+ 		--bool)
+ 			# This will simply toggle a boolean, like:
+ 			bThisBool=true
+ 			;;
+ 		--myvar)
+ 			# This will assign a passed value to according variable
+ 			[[ -n "$2" ]] || { $ECHO "--myvar $SWARM_MSG_WORD_REQUIRES $SWARM_MSG_WORD_ARGUMENT" ; exit 1 ;}
+ 			# Save the variable for later use:
+ 			myvar="$2"
+ 			# Since this represents 2 arguments, lets remove one now
+ 			# and the other and the end of the while-loop
+ 			shift
+ 			;;
+ 		*)
+ 			break
+ 			;;
+ 		esac
+ 		# This will 'delete' the current "$1", which was an option
+ 		# If it was not an option (--myvar) it will 'enter' "*" and will break out of the loop before getting here
+ 		shift
+ 	done
+EO_SCREEN

@@ -451,9 +451,19 @@
 				done
 				;;
 			"log")
-				title "SWARM LOG"
-				#${MORELESS:-cat} "$SWARM_LOG"
-				printfile "$SWARM_LOG"
+				case "$2" in
+				clear)	# Clears the log file
+					>"$SWARM_LOG"
+					;;
+				alt)	# Uses alternate methods
+					title "SWARM LOG"
+					${MORELESS:-cat} "$SWARM_LOG"
+					;;
+				*)	# Show log with 'default' settings
+					title "SWARM LOG"
+					printfile "$SWARM_LOG"
+					;;
+				esac
 				exit $?
 				;;
 			"crash")

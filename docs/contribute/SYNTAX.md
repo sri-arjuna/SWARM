@@ -34,7 +34,18 @@ This is a BASH framework, so in case of doubt, use BASH'ism.
 * Functions that start with _swarm.print._ are supposed to be used by contributors, not script-authors. These are NOT shown in the help menu (./runtime help) (manpage is to be shown however)
 
 
-Lists
+BOOLEANS
+========
+
+All variables or function (sub-names) should start with either ___isYYY___ or ___beYYY___.
+
+Examples are:
+
+* $isRoot = swarm.util.isRoot
+* $beVerbose in functions
+
+
+LISTS
 =====
 
 Functions that return a list, must obey these points:
@@ -42,7 +53,7 @@ Functions that return a list, must obey these points:
 * Lists must NOT be a single line ; exception are SWARM internal lists where it is verified that items do not contain spaces
 
 
-Functions
+FUNCTIONS
 =========
 
 Functions definitions shall take 3 lines,

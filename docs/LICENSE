@@ -10,7 +10,7 @@ Short:
 ------
 * SWARM is a BASH library, as such you may use it for anything you do in/with BASH shell.
 * Your project does NOT have to be available to the public or opensource (example: if used as an ssh/telnet-endpoint/server - menu)
-* The moment you change code of SWARM (like, but not limited to: bugfixes, improvements ; excluding themes, but not theme handling), you have to (mandatory) provide updates (these changes) to the source of where you have obtained SWARM. (https:/github.com/sri-arjuna/SWARM)
+* The moment you change code of SWARM (like, but not limited to: bugfixes, improvements (not including themes), theme handling), I highly ask from you to provide the updates (these changes) to the source of where you have obtained SWARM. (https:/github.com/sri-arjuna/SWARM)
 
 Important:
 ----------
@@ -27,9 +27,10 @@ It was written for myself as the base for another project, I had best (cross-pla
 * You may use SWARM within closed environments (example: Government, Military) and for commercial (see "Terms for Company use") use.
 * Allthough your scripts use SWARM, your scripts do not have to be GPLv2.
 * Meaning, as long you leave SWARM 'as is' you can do whatever you want with it.
-* But the moment you change ANYTHING of SWARMs code, you must provide these changes publicly.
+* But the moment you change ANYTHING of SWARMs code, you must provide these changes publicly / back to the source.
 * A good place to send code pull requests are at: https:/github.com/sri-arjuna/SWARM
 * If you use SWARM within any kind of company, I do ask you to review the code as good as possible and send me any bugfixes you were able to fix.
+* If you could not fix the bug, please report it at the very least with the best possible description of what, where, why and how it 'came to the surface'.
 
 
 Terms for Company use:
@@ -39,7 +40,8 @@ This said, you can use this framework for projects within your company.
 While doing so, you are not allowed to alter the code of SWARM unless you fix bugs and send a pull request.
 
 In fact, the only term I have if you want to use SWARM within a/your company is exactly this,
-that at least one person occasionaly spends 1-2 hours looking at the known issues and send possible bug fixes.
+that at least one person occasionaly (like after 10-20 "build" udpates) spends 1-2 hours looking at the known issues and send possible bug fixes.
+--> From the community, for the community <--
 Of course, if they stumble upon something they could improve in regards of performance, stability or security,
 that is very welcome too!
 
@@ -53,16 +55,17 @@ Statement:
 ----------
 However, to 'repeat' the GPLv2 - I deny any responsiblity,
 for any possible damange, like - but not limited to - data and any involved money/profit loss,
-unusable system/s, growing grey hairs, or any variation thereof that may occour.
+unusable system/s, growing grey hairs, or any variation thereof that may or may not occour.
 
 Using FOSS is risky if you are not willing to invest something back into it.
 See the Heartbleed incident, 1 person can not possible cover every security issue there is.
 And this is the precice reason why 'a company' must spend some resources to help fixing bugs
-and security issues in and for SWARM - if they want to use it.
+and security issues in and for SWARM (any 'community'/open source project) - if they want to use it.
 
 Keep in mind, from 0 to TUI (the predecessor of SWARM), I have invested about 5 years,
 where I spent almost every day 6-18 hours working on 'this'.
 (5 * (365 - 30) ('offdays')) * 12 == 21'540 hours
+Granted these 21,5K hours include any and all studies & trial and errors that were related.
 So I would say, 'giving a few hours back' is a fair trade.
 On top of that comes the time required to rewrite TUI to SWARM so it is all "runtime".
 

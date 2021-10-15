@@ -15,6 +15,8 @@
 	SWARM_MSG_PHRASE_WARRANTY3="See ./docs/GPLv2 and ./docs/LICENSE for details."
 	SWARM_MSG_PHRASE_REMOVE_SWARM="This will only remove loose configuration files of SWARM, not the software itself."
 	SWARM_MSG_PHRASE_CRASHREPORT="Please wait while the crash report is written."
+	SWARM_MSG_PHRASE_THEME_CHANGE_QUESTION="Do you want to change the displayed theme?"
+	SWARM_MSG_PHRASE_THEME_SELECT="Please select your new theme"
 	SWARM_MSG_SU_NFOUND="Sudo could not be found on your system."
 	SWARM_MSG_PHRASE_SSHSESSION="This is a SSH session. ($SSH_TTY)"
 	SWARM_MSG_PHRASE_TERMINAL="This is a terminal (TTY #${XDG_VTNR}) session."

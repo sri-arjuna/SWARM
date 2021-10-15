@@ -61,7 +61,9 @@ Useses several commands of SWARM and prints its source code.
 $0 log|crash [alt|clear]
 Prints the general logfile or the last crash report.
 $0 theme [name]
-If you do not like the default theme, you can always change it here."
+If you do not like the default theme, you can always change it here.
+$0 remove
+Want to get rid of the settings for SWARM?"
 #
 # SWARM Runtime Help Menu
 #

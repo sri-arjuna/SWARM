@@ -47,6 +47,7 @@ KNOWN ISSUES
 ------------
 swarm.str.usb			linux works, BSD/arm not so sure
 yesno ??			fix empty line in ssh session?
+./runtime log			fix with dynamic FD's
 
 
 Shellcheck recheck:

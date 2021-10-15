@@ -364,8 +364,13 @@
 			status 111 "$SWARM_MSG_WELCOME_INFOLINE2"
 			printe "$SWARM_MSG_WELCOME_INFOLINE3" "${SWARM_USER_DIR_SCRIPTS}/SWARM"
 			title	"$SWARM_MSG_WORD_ARGUMENTS"
-			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 -- # "TODO: Visuals, then explain, configure and stuff..."
-			$PRINTF '\n'
+			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 --
+			printe
+			# Change theme upon first usage?
+			if ${isSWARMfirstTime:-false}
+			then	yesno "$SWARM_MSG_PHRASE_THEME_CHANGE_QUESTION" && $0 theme
+			fi
+
 			exit 0
 		else	# Has arguments, lets parse
 			$PRINTF "$(swarm.print.goto 0)"
@@ -532,7 +537,7 @@
 			;;
 			remove)
 				title "$SWARM_MSG_WORD_REMOVE: SWARM"
-				printe "$SWARN_MSG_PHRASE_REMOVE_SWARM"
+				printe "$SWARM_MSG_PHRASE_REMOVE_SWARM"
 				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC)?" || exit 1
 				swarm.util.rm -v "$SWARMRC" "$SWARM_USER_DIR_BASE"
 				swarm.cleanup remove
@@ -545,7 +550,8 @@
 						status $? "$SWARM_MSG_INIT_THEME ($2)"
 						init.log "$SWARM_MSG_INIT_THEME ($2)"
 					fi
-				else	newtheme=$(pick -m $(swarm.list.theme))
+				else	title "$SWARM_MSG_PHRASE_THEME_SELECT"
+					newtheme=$(pick -m $(swarm.list.theme))
 					if swarm.update.theme "$newtheme"
 					then	cfg.set -v "$SWARMRC" "SWARM_THEME" "$newtheme"
 						status $? "$SWARM_MSG_INIT_THEME ($newtheme)"

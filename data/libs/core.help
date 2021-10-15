@@ -7,7 +7,7 @@
 	swarm.eu.function.list() { # [FILE]
 	# Prints a list of properly declared functions
 	# see ./docs/{MANUAL,SYNTAX}.md for details
-		swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+		#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 		local tmp_oldpwd="${PWD:-$($PWD_EXEC)}"
 		local tmp_file="${1##*/}"
 		local tmp_dir=${1/$tmp_file}
@@ -52,7 +52,7 @@
 	# Prints either these 2 comment lines or the code
 	# Please see: ./docs/contribute/{MANUAL,SYNTAX}.md)
 		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Vars
 		#
@@ -126,7 +126,7 @@
 	# Shows the basic core functions
 	#
 		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
 		#list=$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.commands")
@@ -161,7 +161,7 @@
 	# Shows the basic core functions
 	#
 		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local list=""
 		list="isDir isRoot isGUI DESKTOP DISTRO BASED TAR EX CP MV"
@@ -192,7 +192,7 @@
 	# Shows the basic core functions
 	#
 		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		# Get full list of all functions
 		local list="" this="" item=""
@@ -572,7 +572,7 @@
 	# Returns the 'usage help screen' according to passed FUNCNAME
 	# The strings are in SWARMDIR/data/lang/en_GB/strings_usage.lang
 		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local out=""
 	# Parse argument
 		case "$1" in

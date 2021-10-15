@@ -2,7 +2,7 @@
 edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 # Lets you edit a file without the need to care what the user has installed
 # Uses console apps as fallback
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 # Variables
 	local cli_forced=false
 	local EDITOR=""
@@ -56,7 +56,7 @@ edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 filemgr() { # [ -c ] FILE1 FILE2 FILE3 ...
 #
 #
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 # Variables
 	local cli_forced=false
 	local FILEMGR=""
@@ -111,7 +111,7 @@ filemgr() { # [ -c ] FILE1 FILE2 FILE3 ...
 web() { # [ -c ] FILE1 FILE2 FILE3 ...
 #
 #
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 # Variables
 	local cli_forced=false
 	local WEB=""
@@ -167,7 +167,7 @@ web() { # [ -c ] FILE1 FILE2 FILE3 ...
 terminals() {  ## # [ -c ] FILE1 FILE2 FILE3 ...
 #
 #
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 # Variables
 	local cli_forced=false
 	local WEB=""

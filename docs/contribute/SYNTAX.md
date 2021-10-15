@@ -41,15 +41,16 @@ All variables or function (sub-names) should start with either ___isYYY___ or __
 
 Examples are:
 
-* $isRoot = swarm.util.isRoot
-* $beVerbose in functions
+* $isRoot = swarm.util.isRoot (public used)
+* $beVerbose in functions (local)
+* $doShowStatus (local)
 
 
 LISTS
 =====
 
 Functions that return a list, must obey these points:
-* Lists must be on multiple lines, as in: each item on its own line
+* Lists from FILES must be on multiple lines, as in: each item on its own line
 * Lists must NOT be a single line ; exception are SWARM internal lists where it is verified that items do not contain spaces
 
 

@@ -2,7 +2,7 @@
 swarm.str.hash() { # [-v|--verbose] [-t|-type md5,sha1,sha224,sha256,sha384,sha512] STRING1 FILE2 ..
 # Prints the hash of any passed string or file
 # Use verbose mode if you have multiple items to hash, or have multiple hashes for any iven item.
- 	swarm.protect "${FUNCNAME[@]}" "(${CALLER:-$SWARM_MSG_WORD_UNKOWN})" "${@}" && return 1
+ 	#swarm.protect "${FUNCNAME[@]}" "(${CALLER:-$SWARM_MSG_WORD_UNKOWN})" "${@}" && return 1
 # Variables
  	local RET=1 beVerbose=false types="" TOOLS="" missing=""
 # Catch arguments
@@ -281,7 +281,7 @@ swarm.str.bool2str() { # [options] $?
 swarm.str.num2char() { # NUM
 # Returns a letter string: a-z
 # Or: aa-az ba-bz, etc
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 	local array
 	num="$1"
 	out=""
@@ -295,7 +295,7 @@ swarm.str.num2char() { # NUM
 swarm.str.num2roman() { # NUM
 # Returns NUM in roman letters
 #
-	swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
+	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 	input="$1"	# input num
 	output=""	# Clear output string
 	len="${#input}"	# Initial length to count down

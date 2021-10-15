@@ -21,7 +21,7 @@
 	# Updates the current language with passed lang_code
 	# Automaticly checks for all available langs otherwise.
 		#shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# Use passed language or try to auto-detect
 		local lang_wish="" ; lang_wish=${1:-${LANG/.*}}
 		local lang_short="" ; lang_short=${lang_wish/_*}

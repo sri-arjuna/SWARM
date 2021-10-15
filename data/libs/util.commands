@@ -11,7 +11,7 @@
 	# This prints a full line in blue (default-back), with white (default-front) text
 	# TODO long string adjustments TODO, uses script_{name,version} before it uses its SWARM counterparts
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		swarm.print.border -h
 		case "$1" in
 		"--")
@@ -145,7 +145,7 @@
 	# Simply prints the strings as passed, stays on the same line
 	# It requires 3 strings to use the center
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#set -x
 		local MODE="none"
 		# Get args
@@ -218,7 +218,7 @@
 	# Ask a yes/no question, returns 0/true for yes and 1/false for no
 	# y/n are taken from language file and are used in code
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		local Y="${SWARM_MSG_WORD_YES:0:1}"
 		local N="${SWARM_MSG_WORD_NO:0:1}"
 		local failsafe=0
@@ -415,7 +415,7 @@
 	# Select an item of a LIST or an ARRAY, that will be returned
 	# Use -a for autoselect if only 1 entry, and -m as this will present 'Back' (translated)
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		#
 		# Variables
 		#
@@ -559,7 +559,7 @@
 	# Reads a user's input
 	# Returns the buffer
 		# shellcheck disable=SC2128
-		swarm.protect "$FUNCNAME" "${@}" && exit 1
+		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 	# Variables
 		local hideText="" buffer="" STR=""
 		local notEmpty=false failsafe=0
@@ -848,7 +848,7 @@
 	log() { # [-?|-h|--help] [-f FILE=$script_log ] [-r "REASON=$script_name" ] "MESSAGE"
 	# Purpose and result
 	# additional description
-	 	swarm.protect "${FUNCNAME[@]}" "${CALLER:-$SWARM_MSG_WORD_UNKOWN}" "${@}" && return 1
+	 	#swarm.protect "${FUNCNAME[@]}" "${CALLER:-$SWARM_MSG_WORD_UNKOWN}" "${@}" && return 1
 	#
 	# Variables
 	#
@@ -991,7 +991,7 @@
 			cfg.set -v "$SWARM_USER_CONF" "useSudo" "$useSudo"
 		fi
 	# Variables / Defaults
-		local FILE_TMP=$(swarm.str.genfilename "$SWARM_TMP_DIR/$(swarm.code).tmp~")
+		local FILE_TMP=$(swarm.str.genfilename "$SWARM_TMP_DIR/asRoot-$(swarm.code).tmp~")
 		local FILE_RET="${FILE_TMP/tmp~/ret}"
 		local FILE_LOG="$SWARM_LOG"
 		local FILE_OUT=""
@@ -999,17 +999,17 @@
 		local sMSG1=""	# Pre - Run
 		local sMSG2=""	# while - run
 		local sMSG3=""	# Post - run
-		local bBackground=false
-		local bShowStatus=true
+		local beInBackground=false
+		local doShowStatus=true
 		local sCatchOutputBG="1>>\"$FILE_LOG\" 2>>\"$FILE_LOG\""
 	# Check arguments, exit on missing
 		while :
 		do
 			case "$1" in
-			"-b")	bBackground=true
+			"-b")	beInBackground=true
 				;;
 			"--skip-status")
-				bShowStatus=false
+				doShowStatus=false
 				;;
 			"-r")	# Wants a custom FILE_RET
 			 	FILE_RET=$(swarm.str.genfilename "$2")
@@ -1066,12 +1066,13 @@
 	# Show prior message if applicable
 		[[ -n "$sMSG1" ]] && printe "$sMSG1"
 	# Call it properly
-		if $bBackground
+		if $beInBackground
 		then
 			local sCMD="#!/usr/bin/env bash
 # Load SWARM environment
 	SWARMDIR=$SWARM_DIR_ROOT
 	source \$SWARMDIR/runtime
+	status -c $RET_TODO
 # Prepare command
 	(
 		$@ $sCatchOutputBG
@@ -1084,7 +1085,9 @@
 	bar -C
 	while $PS -p \$PID >/dev/zero
 	do
-		bar \"${sMSG2:-${SWARM_MSG_WORD_RUNNING}: ${@}}\"
+		str=""
+		str=\$(${TAIL:-tail} -n1 "$FILE_LOG" )
+		bar \"${sMSG2:-${SWARM_MSG_WORD_RUNNING}: \${str:-${@}}}\"
 		sleep 0.2
 	done
 	exit \$(<$FILE_RET) #\$RET
@@ -1123,7 +1126,7 @@
 	# Get value if requested
 		RET=$(<"$FILE_RET")
 	# Show and exit with RET code
-		if ${bShowStatus}
+		if ${doShowStatus}
 		then	# Show either of these, has to be different because of additional field
 			if [[ -n "$sMSG3" ]]
 			then	status -c $RET "$sMSG3"

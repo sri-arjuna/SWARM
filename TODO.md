@@ -2,6 +2,7 @@ Statement
 ---------
 Framework core functions were written from scratch, again,
 wheres most functions have been migrated from its initial form TUI.
+
 Due to this, some issues are to be expected in the early public phases
 
 
@@ -45,9 +46,9 @@ Missing: Small Functions
 
 KNOWN ISSUES
 ------------
-swarm.str.usb			linux works, BSD/arm not so sure
-yesno ??			fix empty line in ssh session?
-./runtime log			fix with dynamic FD's
+* swarm.str.usb			linux works, BSD/arm not so sure
+* yesno ??			fix empty line in ssh session?
+* ./runtime log			fix with dynamic FD's
 
 
 Shellcheck recheck:

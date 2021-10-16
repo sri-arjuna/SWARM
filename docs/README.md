@@ -147,7 +147,7 @@ CREDITS:
 * UNIX.com ; Staff & Members
 
 
-Alpha Testers
+ALPHA TESTERS
 -------------
 
 * lsatenstein @ fedoraforum.org
@@ -157,4 +157,4 @@ Alpha Testers
 KNOWN ISSUES
 ------------
 
-* iMac / Apple users must manualy update their BASH to 4.3 using homebrew, see this [StackExchange Article](https://apple.stackexchange.com/questions/193411/update-bash-to-version-4-0-on-osx/197172#197172)
+* iMac / Apple users must manualy update their BASH to 4.3 (or higher) using homebrew, see this [StackExchange Article](https://apple.stackexchange.com/questions/193411/update-bash-to-version-4-0-on-osx/197172#197172)

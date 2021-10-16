@@ -336,7 +336,7 @@
 
 			case "$item" in
 			"${SWARM_MSG_WORD_BACK}")
-				$PRINTF "$POS_END\n" >&2
+				#$PRINTF "$POS_END\n" >&2
 				return 4
 				;;
 			"$SWARM_MSG_HELPMENU_ROOT_TOPIC1")

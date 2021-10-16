@@ -367,7 +367,14 @@
 			$ECHO "$SWARM_MSG_WELCOME_CONTENT" | printe -2 --
 			# Change theme upon first usage?
 			if ${isSWARMfirstTime:-false}
-			then	printe
+			then	title "$SWARM_MSG_PHRASE_FIRST_TIME_TITLE"
+				if yesno "$SWARM_MSG_PHRASE_FIRST_TIME_TEXT"
+				then	# General help
+					$0 help faq
+					$0 help SWARM
+					# Browse stuff
+					$0 help
+				fi
 				yesno "$SWARM_MSG_PHRASE_THEME_CHANGE_QUESTION" && $0 theme
 			fi
 

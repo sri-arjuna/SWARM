@@ -236,17 +236,20 @@
 	swarm.eu.show.sysinfo() { #
 	# Shows all funtions related to System Information
 	#
-		local list="$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.func.$F")"
+		# the list should only need 'hw', however, I need to add "filesystem",
+		# allthough that does not contain a single swarm.sysinfo.* function
+		local list="$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.func.{hw,filesystem}")"
 		local list_verified=""
 	# Sort out the unwanted ones
-		for this in $($PRINTF '%s\n' "$list" | $SORT -u)
+		for this in $list 
 		do
 			# Hide subfunctions
 			[[ "_" == "${this:0:1}" ]] && continue
 			# Hide 'internal' functions
 			$ECHO "$this" | $GREP -q "sysinfo\." || continue
 			# For some reason, I'm getting multiple entries otherwise...
-			$ECHO "$list_verified" | $GREP -q "$this" || list_verified+=" $this"
+			#$ECHO "$list_verified" | $GREP -q "$this" || list_verified+=" $this"
+			list_verified+=" $this"
 		done
 	# Display
 		while true

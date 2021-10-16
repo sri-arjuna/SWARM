@@ -63,6 +63,7 @@
 		local bClear=false	# Do not print \n but return to first (left) field
 		local bPipe=false	# Go for pipe?
 		local sPipeOpts=""	# Pass pipe options
+		local doReturn=false	# Return on same line
 	# Get args
 		while :
 		do
@@ -81,6 +82,10 @@
 				;;
 			"-"|"--")
 				bPipe=true
+				;;
+			"-r")
+				doReturn=true
+				bNewline=false
 				;;
 			*)
 				break
@@ -139,77 +144,12 @@
 				swarm.print.text -e "$1" "$2" "$3"
 				;;
 		esac
-		$bNewline || $PRINTF "$posEND\n"
-	}
-	printl() { # [-|--] STR1 STR2 STR3
-	# Simply prints the strings as passed, stays on the same line
-	# It requires 3 strings to use the center
-		# shellcheck disable=SC2128
-		#swarm.protect "$FUNCNAME" "${@}" && exit 1
-		#set -x
-		local MODE="none"
-		# Get args
-		case "$1" in
-		"-1"|"-2")	MODE="${1/-}"
-				shift
-				;;
-		*)		MODE="normal"
-				;;
-		esac
-		# Get arg number if not forced yet
-		[[ "normal" == "$MODE" ]] && [[ "-" != "$1" ]] && [[ "--" != "$1" ]] && MODE=${#@}
-		# Get pipe?
-		case "$1" in
-		"--"|"-")
-			case "$MODE" in
-			"2")
-				# Read pipe, expect 2 lines
-				while $READ -r LEFT
-				do
-					$READ -r RIGHT
-					printe "$LEFT" "" "$RIGHT"
-				done
-				return 0
-				;;
-			"1")
-				# Read pipe, expect 1 lines
-				while $READ -r LEFT
-				do
-					printe "$LEFT"
-				done
-				return 0
-				;;
-			*)
-				# Read pipe, expect 3 lines (default)
-				while $READ -r LEFT
-				do
-					$READ -r CENTER; $READ -r RIGHT
-					printe "$LEFT" "$CENTER" "$RIGHT"
-				done
-				return 0
-				;;
-			esac
-			;;
-		esac
-		#set +x
-		case "$MODE" in
-			"0")
-				swarm.print.border -e
-				swarm.print.text -e "" "" ""
-				;;
-			"1")
-				swarm.print.border -e
-				swarm.print.text -e "$1" "" ""
-				;;
-			"2")
-				swarm.print.border -e
-				swarm.print.text -e "$1" "" "$2"
-				;;
-			"3")
-				swarm.print.border -e
-				swarm.print.text -e "$1" "$2" "$3"
-				;;
-		esac
+		if $doReturn
+		then	# Return on line
+			$PRINTF "\r"
+		else 	$bNewline || $PRINTF "\n"
+		fi
+
 	}
 #
 # Visual outputs - 'End user' stuff - Core Convenience
@@ -515,45 +455,42 @@
 		# Vars
 		local mode=""
 		local doReturn=false
-		# Catch arguments
-		for opt in "${@}"
-		do	if [[ "-" == "${opt:0:1}" ]]
-			then	case "${opt:1}" in
-				"c")	mode="center"
-					shift
-					;;
-				"l")	mode="left"
-					shift
-					;;
-				"r")	mode="right"
-					shift
-					;;
-				#"R")	doReturn=true
-				#	shift
-				#	;;
-				esac
-			fi
+	# Catch arguments
+		while :
+		do	# Parse args
+			case "$1" in
+			"-c")	mode="center"
+				;;
+			"-l")	mode="left"
+				;;
+			"-r")	mode="right"
+				;;
+			*)	break
+				;;
+			esac
+			shift
 		done
 	# Display
+		swarm.print.border
 		case "$mode" in
 		"center")
-			printl "" "${1:-$SWARM_MSG_PRESS_ENTER}" ""
+			swarm.print.text "" "${1:-$SWARM_MSG_PRESS_ENTER}" ""
 			;;
 		"left")
-			printl "${1:-$SWARM_MSG_PRESS_ENTER}"
+			swarm.print.text "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		"right")
-			printl "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+			swarm.print.text "" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
-		*)
-			printl "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
+		*)	# Default left & right
+			swarm.print.text "${1:-$SWARM_MSG_PRESS_ENTER}" "" "${1:-$SWARM_MSG_PRESS_ENTER}"
 			;;
 		esac
 	# Action :p
 		#$doReturn && \
 		#	$PRINTF "$(swarm.print.goto 0)" && \
 		#	(var=$(builtin read -u buffer n0 2>/dev/null)) & || \
-			read -r
+			IFS="" ${READ:-read} -r 1>/dev/zero
 	}
 	ask() { # "A question?"
 	# Reads a user's input

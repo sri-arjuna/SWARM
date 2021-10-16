@@ -411,15 +411,15 @@
 				then
 					# shellcheck disable=SC2015
 					[[ ${#L} -ge $(( COLUMNS - 6 )) ]] && \
-						swarm.str.split "$L" | printl -1 -- || \
-						printl "$L"
+						swarm.str.split "$L" | printe -1 -- || \
+						printe "$L"
 				fi
 				if [[ -n "$M" ]]
 				then
 					# shellcheck disable=SC2015
 					[[ ${#M} -ge $(( COLUMNS - 6 )) ]] && \
-						swarm.str.split "$M" | printl -2 -- || \
-						printl "$M"
+						swarm.str.split "$M" | printe -2 -- || \
+						printe "$M"
 				fi
 				if [[ -n "$R" ]]
 				then

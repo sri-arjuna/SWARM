@@ -208,7 +208,8 @@
 			# Hide 'internal' functions
 			$ECHO "$this" | $GREP -q -ve "print\." -ve "sanity" -ve "\.eu\." -ve "\.theme" -ve "\.lang\." \
 						-ve "\.udpate" -ve "\.error" -ve "\.cleanup" -ve "\.protect" \
-						-ve "cfg\." -ve "init\." -ve "lang\." -ve "help\." -ve "color\." || continue
+						-ve "cfg\." -ve "init\." -ve "lang\." -ve "help\." -ve "color\." \
+						-ve "sysinfo\." || continue
 			# For some reason, I'm getting multiple entries otherwise...
 			$ECHO "$list_verified" | $GREP -q "$this" || list_verified+=" $this"
 		done
@@ -223,12 +224,45 @@
 			item=$(pick -m $list_verified )
 			case "$item" in
 			"$SWARM_MSG_WORD_BACK")
-				$PRINTF "$POS_END\n" >&2
+				$PRINTF "$POS_END\n" #>&2
 				return 4
 				;;
 			*)
 				swarm.eu.show.submenu "$item"
 				;;
+			esac
+		done
+	}
+	swarm.eu.show.sysinfo() { #
+	# Shows all funtions related to System Information
+	#
+		local list="$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.func.$F")"
+		local list_verified=""
+	# Sort out the unwanted ones
+		for this in $($PRINTF '%s\n' "$list" | $SORT -u)
+		do
+			# Hide subfunctions
+			[[ "_" == "${this:0:1}" ]] && continue
+			# Hide 'internal' functions
+			$ECHO "$this" | $GREP -q "sysinfo\." || continue
+			# For some reason, I'm getting multiple entries otherwise...
+			$ECHO "$list_verified" | $GREP -q "$this" || list_verified+=" $this"
+		done
+	# Display
+		while true
+		do
+			title 	"$SWARM_MSG_HELPMENU_ROOT_TOPIC5"
+			$ECHO "$SWARM_MSG_HELPMENU_SYSINFO_TEXT" | printe -2 --
+			#shellcheck disable=SC2086
+			item=$(pick -m $list_verified )
+			case "$item" in
+			"$SWARM_MSG_WORD_BACK")
+				$PRINTF "$POS_END\n" #>&2
+				return 4
+				;;
+		#	*)
+		#		swarm.eu.show.submenu "$item"
+		#		;;
 			esac
 		done
 	}
@@ -331,7 +365,7 @@
 			title "${SWARM_MSG_HELPMENU_ROOT_TITLE}"
 			printe "${SWARM_MSG_HELPMENU_ROOT_TEXT1}"
 
-			local mnu_root_array=("$SWARM_MSG_HELPMENU_ROOT_TOPIC1" "$SWARM_MSG_HELPMENU_ROOT_TOPIC2" "$SWARM_MSG_HELPMENU_ROOT_TOPIC3" )
+			local mnu_root_array=("$SWARM_MSG_HELPMENU_ROOT_TOPIC1" "$SWARM_MSG_HELPMENU_ROOT_TOPIC2" "$SWARM_MSG_HELPMENU_ROOT_TOPIC3" "$SWARM_MSG_HELPMENU_ROOT_TOPIC5" )
 			item=$(pick -2 -m  "${mnu_root_array[@]}") #$(swarm.eu.function.list))" || item=""
 
 			case "$item" in
@@ -353,6 +387,11 @@
 				# Advanced functions
 				#shellcheck disable=SC2119
 				swarm.eu.show.advanced
+				;;
+			"$SWARM_MSG_HELPMENU_ROOT_TOPIC5")
+				# Show System Information functions
+				#shellcheck disable=SC2119
+				swarm.eu.show.sysinfo
 				;;
 			esac
 		done

@@ -75,6 +75,11 @@ Want to get rid of the settings for SWARM?"
 	SWARM_MSG_HELPMENU_VARS_TEXT="Please select a variable name for more information:"
 	SWARM_MSG_HELPMENU_ADVANCED_TEXT="Please select one of these advanced functions:"
 	SWARM_MSG_HELPMENU_BASIC_SUBMENU_TEXT="Please select the information style:"
+	SWARM_MSG_HELPMENU_SYSINFO_TEXT="This is only a list to review.
+
+For best experience, you should watch:
+$0 sysinfo [SECTION[.SUBSECTION]]
+"
 
 #
 # --- SWARMRC Script Text ---

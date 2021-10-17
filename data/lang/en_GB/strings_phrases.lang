@@ -28,3 +28,4 @@
 	SWARM_MSG_PHRASE_PLEASE_CHECK_LOG="Please check the 'SWARM/runtime log' for more details."
 	SWARM_MSG_PHRASE_FIRST_TIME_TITLE="First Time Usage"
 	SWARM_MSG_PHRASE_FIRST_TIME_TEXT="Would you like to open the help menu to browse?"
+	SWARM_MSG_PHRASE_NO_INTERNET="Could not find a working internet connection."

@@ -610,6 +610,27 @@
 				done
 				status -c $? "All done"
 				;;
+			update)
+				# Attempts to update SWARM
+				if ${PING:-ping} -c1 8.8.8.8 >/dev/zero
+				then	# Google DNS is available = has internet
+					GIT=$(${WHICH:-which} git)
+					if $?
+					then	# Found git
+						${CD:-cd} "$SWARM_DIR/.."
+						git pull https://github.com/sri-arjuna/SWARM ${SWARM_DIR##*/}
+						status $? "$SWARM_MSG_WORD_UPDATED SWARM"
+						exit $?
+					else	# Could not find GIT, lets download it
+						download https://github.com/sri-arjuna/SWARM/archive/refs/heads/main.zip
+						${MV:mv} main.zip SWARM.zip
+						$EX SWARM.zip
+					fi
+				else	# No internet
+					status $? "$SWARM_MSG_PHRASE_NO_INTERNET"
+					exit $?
+				fi
+
 			esac
 		fi
 	fi

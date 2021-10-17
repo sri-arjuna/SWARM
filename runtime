@@ -6,7 +6,7 @@
 # Copyleft:	1995-2021		     #
 # Created:	2020.01.18		     #
 # Changed:	2021.10.17	 	     #
-# Build:	69			     #
+# Build:	69b			     #
 ##############################################
 #
 #	SWARM is the successor of TUI (Text User Interace)
@@ -79,7 +79,7 @@
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
 	SWARM[VERSION]=0.8.12
-	SWARM[BUILD]=69
+	SWARM[BUILD]=69b
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"
@@ -615,10 +615,10 @@
 				if ${PING:-ping} -c1 8.8.8.8 >/dev/zero
 				then	# Google DNS is available = has internet
 					GIT=$(${WHICH:-which} git)
-					if $?
+					if [[ 0 == $? ]]
 					then	# Found git
-						${CD:-cd} "$SWARM_DIR/.."
-						git pull https://github.com/sri-arjuna/SWARM ${SWARM_DIR##*/}
+						${CD:-cd} "${SWARM[ROOTDIR]}"
+						git pull https://github.com/sri-arjuna/SWARM
 						status $? "$SWARM_MSG_WORD_UPDATED SWARM"
 						exit $?
 					else	# Could not find GIT, lets download it

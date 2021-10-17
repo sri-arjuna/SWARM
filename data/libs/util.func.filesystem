@@ -285,6 +285,7 @@ swarm.util.rm() { # FILE1 DIR2
 # Deletes files and dirs recurisvly.
 # Ask before removing a directory.
 	local isVerbose=false
+	local RET=1
 	if [[ "-v" == "$1" ]]
 	then	isVerbose=true
 		shift
@@ -320,4 +321,5 @@ swarm.util.rm() { # FILE1 DIR2
 		[[ $RET == 0 ]] && [[ -f "$SWARM_LOG" ]] && init.log "$msg"
 		$isVerbose && status "$RET" "$msg"
 	done
+	return $RET
 }

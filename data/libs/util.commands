@@ -938,7 +938,7 @@
 		local sMSG3=""	# Post - run
 		local beInBackground=false
 		local doShowStatus=true
-		local sCatchOutputBG="1>>\"$FILE_LOG\" 2>>\"$FILE_LOG\""
+		local sCatchOutputBG="2>>\"$FILE_LOG\""
 	# Check arguments, exit on missing
 		while :
 		do
@@ -982,8 +982,8 @@
 				shift
 				;;
 			"-o")
-				$TOUCH "$2"
-				sCatchOutputBG="1>\"$2\" 2>>\"$FILE_LOG\""
+				$TOUCH "${2:-$FILE_LOG}"
+				sCatchOutputBG="1>>\"${2:-$FILE_LOG}\" $sCatchOutputBG"
 				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_OUT == $2"
 				FILE_OUT="$2"
 				shift
@@ -1009,7 +1009,7 @@
 # Load SWARM environment
 	SWARMDIR=$SWARM_DIR_ROOT
 	source \$SWARMDIR/runtime
-	status -c $RET_TODO
+	#status -c $RET_TODO
 # Prepare command
 	(
 		$@ $sCatchOutputBG
@@ -1018,15 +1018,19 @@
 		exit \$RET
 	) &
 	PID=\$!
+	#len=\${SWARM_THEME_DATA[border-left]}
+	#len=\$(( \${#len} + 1 ))
 # Do the loop
 	bar -C
 	while $PS -p \$PID >/dev/zero
 	do
-		str=""
-		str=\$(${TAIL:-tail} -n1 "$FILE_LOG" )
+		str=\"\" ## \"\$(swarm.print.goto \$len )\"
+		str=\$(${TAIL:-tail} -n1 \"$FILE_LOG\" )
 		bar \"${sMSG2:-${SWARM_MSG_WORD_RUNNING}: \${str:-${@}}}\"
 		sleep 0.2
 	done
+	#status -r -c \"\"
+	#$PRINTF \"\n\"
 	exit \$(<$FILE_RET) #\$RET
 "
 			$ECHO "$sCMD" > "$FILE_TMP"

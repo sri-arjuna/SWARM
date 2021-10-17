@@ -375,7 +375,7 @@
 
 		if [[ ${len_strings_total:-0} -ge $(( COLUMNS - 6 )) ]]
 		then	# Needs splitting
-			case "$MODE" in
+			case "${MODE:-basic}" in
 			"basic")
 				if false; then
 				# Wish this would work, but all this shows are empty lines

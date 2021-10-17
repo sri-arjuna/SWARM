@@ -464,19 +464,29 @@
 				;;
 			"log")
 				case "$2" in
-				clear)	# Clears the log file
-					>"$SWARM_LOG"
-					;;
 				alt)	# Uses alternate methods
 					title "SWARM LOG"
 					${MORELESS:-cat} "$SWARM_LOG"
+					RET=$?
+					;;
+				clear|clean)
+					# Clears the log file
+					>"$SWARM_LOG"
+					RET=$?
+					;;
+				rm|remove|del|delete)
+					# Delete the file
+					swarm.util.rm "$SWARM_LOG"
+					status -c $? "$SWARM_MSG_WORD_DELETED: $SWARM_LOG"
+					RET=$?
 					;;
 				*)	# Show log with 'default' settings
 					title "SWARM LOG"
 					printfile "$SWARM_LOG"
+					RET=$?
 					;;
 				esac
-				exit $?
+				exit $RET
 				;;
 			"crash")
 				title "SWARM CRASH LOG"

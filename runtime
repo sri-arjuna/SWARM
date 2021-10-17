@@ -403,7 +403,7 @@
 				F="$HOME/swarm-${SWARM[BUILD]}-full.tar.gz"
 				tar -acf "$F" "${SWARM_DIR_ROOT##*/}" 2&>/dev/null
 				[[ -f "$F" ]]
-				status $? "$F"
+				status $? "$SWARM_MSG_WORD_CREATED: $F"
 				cd "$OLDPWD"
 				;;
 			"tar")
@@ -412,7 +412,7 @@
 				F="$HOME/swarm-${SWARM[BUILD]}.tar.gz"
 				tar -acf "$F" --exclude ".git" "${SWARM_DIR_ROOT##*/}"  2&>/dev/null
 				[[ -f "$F" ]]
-				status $? "$F"
+				status -c $? "$SWARM_MSG_WORD_CREATED: $F"
 				cd "$OLDPWD"
 				;;
 			"new")

@@ -333,6 +333,7 @@
 		[[ "-" = "${1:0:1}" ]] && \
 			case ${1/-} in
 			t)	MODE=title
+				fix_header_r=3 #$(( ${#SWARM_COLOR_INVERT} + ${#c_front} + ${#c_back} ))
 				shift	;;
 			h)	MODE=header
 				fix_header_r=0
@@ -471,6 +472,12 @@
 				$PRINTF "${posLEFT}${c_front}${c_back}$1"
 				$PRINTF "${posRIGHT}$2${c_reset}"
 				;;
+			"title")
+				#local len_left=$(( ${#SWARM_COLOR_INVERT} + ${#c_front} ${#c_back} ))
+				local posRIGHT="\33[$(( numEND - lenMiddle - lenEvalMiddle - 1 - fix_header_r  ))G"
+				$PRINTF "${posLEFT}${SWARM_COLOR_INVERT}${c_front}${c_back}$1"
+				$PRINTF "${posRIGHT}${SWARM_COLOR_INVERT}${c_front}${c_back}$2${c_reset}"
+				;;
 			esac
 			;;
 		3)
@@ -495,6 +502,17 @@
 				$PRINTF "${posMIDDLE}$2"
 				$PRINTF "${posRIGHT}$3${c_reset}"
 				;;
+			"title")
+				local posRIGHT=""
+				# The following grep is required for (util.func.)bar
+				if $ECHO "$3" | $GREP -q '%%'
+				then	posRIGHT="\33[$(( numEND - identRight - lenEvalRight ))G"
+				else	posRIGHT="\33[$(( numEND - identRight - lenEvalRight - 1 - len_left ))G"
+				fi
+
+				$PRINTF "${posLEFT}${SWARM_COLOR_INVERT}${c_front}${c_back}$1${SWARM_RESET}"
+				$PRINTF "${posMIDDLE}${SWARM_COLOR_INVERT}${c_front}${c_back}$2${SWARM_RESET}"
+				$PRINTF "${posRIGHT}${SWARM_COLOR_INVERT}${c_front}${c_back}$3${SWARM_RESET}"
 			esac
 			;;
 		esac

@@ -15,10 +15,15 @@ swarm.list.files() { # DIR
 	# Parse the array
 	for item in "${FILES[@]}"
 	do
-		# This is about FILES, so skip Directories
-		[[ -d "${item}" ]] && { unset FILES[$iCounter] ; continue ; }
-		# Make sure we can resolve the filename
-		[[ -f "${item}" ]] && $ECHO "$($ECHO ${item})" || { unset FILES[$iCounter] ; continue ; }
+		if [[ -d "${item}" ]]
+		then	# This is about FILES, so skip directories
+			unset FILES[$iCounter]
+		elif [[ -f "${item}" ]]
+		then	# We can resolve the filename, so let this pass
+		 	$ECHO "$($ECHO ${item})"
+		else 	# Cannot handle this item, so lets remove this
+			unset FILES[$iCounter]
+		fi
 		((iCounter++))
 	done
 	# Export Array for -> ADDITIONAL <- reuse

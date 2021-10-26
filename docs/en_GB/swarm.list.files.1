@@ -1,0 +1,44 @@
+.\" Manpage template for SWARM
+.TH SWARM 1 "Copyleft 1995-2020" "SWARM 1.0" "SWARM Manual"
+
+.SH NAME
+\fBswarm.list.files\fP - Summarized manpage for list functions
+
+.SH DESCRIPTION
+The \fBswarm.list.files\fP Lists all files of the passed directory and exports them to the array \fBFILES\fP.
+
+.SH SYNOPSIS
+.TP
+\fBswarm.list.files "$PWD"\fP
+Prints each file on a new line, you might need to consider special handling to preserve new multi-line filenames, which are shown as a single line!
+
+
+.SH EXAMPLE
+.P
+This could be used to search for a certain file extension within a directory:
+.RE
+	PATTERN_EXT="${1:-txt}"
+.RE
+	swarm.list.files "$PWD" | grep  ${PATTERN_EXT}$ | while read -r FN
+.RE
+	do
+.RE
+		echo "line: $FN"
+.RE
+	done
+.P
+Or select one of the files:
+.RE
+	swarm.list.files "$PWD" >/dev/zero
+.RE
+	FN=$(pick "${FILES[@]}")
+
+
+.SH BUGS
+.PP
+ Report bugs to: https://github.com/sri-arjuna/SWARM/issues
+ SWARM - Homepage: https://github.com/sri-arjuna/SWARM/
+ General help using GNU software: <http://www.gnu.org/gethelp/>
+
+.SH AUTHOR
+This manpage was written by Simon Arjuna Erat (sea) for SWARM version 1.0

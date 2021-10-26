@@ -1,21 +1,29 @@
 #!/usr/bin/env bash
 swarm.list.files() { # DIR
 # Returns a list of every file contained in DIR
-#
-	local DIR=""
+# Exports all the entries as array FILES
+	# Check for passed argument
 	[[ -z "$1" ]] && { swarm.help.usage "${FUNCNAME[@]}" ; return 1 ; }
-	DIR="$1" ; shift
-	$CD "$DIR"
-	for f in $($LS -a1) # for f in "$d"/* "$d"/.[!.]*
+	# Check if it is a directory, fail otherwise
+	[[ ! -d "$1" ]] && { status 1 "$SWARM_MSG_PHRASE_DIRNOTFOUND" "${FUNCNAME[@]} $1" ; return 1 ; }
+	# Prepare counter to remove unwanted entries
+	local iCounter=0
+	# Go to the work dir
+	$CD "$1"
+	# Lets fill an array
+	FILES=( * )
+	# Parse the array
+	for item in "${FILES[@]}"
 	do
-		case "$f" in
-		'.'|'..')
-			continue
-			;;
-		*)	[[ -f "$f" ]] && $PRINTF '%s\n' "$f"
-			;;
-		esac
+		# This is about FILES, so skip Directories
+		[[ -d "${item}" ]] && { unset FILES[$iCounter] ; continue ; }
+		# Make sure we can resolve the filename
+		[[ -f "${item}" ]] && $ECHO "$($ECHO ${item})" || { unset FILES[$iCounter] ; continue ; }
+		((iCounter++))
 	done
+	# Export Array for -> ADDITIONAL <- reuse
+	export -A FILES
+	# Go back to where we were
 	$CD "$OLDPWD"
 }
 swarm.list.dirs() { # DIR

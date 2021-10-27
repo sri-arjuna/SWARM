@@ -119,3 +119,8 @@ $0 sysinfo [SECTION[.SUBSECTION]]
 # --- SWARMRC sysinfo text
 #
 	SWARM_MSG_SYSINFO_INFO="You can limit this output by passing the section name as argument."
+#
+# --- SWARM-TUI ---
+#
+	SWARM_MSG_TUI_TITLE="SWARM - Text User Interface"
+	SWARM_MSG_TUI_EMPTY_LOCATION="Location is empty"

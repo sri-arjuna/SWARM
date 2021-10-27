@@ -4,11 +4,264 @@
 #	Contact:	erat.simon@gmail.com
 #	License:	GNU General Public License (GPL)
 #	Created:	2014.04.26
-#	Changed:	2015.11.27
+#	Changed-orig:	2015.11.27
+# 	Changed-SWARM:	2021.10.26
 #	Description:	A script to browse a folder recursively,
 #			using its start directory as 'BASE' which it wont leave ".."
 #			Highly modifiable.
-tui() { #
+#
+tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
+# Brows BASE_PATH using SWARM function, exit once leaving (back) BASE_PATH for "top level"
+# See manpage ./runtime help tui for all details
+	local tui_version=0.9.5
+	local PWD_OLD="$PWD"
+	#local tui_conf=$SWARM_DIR_CONF/${ME}/${ME}.conf
+# Default values
+	# Labels = show to user
+	local lbl_title="${ME:-$SWARM_MSG_TUI_TITLE} (${script_version:-$tui_version})"	# 0 TOP RIGHT
+	local lbl_user="$USER_NAME" # @ $(${DATE:-date} +'%F %T')"			# 0 TOP LEFT
+	local lbl_location="$SWARM_MSG_WORD_LOCATION:"					# 1 TOP RIGHT
+	local lbl_position=""								# 1 TOP LEFT	-- unused yet
+	local lbl_dir="$SWARM_MSG_WORD_DIR"
+	local lbl_file="$SWARM_MSG_WORD_FILE"
+	# Strings = internal usage
+	local str_default="default"
+	# Booleans
+	local doShowPositionOnDirectCall=false
+	local doClearOnNewMenu=false
+	local doShowFirstHeader=true
+	local beQuiet=false
+	# Specials
+
+# Get arguments
+	while :
+	do
+		case "$1" in
+		"-c")	# Config File
+			if [[ -f "$2" ]]
+			then 	# Argument exists
+				tui_conf="$2"
+				shift
+			else 	# File or dir could not be found
+				status 1 "${SWARM_MSG_PHRASE_MISSING_ARG}" "CONF=$2"
+				return 1
+			fi
+			;;
+		"-d")	# Change the str: default to $2
+			if [[ "-" == "${2:0:1}" ]]
+			then	# $2 starts with a "-" and is invalid
+				status 1 "${SWARM_MSG_PHRASE_MISSING_ARG}" "default=$2"
+				return 1
+			else	# Seems like a valid string:
+				str_default="$2"
+				shift
+			fi
+			;;
+		"-C")	# Force Clearscreen on every new menu "page"
+			doClearOnNewMenu=true
+			;;
+		"-S")	# Force position display on Sub-Script call
+			$beQuiet && continue
+			doShowPositionOnDirectCall=true
+			;;
+		"-U")	# Do not use $USER_NAME, but this string instead on header top right
+			if [[ "-" == "${2:0:1}" ]]
+			then	# $2 starts with a "-" and is invalid
+				status 1 "${SWARM_MSG_PHRASE_MISSING_ARG}" "lbl_user=$2"
+				return 1
+			else	# Seems like a valid string:
+				lbl_user="$2"
+				shift
+			fi
+			;;
+		"-q")	# Stay quiet, do not show header, title or footer... ever!
+			# Let the scripts handle these ; This overwrites "-S"
+			beQuiet=true
+			doShowPositionOnDirectCall=false
+			doShowFirstHeader=false
+			;;
+		*)	# Break on first non-option-arguments
+			break
+			;;
+		esac
+		shift
+	done
+	BASE_DIR="$1" ; shift
+	# Head for the 'menu' base_dir
+	# and prepare for any possible base sub dir
+	$CD "$BASE_DIR"
+	BASE=""
+# Internal functions
+	_tui.pos.show() { # PATH
+	# Parses PATH and 'make it look nice'
+	# Returns the 'nice looking string'
+		if [[ -z "$1" ]] ; then status 1 $PRINTF "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; fi
+		local str="${1/$BASE_DIR}"
+		local out=""
+	# If PATH is just $BASE it shows a simple /, otherwise removing leading .
+		case "$str" in
+		"")	$ECHO "/"
+			;;
+		".")	$SED s\\"/"\\" / "\\g <<< "$PWD"
+			;;
+		*)	$SED s\\"/"\\" / "\\g <<< "$str"
+			;;
+		esac
+	## DEBUG
+	#	echo "
+	#	0$0
+	#	1: $1
+	#	BD:$BASE_DIR
+	#	str: $str
+	#	" >> /dev/stderr
+		return
+	## Original
+		if [[ "$1" == "${BASE_DIR}" ]]
+		then	out="/"
+		elif $GREP -q '\.' <<< "${1}"
+		then	out="${1:1}"
+		else	out="${1}"
+		fi
+	# Replace the slashes with something else  (space-slash-space)
+		#set -x
+		$SED s\\"/"\\" / "\\g <<< "/${out}" | $SED s," /  / ","/",
+		#set +x
+	}
+	_tui.pos.fromArgs() { # ARGS[@]
+	# Parses ARGS[@] and prints an absolute path to passed arguments as path
+	#
+		if [[ -z "$1" ]] ; then status 1 $PRINTF "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; fi
+		[[ -z "$BASE" ]] && return 1
+		out="$BASE/"
+		for a in "${@}";do
+			[[ -d "$out/$a" ]] && out+="$a/"
+		done
+		$ECHO "$out"
+	}
+	_tui.show.content() { # ABSOLUTEPATH
+	# Displays the content of a path
+	#
+		[[ -z "$1" ]] && { status 1 $PRINTF "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; }
+		$CD "$1"
+	# Vars
+	#	unset folders[@] files[@]
+	#	declare -a folders=( $(swarm.list.dirs "$1" | $GREP -v "${str_default}\." ) )
+	#	declare -a files=( $(swarm.list.files "$1" | $GREP -v "${str_default}\.") )
+	# Preps SPECIAL handling (str_default)
+		for task in cmd info
+		do
+			if [[ -f "${str_default}.$task" ]]
+			then	# The special file is available
+				case "$task" in
+				cmd)	# This needs to be sourced so we have all variables available
+					source "${str_default}.$task"
+					;;
+				info)	# This is just for display
+					printfile "${str_default}.$task"
+					;;
+				esac
+			fi
+		done
+	# Preparation
+		if [[ -z "${folders[@]}${files[@]}" ]]
+		then 	status 111 "$SWARM_MSG_TUI_EMPTY_LOCATION"
+			printe
+		else	# Has entries for this directory
+			# Show content
+			return
+			printlist -n "${folders[@]}" "${files[@]}"
+			return
+
+			for task in folder files;do
+				unset array
+				# Counters C D E
+				C=0 ; D=1 ; E=2
+				# Show task and create specific array
+				case $task in
+				folder)	content_title="$lbl_dir"
+					array=( "${folders[@]}" )
+					;;
+				files)	content_title="$lbl_file"
+					array=( "${files[@]}" )
+					;;
+				esac
+				# Don't show title if no entries available
+				if [ ! 0 = "${#array[@]}" ]
+				then 	title "${content_title}:"
+					printlist -n "${array[@]}"
+				fi
+			done
+		fi
+	}
+#
+# --- Prepare args for BASE
+#
+	if [[ -n "$@" ]]
+	then	# There are:
+		#echo $@
+		for item in "${@}"
+		do
+			if [[ -d "$item" ]]
+			then	# it is a directory, change to it
+				$CD "$item"
+				BASE="$PWD"
+				shift
+			else 	# It is a file now:
+				workitem="$item" ; shift
+				if ! $beQuiet
+				then	# Show headers
+					if $doShowFirstHeader
+					then 	header "${script_name:-${FUNCNAME[0]}} (${script_version:-$tui_version})" "" "$@ | $(swarm.date.today) / $(swarm.date.time)"
+						! $doClearOnNewMenu || doShowFirstHeader=false
+					fi
+				fi
+				# Call/Execute/Source it
+				source "$workitem" $@
+				return
+			fi
+		done
+	fi
+#
+# --- ACTUAL HANDLING ---
+#
+	while $GREP -q ${BASE:-$BASE_DIR} <<< $PWD
+	do
+	# Get current data:
+		unset folders[@] files[@]
+		declare -a folders=( $(swarm.list.dirs "$1" | $GREP -v "${str_default}\." ) )
+		declare -a files=( $(swarm.list.files "$1" | $GREP -v "${str_default}\.") )
+	# Show menu ?
+		$doClearOnNewMenu && clear
+		if ! $beQuiet
+		then	# Show headers
+			if $doShowFirstHeader
+			then 	header "${script_name:-${FUNCNAME[0]}} (${script_version:-$tui_version})" "" "$(swarm.date.today) / $(swarm.date.time)"
+				$doClearOnNewMenu || doShowFirstHeader=false
+			fi
+			swarm.print.border -t
+			swarm.print.text -t "$lbl_location" "$(_tui.pos.show "${PWD}")"
+			$PRINTF "\n"
+		fi
+	# Select action
+		action=$(pick -m  $(swarm.list.dirs "$PWD") $(swarm.list.files "$PWD" | $GREP -v "${str_default}\." ) )  ##"${folders[@]}" "${files[@]}" )
+		case "$action" in
+		"$SWARM_MSG_WORD_BACK")
+			$CD ..
+			;;
+		*)	# Lets check if it is a file or dir
+			if [[ -d "$action" ]]
+			then	$CD "$action"
+			else 	source "$action"
+			fi
+			;;
+		esac
+	done
+	${CD_EXEC:-cd} "$PWD_OLD"
+}
+
+
+
+tui_old() { #
 #
 #
 	script_version=0.9.1c

@@ -64,8 +64,8 @@ In the following I'll use certain terms to simplify explanations:
 * <PRJ_DIR> = Something along: $HOME/prj/<PROJECT NAME>
 
 
-Get started:
-------------
+Configuration:
+--------------
 
 After the project is created, usualy at __$HOME/prjs/<FOLDERNAME>__, but depending on your SWARM settings this might be somewhere different, you can start tweaking the files SWARM has created and adjust them to your needs.
 
@@ -83,6 +83,10 @@ This will allow users to call:
 
 And select among multiple config files, where/if available.
 This will work in the very same way as __SWARM/runtime conf[ig]__
+
+Be aware, while you provide a default configuration file, this will be copied 'as is' to something like: __$HOME/.config/swarm/conf/${script_name}/${script_name}.conf__
+
+This said, users will edit that/those file/s, not the file/s that you actualy provided!
 
 
 More Variables:

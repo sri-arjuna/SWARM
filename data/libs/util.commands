@@ -129,27 +129,26 @@
 		case "$MODE" in
 			"0")
 				swarm.print.border -e
-				swarm.print.text -e "" "" ""
+				swarm.print.text "" "" ""
 				;;
 			"1")
 				swarm.print.border -e
-				swarm.print.text -e "$1" "" ""
+				swarm.print.text "$1" "" ""
 				;;
 			"2")
 				swarm.print.border -e
-				swarm.print.text -e "$1" "" "$2"
+				swarm.print.text "$1" "" "$2"
 				;;
 			"3")
 				swarm.print.border -e
-				swarm.print.text -e "$1" "$2" "$3"
+				swarm.print.text "$1" "$2" "$3"
 				;;
 		esac
 		if $doReturn
 		then	# Return on line
 			$PRINTF "\r"
-		else 	$bNewline || $PRINTF "\n"
+		else 	$bNewline && $PRINTF "\n"
 		fi
-
 	}
 #
 # Visual outputs - 'End user' stuff - Core Convenience

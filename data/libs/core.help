@@ -241,7 +241,7 @@
 		local list="$(swarm.eu.function.list "${SWARM_DIR_LIBS}/util.func.{hw,filesystem}")"
 		local list_verified=""
 	# Sort out the unwanted ones
-		for this in $list 
+		for this in $list
 		do
 			# Hide subfunctions
 			[[ "_" == "${this:0:1}" ]] && continue
@@ -818,6 +818,9 @@
 			;;
 		"swarm.date.log_long")
 			out="$SWARM_MSG_DATE_LOGLONG_USAGE"
+			;;
+		"tui")
+			out="$SWARM_MSG_TUI_USAGE"
 			;;
 		"")
 			out="$"

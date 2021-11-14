@@ -88,14 +88,28 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 	done
 	# Check for valid arguments
 	if [[ -z "$1" ]]
-	then	#status -c 1 "${SWARM_MSG_WORD_USAGE}: \"${FUNCNAME[0]}\" - $SWARM_MSG_TUI_MISSNG_PATH"
+	then	status -c 1 "\"${FUNCNAME[0]}\" - $SWARM_MSG_TUI_MISSNG_PATH"
 		swarm.help.usage "${FUNCNAME[0]}"
 		return 1
 	elif [[ ! -d "$1" ]]
-	then	#status -c 1 "${SWARM_MSG_WORD_USAGE}: \"${FUNCNAME[0]}\" - $SWARM_MSG_TUI_MISSNG_PATH"
+	then	status -c 1 "\"${FUNCNAME[0]}\" - $SWARM_MSG_TUI_MISSNG_PATH"
 		swarm.help.usage "${FUNCNAME[0]}"
 		return 1
-	else	BASE_DIR="$1"
+	else	# We got an argument, lets verify it:
+		if [[ "." == "$1" ]]
+		then	# its a dot, fix this
+			BASE_DIR="$PWD"
+		else	# Should be valid, but check for length
+			if [[ -d "$PWD/$1" ]]
+			then	# Yay
+				BASE_DIR="$PWD/$1"
+			elif [[ -d "$1" ]]
+			then	BASE_DIR="$1"
+			else	# Nay
+				swarm.help.usage "${FUNCNAME[0]}"
+				return 1
+			fi
+		fi
 		shift
 	fi
 	ARGS=( "${@}" )
@@ -108,6 +122,7 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 	# Parses PATH and 'make it look nice'
 	# Returns the 'nice looking string'
 		if [[ -z "$1" ]] ; then status 1 "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; fi
+		# IF BASE_DIR is empty, assign old PWD
 		[[ -z "$BASE_DIR" ]] && str="" && export BASE_DIR="$PWD_OLD"
 		local str="${1/$BASE_DIR}"
 	# If PATH is just $BASE it shows a simple /, otherwise removing leading .
@@ -116,31 +131,12 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 		"")	$ECHO "/"
 			;;
 		".")	# Is this even executed?
-			echo "DEBUG: _tui.pos.show IS used with a dot (.) yay" > /dev/stderr
+			$ECHO "DEBUG: ${FUNCNAME[0]} IS used with a dot (.) yay" > /dev/stderr
 			$SED s\\"/"\\" / "\\g <<< "${PWD/$BASE_DIR}"
 			;;
 		*)	$SED s\\"/"\\" / "\\g <<< "${str/$BASE_DIR}"
 			;;
 		esac
-	## DEBUG
-	#	echo "
-	#	0$0
-	#	1: $1
-	#	BD:$BASE_DIR
-	#	str: $str
-	#	" >> /dev/stderr
-		return
-	## Original
-		if [[ "$1" == "${BASE_DIR}" ]]
-		then	out="/"
-		elif $GREP -q '\.' <<< "${1}"
-		then	out="${1:1}"
-		else	out="${1}"
-		fi
-	# Replace the slashes with something else  (space-slash-space)
-		#set -x
-		$SED s\\"/"\\" / "\\g <<< "/${out}" | $SED s," /  / ","/",
-		#set +x
 	}
 	_tui.pos.fromArgs() { # ARGS[@]
 	# Parses ARGS[@] and prints an absolute path to passed arguments as path
@@ -178,7 +174,7 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 			fi
 		done
 	# Preparation
-		echo PREP > /dev/stderr
+		echo "DEBUG: PREP" > /dev/stderr
 		if [[ -z "${folders[@]}${files[@]}" ]]
 		then 	status 111 "$SWARM_MSG_TUI_EMPTY_LOCATION"
 			printe
@@ -233,10 +229,10 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 				# Call/Execute/Source it
 				source "$workitem" "${@}"
 				return
-			else	echo FATAL ERROR
+			else	echo "DEBUG: FATAL ERROR" >> /dev/stderr
 			fi
 		done
-	#else echo häää
+	#else echo KEINE ARGS
 	fi
 #
 # --- ACTUAL HANDLING ---
@@ -578,7 +574,7 @@ AUTHOR
 	ShowContent() { # ABSOLUTEPATH
 	# Displays the content of a path
 	#
-		[ -z "$1" ] && printf "Missing argument" && return 1
+		[[ -z "$1" ]] && printf "Missing argument" && return 1
 		if [ "" = "$(ls)" ]
 		then 	tui-status 1 "Location is empty"
 			tui-print

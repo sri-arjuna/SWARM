@@ -86,7 +86,19 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 		esac
 		shift
 	done
-	BASE_DIR="$1" ; shift
+	# Check for valid arguments
+	if [[ -z "$1" ]]
+	then	#status -c 1 "${SWARM_MSG_WORD_USAGE}: \"${FUNCNAME[0]}\" - $SWARM_MSG_TUI_MISSNG_PATH"
+		swarm.help.usage "${FUNCNAME[0]}"
+		return 1
+	elif [[ ! -d "$1" ]]
+	then	#status -c 1 "${SWARM_MSG_WORD_USAGE}: \"${FUNCNAME[0]}\" - $SWARM_MSG_TUI_MISSNG_PATH"
+		swarm.help.usage "${FUNCNAME[0]}"
+		return 1
+	else	BASE_DIR="$1"
+		shift
+	fi
+	ARGS=( "${@}" )
 	# Head for the 'menu' base_dir
 	# and prepare for any possible base sub dir
 	$CD "$BASE_DIR"
@@ -95,16 +107,19 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 	_tui.pos.show() { # PATH
 	# Parses PATH and 'make it look nice'
 	# Returns the 'nice looking string'
-		if [[ -z "$1" ]] ; then status 1 $PRINTF "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; fi
+		if [[ -z "$1" ]] ; then status 1 "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; fi
+		[[ -z "$BASE_DIR" ]] && str="" && export BASE_DIR="$PWD_OLD"
 		local str="${1/$BASE_DIR}"
-		local out=""
 	# If PATH is just $BASE it shows a simple /, otherwise removing leading .
+	#echo "BD=$BASE_DIR // str=$str tmpval=$tmpval ARGS=${ARGS[*]}">/dev/stderr
 		case "$str" in
 		"")	$ECHO "/"
 			;;
-		".")	$SED s\\"/"\\" / "\\g <<< "$PWD"
+		".")	# Is this even executed?
+			echo "DEBUG: _tui.pos.show IS used with a dot (.) yay" > /dev/stderr
+			$SED s\\"/"\\" / "\\g <<< "${PWD/$BASE_DIR}"
 			;;
-		*)	$SED s\\"/"\\" / "\\g <<< "$str"
+		*)	$SED s\\"/"\\" / "\\g <<< "${str/$BASE_DIR}"
 			;;
 		esac
 	## DEBUG
@@ -144,9 +159,9 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 		[[ -z "$1" ]] && { status 1 $PRINTF "$SWARM_MSG_PHRASE_MISSING_ARG" "${FUNCNAME[0]}"; return 1 ; }
 		$CD "$1"
 	# Vars
-	#	unset folders[@] files[@]
-	#	declare -a folders=( $(swarm.list.dirs "$1" | $GREP -v "${str_default}\." ) )
-	#	declare -a files=( $(swarm.list.files "$1" | $GREP -v "${str_default}\.") )
+		unset folders[@] files[@]
+		declare -a folders=( $(swarm.list.dirs "$1" | $GREP -v "${str_default}\." ) )
+		declare -a files=( $(swarm.list.files "$1" | $GREP -v "${str_default}\.") )
 	# Preps SPECIAL handling (str_default)
 		for task in cmd info
 		do
@@ -163,12 +178,12 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 			fi
 		done
 	# Preparation
+		echo PREP > /dev/stderr
 		if [[ -z "${folders[@]}${files[@]}" ]]
 		then 	status 111 "$SWARM_MSG_TUI_EMPTY_LOCATION"
 			printe
 		else	# Has entries for this directory
 			# Show content
-			return
 			printlist -n "${folders[@]}" "${files[@]}"
 			return
 
@@ -198,7 +213,7 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 #
 	if [[ -n "$@" ]]
 	then	# There are:
-		#echo $@
+		#echo "NOT empty -- $@" > /dev/stderr
 		for item in "${@}"
 		do
 			if [[ -d "$item" ]]
@@ -206,8 +221,8 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 				$CD "$item"
 				BASE="$PWD"
 				shift
-			else 	# It is a file now:
-				workitem="$item" ; shift
+			elif [[ -f "$item" ]] 	# It is a file now:
+			then	workitem="$item" ; shift
 				if ! $beQuiet
 				then	# Show headers
 					if $doShowFirstHeader
@@ -216,15 +231,17 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 					fi
 				fi
 				# Call/Execute/Source it
-				source "$workitem" $@
+				source "$workitem" "${@}"
 				return
+			else	echo FATAL ERROR
 			fi
 		done
+	#else echo häää
 	fi
 #
 # --- ACTUAL HANDLING ---
 #
-	while $GREP -q ${BASE:-$BASE_DIR} <<< $PWD
+	while [[ -n "$GREP" ]] && ${GREP} -q ${BASE:-$BASE_DIR} <<< $PWD
 	do
 	# Get current data:
 		unset folders[@] files[@]
@@ -246,7 +263,7 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 		action=$(pick -m  $(swarm.list.dirs "$PWD") $(swarm.list.files "$PWD" | $GREP -v "${str_default}\." ) )  ##"${folders[@]}" "${files[@]}" )
 		case "$action" in
 		"$SWARM_MSG_WORD_BACK")
-			$CD ..
+			${CD:-cd} ..
 			;;
 		*)	# Lets check if it is a file or dir
 			if [[ -d "$action" ]]
@@ -259,7 +276,7 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 	${CD_EXEC:-cd} "$PWD_OLD"
 }
 
-
+return
 
 tui_old() { #
 #

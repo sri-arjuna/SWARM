@@ -40,7 +40,7 @@
 	SWARM_MSG_WELCOME_INFOLINE1="SWARM is not supposed to be called directly like this."
 	SWARM_MSG_WELCOME_INFOLINE2="Instead it is to be sourced by your script to get access to it's functions."
 	SWARM_MSG_WELCOME_INFOLINE3="For best experience, I recomend to place SWARM as follows:"
-SWARM_MSG_WELCOME_CONTENT="When calling SWARM like you just did, you should provide arguments.
+	SWARM_MSG_WELCOME_CONTENT="When calling SWARM like you just did, you should provide arguments.
 
 They are:
 
@@ -124,3 +124,4 @@ $0 sysinfo [SECTION[.SUBSECTION]]
 #
 	SWARM_MSG_TUI_TITLE="SWARM - Text User Interface"
 	SWARM_MSG_TUI_EMPTY_LOCATION="Location is empty"
+	SWARM_MSG_TUI_MISSNG_PATH="Must provide a path to browse"

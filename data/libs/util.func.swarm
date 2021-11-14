@@ -237,7 +237,7 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 #
 # --- ACTUAL HANDLING ---
 #
-	while [[ -n "$GREP" ]] && ${GREP} -q ${BASE:-$BASE_DIR} <<< $PWD
+	while [[ -n "$GREP" ]] && ${GREP} -q ${BASE:-$BASE_DIR} <<< $PWD >/dev/null
 	do
 	# Get current data:
 		unset folders[@] files[@]

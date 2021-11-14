@@ -245,9 +245,9 @@ bar()  { # [options] [MESSAGE]
 		bar_total="$($PRINTF '%*s' ${length/.*})"
 		bar_total="[${bars}${bar_total:${#bars}}]"
 		PROGRESS="$bar_total"
-		if [[ $cent -ge 50 ]] && [[ -n "${SWARM_THEME_DATA[bar-half]}" ]]
+		if [[ $cent -ge 50 ]] && [[ -n "${SWARM_THEME_bar_half}" ]]
 		then	# Replace first BAR indicator with the half-indicator
-			PROGRESS=${PROGRESS/${SWARM_THEME_DATA[bar]} /${SWARM_THEME_DATA[bar-half]} }
+			PROGRESS=${PROGRESS/${SWARM_THEME_bar} /${SWARM_THEME_bar_half} }
 		fi
 		;;
 		*)	status 1 "Error, progressbar type ($TYPE) is unhandled"

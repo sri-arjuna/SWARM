@@ -78,8 +78,8 @@
 		hasCOLUMNS=false
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
-	SWARM[VERSION]=0.9.1
-	SWARM[BUILD]=71
+	SWARM[VERSION]=0.9.2
+	SWARM[BUILD]=72
 	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
 	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
 	SWARM[LICENSE]="GPLv2"

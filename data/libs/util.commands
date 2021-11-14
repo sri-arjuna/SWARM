@@ -176,10 +176,10 @@
 		# Print the text
 		local yn="${SWARM_MSG_WORD_YES:0:1}${SWARM_MSG_WORD_NO:0:1}"
 		local str1=""
-		str1="$(swarm.print.goto $(( ${#SWARM_THEME_DATA[border-left]} + 2  )))$1 (${yn,,})"
+		str1="$(swarm.print.goto $(( ${#SWARM_THEME_border_left} + 2  )))$1 (${yn,,})"
 		# Move the cursor
 		local str2=""
-		str2="$(swarm.print.goto $(( COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2  )))"
+		str2="$(swarm.print.goto $(( COLUMNS / 2 * 2 - ${#SWARM_THEME_border_left} - 2  )))"
 		local RET=""
 		while [[ -z "$RET" ]]
 		do
@@ -237,8 +237,8 @@
 		#	gui_fixer="7" || \
 			gui_fixer=7
 
-		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
-		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_DATA[border-left]} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		$PRINTF "$(swarm.print.goto $(( ${COLUMNS:-$(${TPUT:-\tput} cols)} / 2 * 2 - ${#SWARM_THEME_border_left} - 2 - gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
+		#$PRINTF "$(swarm.print.goto $(( $COLUMNS / 2 * 2 - ${#SWARM_THEME_border_left} - 2 - $gui_fixer  )))"  # Sehe keinen unterschied zw. 4 bis 7
 		$PRINTF "$value" >&1
 
 		# shellcheck disable=SC2015
@@ -408,7 +408,7 @@
 			local NUM=""
 			local POS=""
 			# shellcheck disable=SC2154
-			POS="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_DATA[read]}"
+			POS="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_read}"
 			# shellcheck disable=SC2015
 			$as_menu && \
 				local min=0 || \
@@ -515,8 +515,8 @@
 		done
 	# Define the proper string to display
 		[[ -z "$1" ]] && \
-			STR="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_DATA[read]}" || \
-		 	STR="$(swarm.print.goto $(( identRight + 1 ))) $1 ${SWARM_THEME_DATA[read]}"
+			STR="$(swarm.print.goto $(( identRight + 1 ))) ${SWARM_THEME_read}" || \
+		 	STR="$(swarm.print.goto $(( identRight + 1 ))) $1 ${SWARM_THEME_read}"
 	# Does it need a loop?
 		if $notEmpty
 		then
@@ -1017,7 +1017,7 @@
 		exit \$RET
 	) &
 	PID=\$!
-	#len=\${SWARM_THEME_DATA[border-left]}
+	#len=\${SWARM_THEME_border_left}
 	#len=\$(( \${#len} + 1 ))
 # Do the loop
 	bar -C

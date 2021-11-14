@@ -19,17 +19,17 @@
 		# shellcheck disable=SC2155
 		[[ -z "$LINES" ]] && export LINES="$(${TPUT:-\tput} lines)"
 	# Set basic values
-		export BORDER_LEFT="${SWARM_THEME_DATA[border-left]}"
-		BORDER_RIGHT="${SWARM_THEME_DATA[border-right]}"	# Do not export just yet
-	#	export clrFRONT="${SWARM_THEME_DATA[color-front]}"
-	#	export clrBACK="${SWARM_THEME_DATA[color-back]}"
-		export BAR="${SWARM_THEME_DATA[bar]}"
-		export BAR_HALF="${SWARM_THEME_DATA[bar-half]}"
-		export BAR_EMPTY="${SWARM_THEME_DATA[bar-empty]}"
-	#	export TITLE_LEFT="${SWARM_THEME_DATA[title-left]}"
-	#	export TITLE_RIGH="${SWARM_THEME_DATA[title-right]}"
-	#	export HEADER_LEFT="${SWARM_THEME_DATA[header-left]}"
-	#	export HEADER_RIGHT="${SWARM_THEME_DATA[header-right]}"
+		export BORDER_LEFT="${SWARM_THEME_border_left}"
+		BORDER_RIGHT="${SWARM_THEME_border_right}"	# Do not export just yet
+	#	export clrFRONT="${SWARM_THEME_DATA[color-front}"
+	#	export clrBACK="${SWARM_THEME_DATA[color-back}"
+		export BAR="${SWARM_THEME_bar}"
+		export BAR_HALF="${SWARM_THEME_bar_half}"
+		export BAR_EMPTY="${SWARM_THEME_bar_empty}"
+	#	export TITLE_LEFT="${SWARM_THEME_DATA[title-left}"
+	#	export TITLE_RIGH="${SWARM_THEME_DATA[title-right}"
+	#	export HEADER_LEFT="${SWARM_THEME_DATA[header-left}"
+	#	export HEADER_RIGHT="${SWARM_THEME_DATA[header-right}"
 	# Check if border-right was set:
 		[ -z "$BORDER_RIGHT" ] && \
 				for((i=${#BORDER_LEFT}-1;i>=0;i--)); do BORDER_RIGHT="$BORDER_RIGHT${BORDER_LEFT:$i:1}"; done
@@ -49,8 +49,8 @@
 		# swarm.print.border still needs extra handling for posLEFT
 		export posLEFT="\33[$(( lenLeft + 2 ))G"
 	# Set colors
-		[[ none == "${SWARM_THEME_DATA[color-front]}" ]] || c_front=$(swarm.color.fg "${SWARM_THEME_DATA[color-front]}")
-		[[ none == "${SWARM_THEME_DATA[color-back]}" ]] || c_back=$(swarm.color.bg "${SWARM_THEME_DATA[color-back]}")
+		[[ none == "${SWARM_THEME_color_front}" ]] || c_front=$(swarm.color.fg "${SWARM_THEME_color_front}")
+		[[ none == "${SWARM_THEME_color_back}" ]] || c_back=$(swarm.color.bg "${SWARM_THEME_color_back}")
 		export c_front c_back
 	# If user wants extended logs, he shall have it
 		! ${isRO:-false} && ${doLogExt:-false} && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"
@@ -66,11 +66,11 @@
 		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		# This an assigned array containg the theme related data
 		# Lets make sure each theme gets loaded into clear memory
-		unset SWARM_THEME_DATA[@]	# Use terminal / console / vtr default settings as base
+		unset ${!SWARM_THEME_*} #DATA[@]	# Use terminal / console / vtr default settings as base
 		# These are it's assingments
 		#swarm_list_theme_options="border-left border-right color-font color-back read select"
 		# Lets start fresh
-		declare -Ag SWARM_THEME_DATA
+		#declare -Ag SWARM_THEME_DATA
 		local ret=false
 		local found_full=""
 		local this_theme=""
@@ -111,7 +111,7 @@
 			ret=1
 		fi
 		# Export the values now
-		export SWARM_THEME_DATA
+		export ${!SWARM_THEME_*}
 		# Now, return
 		return ${ret/false/1}
 	}
@@ -248,25 +248,25 @@
 
 		case "${1/-}" in
 		h)	MODE="header"
-			if [[ -n "${SWARM_THEME_DATA[header-left]}" ]]
+			if [[ -n "${SWARM_THEME_header_left}" ]]
 			then	# This theme has special borders
-				this_left="${SWARM_THEME_DATA[header-left]}"
-				this_right="${SWARM_THEME_DATA[header-right]}"
-				[[ -n "${SWARM_THEME_DATA[filler]}" ]] && this_filler="${SWARM_THEME_DATA[filler]}"
+				this_left="${SWARM_THEME_header_left}"
+				this_right="${SWARM_THEME_header_right}"
+				[[ -n "${SWARM_THEME_filler}" ]] && this_filler="${SWARM_THEME_filler}"
 			fi
-			if [[ none == "${SWARM_THEME_DATA[color-front]}" ]] || [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
+			if [[ none == "${SWARM_THEME_color_front}" ]] || [[ none == "${SWARM_THEME_color_back}" ]]
 			then 	filler_num=$(( numEND - $(( ${#this_left} * 2 )) ))
 			else	filler_num=$(( numEND - $(( ${#this_left} * 2 )) + 1 ))
 			fi
 			;;
 		t)	MODE="title"
-			if [[ -n "${SWARM_THEME_DATA[title-left]}" ]]
+			if [[ -n "${SWARM_THEME_title_left}" ]]
 			then	# This theme has special borders
-				this_left="${SWARM_THEME_DATA[title-left]}"
-				this_right="${SWARM_THEME_DATA[title-right]}"
-				[[ -n "${SWARM_THEME_DATA[filler]}" ]] && this_filler="${SWARM_THEME_DATA[filler]}"
+				this_left="${SWARM_THEME_title_left}"
+				this_right="${SWARM_THEME_title_right}"
+				[[ -n "${SWARM_THEME_filler]}" ]] && this_filler="${SWARM_THEME_filler}"
 			fi
-			if [[ none == "${SWARM_THEME_DATA[color-front]}" ]] || [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
+			if [[ none == "${SWARM_THEME_color_front}" ]] || [[ none == "${SWARM_THEME_color_back}" ]]
 			then 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 ))   ))
 			else 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 )) + 1 ))
 			fi
@@ -305,12 +305,12 @@
 	# Special if no colors
 	# Get some numbers
 		local identRight=$(( lenRight + ${#clrCL}  ))
-		if [[ none == "${SWARM_THEME_DATA[color-front]}" ]]
+		if [[ none == "${SWARM_THEME_color_front}" ]]
 		then 	PRINT_LEFT_OUT="" #pos_cor_num=$(( pos_cor_num - 1))
 			local posLEFT=""
 		else 	local posLEFT="\33[$(( ${#this_left} - 2 ))G"
 		fi
-		if [[ none == "${SWARM_THEME_DATA[color-back]}" ]]
+		if [[ none == "${SWARM_THEME_color_back}" ]]
 		then	PRINT_RIGHT_OUT="" #pos_cor_num=$(( pos_cor_num - 1))
 			local posRIGHT=""
 		else	local posRIGHT="\33[$(( numEND - lenRight - pos_cor_num ))G"

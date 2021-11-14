@@ -7,22 +7,22 @@
 #
 #	'title' will use inverted colors
 #
-	SWARM_THEME_DATA[color-back]="yellow"
-	SWARM_THEME_DATA[color-front]="purple"
+	SWARM_THEME_color_back="yellow"
+	SWARM_THEME_color_front="purple"
 #
-#	If 'border-right' is not set,
+#	If 'border_right' is not set,
 #	it will be inveresed from 'border_left'
-#	border-color is not used for 'header'
+#	border_color is not used for 'header'
 #
-	SWARM_THEME_DATA[border-left]=".:"
-	#SWARM_THEME_DATA[border-right]=""
-	#SWARM_THEME_DATA[border-color]="$blue$WHITE"
+	SWARM_THEME_border_left=".:"
+	#SWARM_THEME_border_right=""
+	#SWARM_THEME_border_color="$blue$WHITE"
 #
 #	Char indicators / User prompt
 #
 #
-	SWARM_THEME_DATA[read]="\076"
-	SWARM_THEME_DATA[select]="${SWARM_THEME_DATA[read]}"
-	SWARM_THEME_DATA[bar]="="
-	SWARM_THEME_DATA[bar-half]="-"
-	SWARM_THEME_DATA[bar-empty]=" "
+	SWARM_THEME_read="\076"
+	SWARM_THEME_select="${SWARM_THEME_read}"
+	SWARM_THEME_bar="="
+	SWARM_THEME_bar_half="_"
+	SWARM_THEME_bar_empty=" "

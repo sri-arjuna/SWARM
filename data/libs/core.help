@@ -584,7 +584,7 @@
 	# Opens the manpage according to passed FUNCNAME
 	#
 		#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
-		local tDir="$SWARM_DIR_ROOT/docs/${SWARM[LANG]}"
+		local tDir="$SWARM_DIR_ROOT/docs/${SWARM_LANG}"
 		if [[ -f "$1" ]]
 		then	# Passed argument exists
 			tManpage="$1"

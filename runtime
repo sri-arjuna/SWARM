@@ -49,19 +49,19 @@
 #
 # Version Check
 #
-	if [[ -z ${BASH_VERSINFO[@]} ]] || [[ ${BASH_VERSINFO[0]} -lt 4  ]]
-	then	# Print error of no BASH variables where found
+	#if [[ -z ${BASH_VERSINFO[@]} ]] || [[ ${BASH_VERSINFO[0]} -lt 4  ]]
+	#then	# Print error of no BASH variables where found
 		# Or if BASH version is too low
-		printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
-	else	# Bash version seems is 4 or higher
-		if [[ 4 -eq ${BASH_VERSINFO[0]} ]]
-		then 	# Major matches
-			if [[ ${BASH_VERSINFO[1]} -lt 3  ]]
-			then	# Minor does not
-				printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
-			fi
-		fi
-	fi
+	#	printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+	#else	# Bash version seems is 4 or higher
+	#	if [[ 4 -eq ${BASH_VERSINFO[0]} ]]
+	#	then 	# Major matches
+	#		if [[ ${BASH_VERSINFO[1]} -lt 3  ]]
+	#		then	# Minor does not
+	#			printf '%s\n' "Requires BASH 4.3 or higher" ; return || exit
+	#		fi
+	#	fi
+	#fi
 #
 # Core Public Variables
 #
@@ -78,17 +78,17 @@
 		hasCOLUMNS=false
 	export hasCOLUMNS
 	#echo $hasCOLUMNS;exit
-	SWARM[VERSION]=0.9.2
-	SWARM[BUILD]=72
-	SWARM[AUTHOR]="Simon Arjuna Erat (sea)"
-	SWARM[GIT]="http://github.com/sri-arjuna/swarm"
-	SWARM[LICENSE]="GPLv2"
+	SWARM_VERSION=0.9.2
+	SWARM_BUILD=72-bmt
+	SWARM_AUTHOR="Simon Arjuna Erat (sea)"
+	SWARM_GIT="http://github.com/sri-arjuna/swarm"
+	SWARM_LICENSE="GPLv2"
 	# This is default 'highlighted' MACHINE or ROOT display
 	# Non-root users (if existing) have very hardcoded 'default-blue' (fallback) theme
-	SWARM[THEME]="default-red"
-	SWARM[ROOTDIR]=""
+	SWARM_THEME="default-red"
+	SWARM_ROOTDIR=""
 	# Language must be pre-set up until the basic language file was loaded
-	SWARM[LANG]="en_GB"
+	SWARM_LANG="en_GB"
 	# This is just a temporary setting in case it fails
 	SWARM_LOG_DIR=/tmp
 	SWARM_CRASH=${SWARM_LOG_DIR}/swarm-crash.log
@@ -187,7 +187,7 @@
 			if [[ "SWARM" == "${tmp##*/}" ]]
 			then	# We're in it already
 				# Usualy debug or tryout mode
-				SWARM[ROOTDIR]="$tmp"
+				SWARM_ROOTDIR="$tmp"
 				unset tmp
 				break
 			fi
@@ -195,23 +195,23 @@
 			if [[ -d "${tmp}/SWARM" ]]
 			then	# It's a sub dir
 				# As it should be called
-				SWARM[ROOTDIR]="$tmp/SWARM"
+				SWARM_ROOTDIR="$tmp/SWARM"
 				unset tmp
 				break
 			fi
 		done
 		# Should not reach this point
 		# Other than while debug testing
-		[[ -f ./runtime ]] && SWARM[ROOTDIR]="${PWD:-$(${PWD_EXEC})}"
+		[[ -f ./runtime ]] && SWARM_ROOTDIR="${PWD:-$(${PWD_EXEC})}"
 		unset tmp
 	else
 		# Or optionaly, use the 'install' method
 		# Verify the location
 		if [[ -f "${SWARMDIR}/runtime" ]]
 		then	# Assign the variable
-			SWARM[ROOTDIR]="$SWARMDIR"
+			SWARM_ROOTDIR="$SWARMDIR"
 		else	# This is the only hardcoded 'english only' message
-			$PRINTF '%s\n' "Fatal, provided SWARMDIR=$SWARMDIR dir not found - assumed: \"${SWARM[ROOTDIR]}\" and you are in ${PWD:-$(${PWD_EXEC})}."
+			$PRINTF '%s\n' "Fatal, provided SWARMDIR=$SWARMDIR dir not found - assumed: \"${SWARM_ROOTDIR}\" and you are in ${PWD:-$(${PWD_EXEC})}."
 			sleep 5
 			return 1 || exit 1
 		fi
@@ -223,7 +223,7 @@
 	# Some might wonder why I did not use BASH_SOURCE[0]
 	# -> Because if it was sourced with a relative reference,
 	# I would not get an abslute path
-	export SWARM_DIR_ROOT=${SWARM[ROOTDIR]}
+	export SWARM_DIR_ROOT=${SWARM_ROOTDIR}
 	export SWARM_DIR_DOCS="${SWARM_DIR_ROOT}/docs"
 	export SWARM_DIR_DATA="${SWARM_DIR_ROOT}/data"
 	export SWARM_DIR_CONF="${SWARM_DIR_DATA}/conf"
@@ -354,7 +354,7 @@
 	then	# First time caller or missing arguments
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
-			header "SWARM ${SWARM[VERSION]}-${SWARM[BUILD]} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
+			header "SWARM ${SWARM_VERSION}-${SWARM_BUILD} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
 			title "$SWARM_MSG_WORD_LICENSE"
 			printe "" "$SWARM_MSG_PHRASE_WARRANTY1" ""
 			printe "" "$SWARM_MSG_PHRASE_WARRANTY2" ""
@@ -400,7 +400,7 @@
 			"tarball")
 				# shellcheck disable=SC2164
 				cd "${SWARM_DIR_ROOT}/.."
-				F="$HOME/swarm-${SWARM[BUILD]}-full.tar.gz"
+				F="$HOME/swarm-${SWARM_BUILD}-full.tar.gz"
 				tar -acf "$F" "${SWARM_DIR_ROOT##*/}" 2&>/dev/null
 				[[ -f "$F" ]]
 				status $? "$SWARM_MSG_WORD_CREATED: $F"
@@ -409,7 +409,7 @@
 			"tar")
 				# shellcheck disable=SC2164
 				cd "${SWARM_DIR_ROOT}/.."
-				F="$HOME/swarm-${SWARM[BUILD]}.tar.gz"
+				F="$HOME/swarm-${SWARM_BUILD}.tar.gz"
 				tar -acf "$F" --exclude ".git" "${SWARM_DIR_ROOT##*/}"  2&>/dev/null
 				[[ -f "$F" ]]
 				status -c $? "$SWARM_MSG_WORD_CREATED: $F"
@@ -617,7 +617,7 @@
 					GIT=$(${WHICH:-which} git)
 					if [[ 0 == $? ]]
 					then	# Found git
-						${CD:-cd} "${SWARM[ROOTDIR]}"
+						${CD:-cd} "${SWARM_ROOTDIR}"
 						git pull https://github.com/sri-arjuna/SWARM
 						status $? "$SWARM_MSG_WORD_UPDATED SWARM"
 						exit $?

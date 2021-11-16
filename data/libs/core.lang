@@ -39,13 +39,13 @@
 				if [[ $(swarm.lang.count) -gt 1 ]]
 				then	# More than language has been found
 					select lang_wish in $(swarm.lang.list);do break;done
-					SWARM[LANG]=$lang_wish
+					SWARM_LANG=$lang_wish
 				else	# Only english is available
-					SWARM[LANG]=en_GB
+					SWARM_LANG=en_GB
 				fi
 				# Load the selected language files
 				# shellcheck disable=SC1090
-				source "$SWARM_DIR_LANG/${SWARM[LANG]}"/*.lang
+				source "$SWARM_DIR_LANG/${SWARM_LANG}"/*.lang
 			fi
 		fi
 		# Export all messages

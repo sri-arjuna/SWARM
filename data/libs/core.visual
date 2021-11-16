@@ -264,7 +264,7 @@
 			then	# This theme has special borders
 				this_left="${SWARM_THEME_title_left}"
 				this_right="${SWARM_THEME_title_right}"
-				[[ -n "${SWARM_THEME_filler]}" ]] && this_filler="${SWARM_THEME_filler}"
+				[[ -n "${SWARM_THEME_filler}" ]] && this_filler="${SWARM_THEME_filler}"
 			fi
 			if [[ none == "${SWARM_THEME_color_front}" ]] || [[ none == "${SWARM_THEME_color_back}" ]]
 			then 	filler_num=$(( $(( COLUMNS / 2 * 2)) - $(( ${#this_left} * 2 ))   ))

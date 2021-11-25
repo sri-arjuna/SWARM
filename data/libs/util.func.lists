@@ -157,6 +157,13 @@ swarm.list.hdd() { # [-u]
 }
 swarm.list.network() { #
 # Print a list of network devices
-# On laptops this is usualy a 3 item listk incl io
-	ifconfig | $AWK  '/^[a-z]/ {print $1}' | $SED s/":"//
+# On laptops this is usualy a 2-3 item list incl io
+	if swarm.util.which -q ifconfig
+	then	# log "ifconfig found, assuming old system"
+		ifconfig | $AWK  '/^[a-z]/ {print $1}' | $SED s/":"//
+	elif swarm.util.which -q ip # >/dev/null
+	then	# log "ip found, assuming old system"
+		ip address | awk -F : '/^[1-9]:/ {print $2}'
+	else	status 1 "$SWARM_MSG_PHRASE_NO_NETWORK_TOOLS"
+	fi
 }

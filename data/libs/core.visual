@@ -49,8 +49,14 @@
 		# swarm.print.border still needs extra handling for posLEFT
 		export posLEFT="\33[$(( lenLeft + 2 ))G"
 	# Set colors
-		[[ none == "${SWARM_THEME_color_front}" ]] || c_front=$(swarm.color.fg "${SWARM_THEME_color_front}")
-		[[ none == "${SWARM_THEME_color_back}" ]] || c_back=$(swarm.color.bg "${SWARM_THEME_color_back}")
+		if [[ none == "${SWARM_THEME_color_front}" ]]
+		then	c_front=""
+		else	c_front=$(swarm.color.fg "${SWARM_THEME_color_front}")
+		fi
+		if [[ none == "${SWARM_THEME_color_back}" ]]
+		then	c_back=""
+		else	c_back=$(swarm.color.bg "${SWARM_THEME_color_back}")
+		fi
 		export c_front c_back
 	# If user wants extended logs, he shall have it
 		! ${isRO:-false} && ${doLogExt:-false} && init.log "$SWARM_MSG_INIT_PID_GEOMETRY: ${PPID:-$PID}"

@@ -742,11 +742,11 @@
 		do
 			if [[ -f "$file" ]]
 			then	$bShowTitle && title "$file"
-				while $READ -r line;do
+				while IFS="" $READ -r line;do
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
 					if $bTypewriter
-					then	typewriter $type_ivall "${tmplineb/\</${PRINTABLE_LESSER}}"
+					then	typewriter $type_ivall "$line" #"${tmplineb/\</${PRINTABLE_LESSER}}"
 					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"
 					fi
 					if [[ $C -eq $MAX ]]
@@ -897,6 +897,8 @@
 						;;
 				*)	# It is not a 2-char symbol
 					case "$sSingle" in
+					" ")		toPrint=" "
+							;;
 					"	")	toPrint="	"
 							;;
 					"%")		toPrint="%%"

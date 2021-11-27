@@ -578,6 +578,7 @@
 			"99")	value=" ⅈⅈ "
 				;;
 			"111")	value="${STATUS_TEXT[111]}"
+				value="${value^^}"
 				;;
 			"127")	value=" ${r}${b}✗${R}  "
 				;;

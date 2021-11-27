@@ -552,14 +552,14 @@
 				# shellcheck disable=SC2164
 				cd "$OLDPWD"
 			;;
-			remove)
+			"remove")
 				title "$SWARM_MSG_WORD_REMOVE: SWARM"
 				printe "$SWARM_MSG_PHRASE_REMOVE_SWARM"
 				yesno "$SWARM_MSG_WORD_REMOVE $SWARM_MSG_WORD_CONFIGURATION ($SWARMRC)?" || exit 1
 				swarm.util.rm -v "$SWARMRC" "$SWARM_USER_DIR_BASE"
 				swarm.cleanup remove
 			;;
-			theme)
+			"theme")
 				swarm.clear
 				if [[ -n "$2" ]]
 				then	if swarm.update.theme "$2"
@@ -577,7 +577,7 @@
 					exit $?
 				fi
 				;;
-			sysinfo)
+			"sysinfo")
 				pre="swarm\.sysinfo\.$2"
 				list=$(	declare | $GREP "$pre" | $AWK '/\(\)/ {print $1}' | $GREP -v ^"_" )
 				cur="" last="x"
@@ -595,7 +595,7 @@
 				done
 				[[ -n "$2" ]] || (title "$SWARM_MSG_WORD_INFORMATION"; status $RET_INFO "$SWARM_MSG_SYSINFO_INFO" ; status $RET_INFO "${SWARM_MSG_WORD_OPTIONS}: box, hw, net, os" )
 				;;
-			clear)
+			"clear")
 				list=($($LS $SWARM_TMP_DIR))
 				count=${#list[@]}
 				count=$(( count - 1 ))
@@ -610,7 +610,7 @@
 				done
 				status -c $? "All done"
 				;;
-			update)
+			"update")
 				# Attempts to update SWARM
 				if ${PING:-ping} -c1 8.8.8.8 >/dev/zero
 				then	# Google DNS is available = has internet
@@ -630,7 +630,17 @@
 					status $? "$SWARM_MSG_PHRASE_NO_INTERNET"
 					exit $?
 				fi
-
+				;;
+			# Lets do a special treatment...
+			# Like allowing this to be called from other shells, using the runtime
+			# This is going to be freaking long list....
+			header|title|printe|status|pick|yesno|download)
+				# Clear line
+				swarm.clear
+				# Action, actualy super simple
+				"${@}"
+				exit $?
+				;;
 			esac
 		fi
 	fi

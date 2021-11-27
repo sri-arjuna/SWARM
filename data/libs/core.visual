@@ -429,14 +429,18 @@
 						printe "$M"
 				fi
 				if [[ -n "$R" ]]
-				then
+				then	# Check wether it needs splitting
 					# shellcheck disable=SC2015
-					[[ ${#R} -ge $(( COLUMNS - 6 )) ]] && \
-						swarm.str.split "$R" | while read -r line
-									do
-										printe "" "" "$line"
-									done || \
-									printe "$R"
+					if [[ ${#R} -ge $(( COLUMNS - 6 )) ]]
+					then	# yes
+						swarm.str.split "$R" | \
+							while read -r line
+							do
+								printe "" "" "$line"
+							done
+					else	# No
+						printe "$R"
+					fi
 				fi
 				;;
 			"title")

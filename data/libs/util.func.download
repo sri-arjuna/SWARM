@@ -83,6 +83,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 				;;
 		""|*tp:*)	# Proper handling, either URL or missing
 				break ;;
+		*)		break ;;
 		esac
 	done
 #
@@ -94,7 +95,7 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 		swarm.help.usage download && \
 		return 1
 #
-#	Funcrtion
+#	Functions
 #
 	#shellcheck disable=SC2120
 	_curl_get_filesize() {
@@ -151,12 +152,12 @@ download() { # [-f|--full] [-c] [-s] [-o FILENAME] [-d|--dir DIR] URL [URL2 ... 
 	# Initialize download - user output only
 		status -r 2 "$MSG_INIT_ACT" #"$WORK"
 		>"$FILE_TEMP"
-		echo "LC_ALL=C $CURLWGET $OPT_C $OPT_O \"$out_string\" \"$URL\" 1>/dev/null 2>$FILE_TEMP" > "$FILE_CMD"
+		$ECHO "LC_ALL=C $CURLWGET $OPT_C $OPT_O \"$out_string\" \"$URL\" 1>/dev/null 2>$FILE_TEMP" > "$FILE_CMD"
 		chmod +x "$FILE_CMD"
 		# Not using 'nohup' so the download can be aborted
 		(
-			"$FILE_CMD" 2>/dev/zero
-		) & >/dev/zero 2>/dev/zero
+			"$FILE_CMD" & 2>/dev/zero
+		) >/dev/zero 2>/dev/zero
 		local lPID=$!
 	# Add this PID to the list to force-kill when SWARM is closed
 		export SWARM_PID_USED="$SWARM_PID_USED $lPID"

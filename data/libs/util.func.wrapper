@@ -5,8 +5,9 @@ edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 	#swarm.protect "${FUNCNAME[@]}" "${@}" && exit 1
 # Variables
 	local cli_forced=false
-	local EDITOR=""
+	local EDITOR=""		# Usualy this refers to EMACS, Nano or vi/m only
 	local array array_raw
+	local doInstall=false
 # Get options
 	for opt in "${@}"
 	do
@@ -27,7 +28,23 @@ edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 			result=$($WHICH "$l" 2>/dev/null) && \
 				array+=("$result")
 		done
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		EDITOR_GUI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $EDITOR_GUI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "EDITOR_GUI" "${EDITOR_GUI##*/}"
 		status $? "$SWARM_USER_APPS" "EDITOR_GUI=${EDITOR_GUI##*/}"
 	fi
@@ -36,7 +53,23 @@ edit() { # [ -c ] FILE1 FILE2 FILE3 ...
 		title "$SWARM_MSG_EDITOR_CLI"
 		array_raw=( $(<"${SWARM_DIR_LIST}/editor_cli"))
 		array=( $(for l in "${array_raw[@]}";do $WHICH "$l" 2>/dev/null ; done))
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		EDITOR_CLI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $EDITOR_CLI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "EDITOR_CLI" "${EDITOR_CLI##*/}"
 		status $? "$SWARM_USER_APPS" "EDITOR_CLI=${EDITOR_CLI##*/}"
 	fi
@@ -81,7 +114,23 @@ filemgr() { # [ -c ] FILE1 FILE2 FILE3 ...
 			result=$($WHICH "$l" 2>/dev/null) && \
 				array+=("$result")
 		done
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		FILEMGR_GUI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $FILEMGR_GUI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "FILEMGR_GUI" "${FILEMGR_GUI##*/}"
 		status $? "$SWARM_USER_APPS" "FILEMGR_GUI=${FILEMGR_GUI##*/}"
 	fi
@@ -90,7 +139,23 @@ filemgr() { # [ -c ] FILE1 FILE2 FILE3 ...
 		title "$SWARM_MSG_FILEMGR_CLI"
 		array_raw=( $(<"${SWARM_DIR_LIST}/filemgr_cli"))
 		array=( $(for l in "${array_raw[@]}";do $WHICH "$l" 2>/dev/null ; done))
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		FILEMGR_CLI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $FILEMGR_CLI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "FILEMGR_CLI" "${FILEMGR_CLI##*/}"
 		status $? "$SWARM_USER_APPS" "FILEMGR_CLI=${FILEMGR_CLI##*/}"
 	fi
@@ -136,7 +201,23 @@ web() { # [ -c ] FILE1 FILE2 FILE3 ...
 			result=$($WHICH "$l" 2>/dev/null) && \
 				array+=("$result")
 		done
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		WEB_GUI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $WEB_GUI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "WEB_GUI" "${WEB_GUI##*/}"
 		status $? "$SWARM_USER_APPS" "WEB_GUI=${WEB_GUI##*/}"
 	fi
@@ -145,7 +226,23 @@ web() { # [ -c ] FILE1 FILE2 FILE3 ...
 		title "$SWARM_MSG_WEB_CLI"
 		array_raw=( $(<"${SWARM_DIR_LIST}/web_cli"))
 		array=( $(for l in "${array_raw[@]}";do $WHICH "$l" 2>/dev/null ; done))
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		WEB_CLI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $WEB_CLI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "WEB_CLI" "${WEB_CLI##*/}"
 		status $? "$SWARM_USER_APPS" "WEB_CLI=${WEB_CLI##*/}"
 	fi
@@ -192,14 +289,30 @@ terminals() {  ## # [ -c ] FILE1 FILE2 FILE3 ...
 			result=$($WHICH "$l" 2>/dev/null) && \
 				array+=("$result")
 		done
+	# Check for empty results (wsl, maybe others?)
+		if [[ -z "${array[@]}" ]]
+		then	# No application could be found:
+			array=( ${array_raw[@]} )
+			status 1 "$SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND"
+			doInstall=true
+		fi
 		TERMINAL_GUI=$(pick -a "${array[@]}")
+	# Try installing if result was empty
+		if $doInstall
+		then	# Well, yes, try installing it
+			if ! swarm.os.install $TERMINAL_GUI #2&>"$SWARM_LOG"
+			then	# failed
+				status $RET_TODO "$SWARM_MSG_PHRASE_PLEASE_CHECK_LOG"
+				return $?
+			fi
+		fi
 		cfg.set "$SWARM_USER_APPS" "TERMINAL_GUI" "${TERMINAL_GUI##*/}"
 		status $? "$SWARM_USER_APPS" "TERMINAL_GUI=${TERMINAL_GUI##*/}"
 	fi
 # Prepare : Get the proper editor
 	if $cli_forced
 	then
-		echo handle
+		echo TODO handle cli terminal for terminals ??
 		return
 	fi
 # Action

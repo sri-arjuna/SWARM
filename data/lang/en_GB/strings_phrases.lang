@@ -31,3 +31,4 @@
 	SWARM_MSG_PHRASE_NO_INTERNET="Could not find a working internet connection."
 	SWARM_MSG_PHRASE_MISSING_ARG="Missing argument!"
 	SWARM_MSG_PHRASE_NO_NETWORK_TOOLS="Could not find any network tools (ip, ifconfig)"
+	SWARM_MSG_PHRASE_NO_SUITABLE_APP_FOUND="No suitable application was found!"

@@ -352,6 +352,8 @@
 	# This is executed obviously:
 	if [[ "runtime" = "${0##*/}" ]]
 	then	# First time caller or missing arguments
+		#non_bash_shell_cmds=$(grep -h "() {" data/libs/* | grep -ve [[:space:]]_[a-zA-Z] -ve \$GREP| awk -F "(" '{print $1}' | sort ) #| sed s,[[:space:]],"|",g)
+		#echo $non_bash_shell_cmds
 		if [[ -z "$1" ]]
 		then	# First Time // No arguments
 			header "SWARM ${SWARM_VERSION}-${SWARM_BUILD} $SWARM_MSG_WORD_COPYRIGHT (C) 1995-2021 Simon Arjuna Erat (sea)" "" "$($DATE_TODAY) $PRINTABLE_PIPECHAR $($DATE_TIME)" #  	--default
@@ -634,13 +636,16 @@
 			# Lets do a special treatment...
 			# Like allowing this to be called from other shells, using the runtime
 			# This is going to be freaking long list....
-			header|title|printe|status|pick|yesno|download)
+		#	$non_bash_shell_cmds)
+			header|title|printe|status|pick|yesno|download|printfile|typeweriter|swarm.os.*)
 				# Clear line
 				swarm.clear
 				# Action, actualy super simple
 				"${@}"
 				exit $?
 				;;
+			## This is for later auto-completion
+			## grep -h "() {" * | grep -v [[:space:]]_[a-zA-Z] | awk -F "(" '{print $1}' | sort
 			esac
 		fi
 	fi

@@ -208,24 +208,49 @@
 		#swarm.protect "$FUNCNAME" "${@}" && exit 1
 		unset RET TXT1 TXT2
 		local doReturn=false
+		local num_str var_str
 	# Check for options
-		for opt in "${@}"
+		while :
 		do
-			case "${opt}" in
+			case "${1}" in
 			"-r")
 				doReturn=true
-				shift
 				;;
 			"-c")
 				$PRINTF "$(swarm.print.goto 0)\e[2K"
-				shift
 				;;
+			"-h"|"--help")
+				swarm.help.usage ${FUNCNAME[0]}
+				$PRINTF '\n%s \t %s \t %s\n---------------------------------\n' "\$?/${SWARM_MSG_WORD_NUM^}" "$SWARM_MSG_WORD_VARNAME" " $SWARM_MSG_WORD_OUTPUT"
+				for n in $(seq 0 1 130)
+				do
+					num_str="${STATUS_TEXT[$n]}"
+					if [[ -n "$num_str" ]]
+					then	# Has an entry, lets parse return number variables
+						for r in  ${!RET_*}
+						do 	# Check the specific variable for the previously determined numbers
+							[[ $n -eq $(eval $ECHO \$${r}) ]] && break
+						done
+						$PRINTF '%s \t %s \t %s\n' "$n" "$r" "$(swarm.str.status "$n")" #"$num_str"
+					fi
+				done
+				return 99
+				;;
+			*)	break ;;
 			esac
+			shift
 		done
 	# Check for minimal arguments
-		[[ -z "$1" ]] && \
-			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
+#		[[ -z "$1" ]] && \
+#			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID" && \
+#			return 99
+		if $GREP -q -v [[:digit:]] <<< $1 || [[ -z "$1" ]]
+		then
+			$PRINTF '%s\n' "$SWARM_MSG_STATUS_ARG_INVALID"
+			status -h
 			return 99
+		fi
+
 		local RET="$1"
 		local value="" ; value=$(swarm.str.status "$RET")
 

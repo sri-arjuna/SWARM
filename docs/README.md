@@ -1,6 +1,6 @@
 Shell Wrapper And Runtime Modifier - SWARM
 ==========================================
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/sri-arjuna/SWARM?include_prereleases) ![GitHub last commit](https://img.shields.io/github/last-commit/sri-arjuna/SWARM) ![Lines of code](https://img.shields.io/tokei/lines/github/sri-arjuna/SWARM)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/sri-arjuna/SWARM?include_prereleases) ![GitHub last commit](https://img.shields.io/github/last-commit/sri-arjuna/SWARM) 
 
 _SWARM is a framework to easily write application-like BASH scripts._
 

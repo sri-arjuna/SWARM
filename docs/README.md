@@ -1,5 +1,6 @@
 Shell Wrapper And Runtime Modifier - SWARM
 ==========================================
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/sri-arjuna/swarm?include_prereleases) ![GitHub last commit](https://img.shields.io/github/last-commit/sri-arjuna/swarm) ![Lines of code](https://img.shields.io/tokei/lines/github/sri-arjuna/swarm) ![GitHub file size in bytes](https://img.shields.io/github/size/sri-arjuna/swarm/swarm)
 
 _SWARM is a framework to easily write application-like BASH scripts._
 
@@ -145,6 +146,13 @@ CREDITS:
 
 * FedoraForum.org ; Staff & Members
 * UNIX.com ; Staff & Members
+* All my discord friends who had to endure my brabeling about SWARM while they dont use *nix based systems.
+
+
+BETA TESTERS
+-------------
+
+* BMT (PONYMODZ @ github)
 
 
 ALPHA TESTERS

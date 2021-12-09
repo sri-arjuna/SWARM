@@ -468,6 +468,9 @@
 
 		# Output
 		$ECHO "${ARGS[$NUM]}" >&1
+		REPLY="$NUM"
+		PICKED="${ARGS[$NUM]}"
+		export REPLY PICKED
 		#set -x
 		[[ ${#NUM} -lt ${pick_len} ]] || $PRINTF "${POS_END}\n" >&2
 		#set +x

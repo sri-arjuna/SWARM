@@ -819,7 +819,7 @@
 		"swarm.date.log_long")
 			out="$SWARM_MSG_DATE_LOGLONG_USAGE"
 			;;
-		"tui")
+		"tui"|"TUI")
 			out="$SWARM_MSG_TUI_USAGE"
 			;;
 		"")

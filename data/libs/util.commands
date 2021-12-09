@@ -858,13 +858,13 @@
 			${ECHO:-echo_} "$DT" >> "$theLog"
 		}
 		_log.it() { # MSG
-			${PRINTF:-printf} '$($DATE +'%T.%N') : ${REASON:-${script_name:-${0##*/}}} : %s\n' "$1"
+			${PRINTF:-printf} "$(${DATE:-date} +'%T.%N') : ${REASON:-${script_name:-${0##*/}}} : %s\n" "$1"
 		}
 	#
 	# Action
 	#
 		_check.date
-		_log.it "$1"
+		_log.it "$1" >> "$theLog"
 	}
 	typewriter() { # [-d 0.5] STRING1 [ STRING2 ... ]
 	# Prints strings char by char

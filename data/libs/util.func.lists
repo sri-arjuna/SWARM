@@ -87,7 +87,7 @@ swarm.list.dirtree() { # [-g -x EXCLUDE] PATH
  			return 0
  			;;
 		"-g") unset content[0]           ;;
-        -x|-X) echo "HERE $2" >&2
+        -x|-X) $ECHO "TODO DEBUG HERE $2" >&2
             content+=("$2") ; shift    ;;
         --)
  			# General purpose pipe support, might need adjustment!
@@ -130,9 +130,9 @@ swarm.list.hid() { #
 	done
 	$PRINTF '%s\n' "${verified[@]}"
 }
-swarm.list.video() { #
-# Returns a list of video devices
-# Usualy things like webcams
+swarm.list.video_input() { #
+# Returns a list of video devices like webcams
+#
 	cd /dev
 	$LS -1 | $GREP -i [vV]ideo
 	cd "$OLDPWD"
@@ -148,12 +148,32 @@ swarm.list.usb() { #
 	done
 	$PRINTF '%s\n' "${verified[@]}" | $GREP -v usb
 }
-swarm.list.hdd() { # [-u]
+swarm.list.hdd() { # [-u] [-p]
 # Shows a list of local storage,
-# Only if -u is passed, it will include usb storage
-	[[ "-u" == "$1" ]] && \
-		$LS -1 /dev/[sh]d[az]* || \
-		$LS -1 /dev/[sh]d[az]* | $GREP -v  $(for i in $(swarm.list.usb);do $ECHO "-e '$i'";done;)
+# If -u is passed, it will exclude/hide usb storage
+	local list_work=$($ECHO {s,h}d{a..z})
+	local show_part=""
+# Options
+	while :
+	do
+		case "$1" in
+		"-u")	# Remove USB entries from the work list
+			for u in $(swarm.list.usb)
+			do	list_work=${list_work/$u}
+			done
+			;;
+		"-p")	show_part="*"
+			;;
+		*)	break
+			;;
+		esac
+		shift
+	done
+# Action
+	for item in $list_work
+	do
+		[[ -b "/dev/$item" ]] && $LS -1 /dev/${item}${show_part}
+	done
 }
 swarm.list.network() { #
 # Print a list of network devices
@@ -163,7 +183,7 @@ swarm.list.network() { #
 		ifconfig | $AWK  '/^[a-z]/ {print $1}' | $SED s/":"//
 	elif swarm.util.which -q ip # >/dev/null
 	then	# log "ip found, assuming old system"
-		ip address | awk -F : '/^[1-9]:/ {print $2}'
+		ip address | $AWK -F : '/^[1-9]:/ {print $2}'
 	else	status 1 "$SWARM_MSG_PHRASE_NO_NETWORK_TOOLS"
 	fi
 }

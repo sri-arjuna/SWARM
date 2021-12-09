@@ -234,6 +234,8 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 						! $doClearOnNewMenu || doShowFirstHeader=false
 					fi
 				fi
+				# Still apply special handlings if existent on same level!
+				_tui.show.default
 				# Call/Execute/Source it
 				source "./$workitem" "${@}"
 				return

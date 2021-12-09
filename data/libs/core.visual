@@ -434,7 +434,7 @@
 					if [[ ${#R} -ge $(( COLUMNS - 6 )) ]]
 					then	# yes
 						swarm.str.split "$R" | \
-							while read -r line
+							while $READ -r line
 							do
 								printe "" "" "$line"
 							done
@@ -442,12 +442,21 @@
 						printe "$R"
 					fi
 				fi
+				# HOTFIX:
+				# If I ever find the \n that is added by a piped-word-split, this can be removed!
+				$PRINTF "\033[A"
 				;;
 			"title")
 				swarm.str.split "$1" | title --
+				# HOTFIX:
+				# If I ever find the \n that is added by a piped-word-split, this can be removed!
+				$PRINTF "\033[A"
 				;;
 			"header")
 				swarm.str.split "$1" | header --
+				# HOTFIX:
+				# If I ever find the \n that is added by a piped-word-split, this can be removed!
+				$PRINTF "\033[A"
 				;;
 			esac
 			return 0

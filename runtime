@@ -637,7 +637,7 @@
 			# Like allowing this to be called from other shells, using the runtime
 			# This is going to be freaking long list....
 		#	$non_bash_shell_cmds)
-			header|title|printe|status|pick|yesno|download|printfile|typeweriter|swarm.os.*)
+			header|title|printe|status|pick|yesno|log|download|printfile|typeweriter|edit|web|filemgr|swarm.*)
 				# Clear line
 				swarm.clear
 				# Action, actualy super simple

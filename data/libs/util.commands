@@ -31,7 +31,14 @@
 				"$($PRINTF '%s ' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
 			;;
 		*)
-			swarm.print.text -h "$1" "$2" "$3"
+			case ${#@} in
+			0|1|3)
+				swarm.print.text -h "$1" "$2" "$3"
+				;;
+			2)
+				swarm.print.text -h "$1" "" "$2"
+				;;
+			esac
 			;;
 		esac
 		# shellcheck disable=SC2154

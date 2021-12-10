@@ -781,8 +781,8 @@
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
 					if $bTypewriter
-					then	if [[ "${#line}" -gt $(( COLUMNS - (${#SWARM_THEME_border_left} + ${#SWARM_THEME_border_right}) )) ]]
-						then	swarm.str.split "$line" | typewriter $type_ivall --
+					then	if [[ "${#line}" -gt $(( COLUMNS - (${#SWARM_THEME_border_left} + ${#SWARM_THEME_border_right}) - 4 )) ]]
+						then	swarm.str.split -t "$line" | typewriter $type_ivall --
 						else	typewriter $type_ivall "$line" #"${tmplineb/\</${PRINTABLE_LESSER}}"
 						fi
 					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"
@@ -805,8 +805,8 @@
 					tmpline="${line/\|/${PRINTABLE_PIPECHAR}}"
 					tmplineb="${tmpline/\>/${PRINTABLE_GREATER}}"
 					if $bTypewriter
-					then	if [[ "${#tmplineb}" -gt $(( COLUMNS - (SWARM_THEME_border_left + SWARM_THEME_border_right) )) ]]
-						then	swarm.str.split "$tmplineb" | typewriter $type_ivall --
+					then	if [[ "${#tmplineb}" -gt $(( COLUMNS - (${#SWARM_THEME_border_left} + ${#SWARM_THEME_border_right}) - 4 )) ]]
+						then	swarm.str.split -t "$tmplineb" | typewriter $type_ivall --
 						else	typewriter $type_ivall "${tmplineb/\</${PRINTABLE_LESSER}}"
 						fi
 					else	printe "${tmplineb/\</${PRINTABLE_LESSER}}"

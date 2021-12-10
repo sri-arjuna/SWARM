@@ -538,12 +538,19 @@
 		$PRINTF "${posEND}"
 		$doReturn && $PRINTF "\n"
 	}
-	swarm.str.split() { # "STRING"
-	# Splittes passed string in half at the nearest word
-	# and prints each part as a new line
+	swarm.str.split() { # [-t] "STRING"
+	# Splittes passed string in half at the nearest word and prints each part as a new line
+	# The -t option refers to typewriter and splits the line at the end of printable content
 		[[ -z "$1" ]] && return 1
+		local tmp_count=0
 		#local tmp_count=$(( ( $($ECHO "${1}" | $WC -c)  ) / 2 ))
-		local tmp_count=$(( ${#1} / 2 ))
+		case "$1" in
+		"-t")	tmp_count=$(( COLUMNS -  (${#SWARM_THEME_border_left} + ${#SWARM_THEME_border_right}) - 4 ))
+			shift
+			;;
+		*)	tmp_count=$(( ${#1} / 2 ))
+			;;
+		esac
 		$ECHO "$1" | $FOLD -sw "$tmp_count"
 	}
 	swarm.str.status() { # ERRNUM

@@ -27,7 +27,7 @@
 			# shellcheck disable=SC2068
 			swarm.print.text -h \
 				"${script_name:-SWARM} ${script_version:-${SWARM_VERSION}-${SWARM_BUILD}} ($(swarm.sysinfo.os.distro|$SED s,'"','',g))" \
-				"$($PRINTF '%s ' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
+				"$($PRINTF '%s' ${@}) | $($DATE_TODAY) / $($DATE_TIME)"
 			;;
 		*)
 			case ${#@} in

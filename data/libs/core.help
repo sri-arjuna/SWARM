@@ -516,8 +516,8 @@
 			prj_exec=$(ask "$SWARM_MSG_NEW_PROJECT_EXEC")
 			((failsafe++)) ; [[ $failsafe -gt 100 ]] && return 1
 		done
-		echo "$SWARM_USER_DIR_SCRIPTS/$prj_name"
-		echo "$SWARM_USER_DIR_SCRIPTS/$prj_exec"
+		$ECHO "$SWARM_USER_DIR_SCRIPTS/$prj_name"
+		$ECHO "$SWARM_USER_DIR_SCRIPTS/$prj_exec"
 	}
 #
 # Configuration handler

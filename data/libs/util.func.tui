@@ -154,16 +154,16 @@ tui() { # [-c CONF_FILE -s SOURCE_FILES] BASE_PATH
 	#
 		for task in cmd info
 		do
-			if [[ -f "${str_default}.$task" ]]
+			if [[ -f "${str_default}_$task" ]]
 			then	# The special file is available
 				case "$task" in
 				cmd)	# This needs to be sourced so we have all variables available
-					source "${str_default}.$task"
+					source "${str_default}_$task"
 					;;
 				info)	# This is just for display
 					title "${SWARM_MSG_WORD_INFO}"
 					status 3 "TODO: Multi-LANG support (placeholder)"
-					printfile "${str_default}.$task"
+					printfile "${str_default}_$task"
 					title "${SWARM_MSG_WORD_MENU}"
 					;;
 				esac

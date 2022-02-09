@@ -1086,7 +1086,7 @@
 				if [[ -z "$FILE_OUT" ]]
 				then	LC_ALL=C $SUDO ${@} 2>>"$FILE_LOG"
 					RET=$?
-				else	LC_ALL=C $SUDO ${@}  >"$FILE_OUT" 2>>"$FILE_LOG"
+				else	LC_ALL=C $SUDO ${@}  >>"$FILE_OUT" 2>>"$FILE_LOG"
 					RET=$?
 				fi
 				$ECHO "$RET">"$FILE_RET"

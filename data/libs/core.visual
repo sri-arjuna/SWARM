@@ -384,7 +384,7 @@
 		then	# Needs splitting
 			case "${MODE:-basic}" in
 			"basic")
-				if false; then
+				if true; then
 				# Wish this would work, but all this shows are empty lines
 					local L_one="" L_two=""
 					local M_one="" M_two=""
@@ -411,7 +411,7 @@
 					# shellcheck disable=SC2031
 					swarm.print.text  "$L_two" "$M_two" "$R_two"
 					# We're done here, lets get out
-				#	return 0
+					return 0
 				fi
 				## works, but not nice.. empty line???
 				if [[ -n "$L" ]]

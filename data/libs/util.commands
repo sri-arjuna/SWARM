@@ -970,7 +970,7 @@
 		fi
 	# Variables / Defaults
 		local FILE_TMP=$(swarm.str.genfilename "$SWARM_TMP_DIR/asRoot-$(swarm.code).tmp~")
-		local FILE_RET="${FILE_TMP/tmp~/ret}"
+		local FILE_RET="${FILE_TMP/tmp~/ret~}"
 		local FILE_LOG="$SWARM_LOG"
 		local FILE_OUT=""
 		local RET=""
@@ -991,20 +991,20 @@
 				;;
 			"-r")	# Wants a custom FILE_RET
 			 	FILE_RET=$(swarm.str.genfilename "$2")
-				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_RET=$FILE_RET"
+				$doLogExt && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_RET=$FILE_RET"
 				if $TOUCH "$FILE_RET"
 				then	shift
 				else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_RET"
-					return 1
+						return 1
 				fi
 				;;
 			"-l")	# Wants a custom FILE_LOG
-				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_LOG=$FILE_LOG"
+				$doLogExt && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_LOG=$FILE_LOG"
 				# Verify it exists and can be written
 				if $TOUCH "$FILE_LOG"
 				then	shift
 				else	status 1 "$SWARM_MSG_PHRASE_COULDNOTCREATE: $FILE_LOG"
-					return 1
+						return 1
 				fi
 				;;
 			"-m1")
@@ -1025,7 +1025,7 @@
 			"-o")
 				$TOUCH "${2:-$FILE_LOG}"
 				sCatchOutputBG="1>>\"${2:-$FILE_LOG}\" $sCatchOutputBG"
-				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_OUT == $2"
+				$doLogExt && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: FILE_OUT == $2"
 				FILE_OUT="$2"
 				shift
 				;;
@@ -1039,7 +1039,7 @@
 	# If the arg list is empty now, we are missing arguments
 		if [[ -z "$1" ]]
 		then	swarm.show.usage "${FUNCNAME[1]}"
-			return 1
+				return 1
 		fi
 	# Show prior message if applicable
 		[[ -n "$sMSG1" ]] && printe "$sMSG1"
@@ -1083,26 +1083,26 @@
 		else
 			if $useSudo
 			then	# Found SUDO
-				if [[ -z "$FILE_OUT" ]]
-				then	LC_ALL=C $SUDO ${@} 2>>"$FILE_LOG"
-					RET=$?
-				else	LC_ALL=C $SUDO ${@}  >>"$FILE_OUT" 2>>"$FILE_LOG"
-					RET=$?
-				fi
-				$ECHO "$RET">"$FILE_RET"
+					if [[ -z "$FILE_OUT" ]]
+					then	LC_ALL=C $SUDO ${@} 2>>"$FILE_LOG"
+							s_RET=$?
+					else	LC_ALL=C $SUDO ${@}  >>"$FILE_OUT" 2>>"$FILE_LOG"
+							s_RET=$?
+					fi
+					$ECHO "$s_RET">"$FILE_RET"
 			elif [[ -n "$SU" ]]
 			then	# Found SU
-				if [[ -z "$FILE_OUT" ]]
-				then	LC_ALL=C $SU -c "${@}" 2>>"$FILE_LOG"
-					RET=$?
-				else	LC_ALL=C $SU -c "${@}" >"$FILE_OUT" 2>>"$FILE_LOG"
-					RET=$?
-				fi
-				$ECHO "$RET">"$FILE_RET"
+					if [[ -z "$FILE_OUT" ]]
+					then	LC_ALL=C $SU -c "${@}" 2>>"$FILE_LOG"
+							s_RET=$?
+					else	LC_ALL=C $SU -c "${@}" >"$FILE_OUT" 2>>"$FILE_LOG"
+							s_RET=$?
+					fi
+					$ECHO "$s_RET">"$FILE_RET"
 			else	# Found neither SUDO nor SU
-				$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: $SWARM_MSG_SU_NFOUND ($(swarm.str.bool2str -d $(<"${FILE_RET}")))"
-				status 1 "$SWARM_MSG_SU_NFOUND"
-				return $?
+					$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: $SWARM_MSG_SU_NFOUND ($(swarm.str.bool2str -d $(<"${FILE_RET}")))"
+					status 1 "$SWARM_MSG_SU_NFOUND"
+					return $?
 			fi
 		fi
 	# Get value if requested
@@ -1114,7 +1114,7 @@
 			then	status -c $RET "$sMSG3"
 			else	status -c $RET "$SWARM_MSG_WORD_EXECUTED:" "${*}"
 			fi
-			$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: EXIT with ${RET:-$(<"${FILE_RET}")} ($(swarm.str.bool2str -s $(<"${FILE_RET}")))"
+			$doLog && init.log "${SWARM_COLOR_FG_WHITE}${SWARM_COLOR_BG_RED}asRoot${SWARM_COLOR_RESET} :: EXIT with $(<"${FILE_RET}") ($(swarm.str.bool2str -s $(<"${FILE_RET}")))"
 		fi
-		return ${RET:-1}
+		return $(<"${FILE_RET}") #${RET:-1}
 	}
